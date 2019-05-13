@@ -42,7 +42,7 @@ function parse(data, options = {}, start = 0, end = data.length) {
 
           //Main data accessing function
           //Refactor for performance/memory?
-          const getPartial = function(slice, op, ax = 1, type = ks.type) {
+          const getPartial = function(slice, len, ax = 1, type = ks.type) {
             //Log unknown types for future implementation
             if (!types[type]) unknown.add(type);
             else {
@@ -55,17 +55,17 @@ function parse(data, options = {}, start = 0, end = data.length) {
                   let innerType = type;
                   //Pick type from previously read data if needed
                   if (types[type].complex) innerType = complexType[i];
-                  res.push(getPartial(slice + (i * ks.size) / ax, op, 1, innerType));
+                  res.push(getPartial(slice + (i * ks.size) / ax, len / ax, 1, innerType));
                 }
                 return res;
 
                 //Otherwise, read a single value
               } else if (!types[type].complex) {
                 //Add options required by type
-                if (types[type].opt) for (const key in types[type].opt) op[key] = types[type].opt[key];
-
+                let opts = { length: len };
+                if (types[type].opt) for (const key in types[type].opt) opts[key] = types[type].opt[key];
                 //We pick the necessary function based on data format (stored in types)
-                const valParser = new Parser().endianess('big')[types[type].func]('value', op);
+                const valParser = new Parser().endianess('big')[types[type].func]('value', opts);
                 const str = valParser.parse(data.slice(slice));
                 //Return the value
                 return str.value;
@@ -78,8 +78,8 @@ function parse(data, options = {}, start = 0, end = data.length) {
           //Access the values or single value
           if (ks.repeat > 1) {
             partialResult = [];
-            for (let i = 0; i < ks.repeat; i++) partialResult.push(getPartial(start + 8 + i * ks.size, { length: ks.size }, axes));
-          } else partialResult = getPartial(start + 8, { length }, axes);
+            for (let i = 0; i < ks.repeat; i++) partialResult.push(getPartial(start + 8 + i * ks.size, ks.size, axes));
+          } else partialResult = getPartial(start + 8, length, axes);
 
           //If we just read a TYPE value, store it. Will be necessary in this nest
           if (ks.fourCC === 'TYPE') complexType = partialResult;
