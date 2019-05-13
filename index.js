@@ -5,6 +5,7 @@ const { keyAndStructParser, types, fourCCs } = require('./keys');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
 function parse(data, options = {}, start = 0, end = data.length) {
+  const root = start === 0;
   let result = {};
   //Will store unknown types
   let unknown = new Set();
@@ -108,7 +109,11 @@ function parse(data, options = {}, start = 0, end = data.length) {
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
-
+  if (root && !result.DEVC) {
+    const err = 'Invalid GPMF data. Root object must contain DEVC key';
+    if (options.tolerant) setImmediate(() => console.error(err));
+    else throw new Error(`${err}. Use the 'tolerant' option to return anyway`);
+  }
   return result;
 }
 

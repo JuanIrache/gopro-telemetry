@@ -19,9 +19,6 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 
 ## To-Do
 
-- Ask whi values are different, and if it could be merged
-- Debug null values (Hero6)
-- Add information on known types
 - Take potential nested arrays into account f[8]
 - Add filtering options (GPS, Accel, Gyro...)
 - Automated testing
