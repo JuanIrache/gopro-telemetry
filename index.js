@@ -1,5 +1,6 @@
-const Parser = require('binary-parser').Parser;
-const Parser64 = require('@gmod/binary-parser').Parser;
+//binary-parser does not support 64bits use @gmod/binary-parser
+const Parser = require('@gmod/binary-parser').Parser;
+// const Parser64 = require('@gmod/binary-parser').Parser;
 const { keyAndStructParser, types, fourCCs } = require('./keys');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
@@ -15,7 +16,8 @@ function parse(data, options = {}, start = 0, end = data.length) {
 
     try {
       //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
-      const ks = keyAndStructParser.parse(data.slice(start));
+      const ks = keyAndStructParser.parse(data.slice(start)).result;
+
       //Get the length of the value (or values, or nested values)
       length = ks.size * ks.repeat;
       let partialResult;
@@ -66,14 +68,9 @@ function parse(data, options = {}, start = 0, end = data.length) {
                 let opts = { length: len };
                 if (types[type].opt) for (const key in types[type].opt) opts[key] = types[type].opt[key];
                 //We pick the necessary function based on data format (stored in types)
-                let valParser;
-                //binary-parser does not support 64bits use @gmod/binary-parser
-                if (types[type].size > 4) valParser = new Parser64().endianess('big')[types[type].func]('value', opts);
-                else valParser = new Parser().endianess('big')[types[type].func]('value', opts);
-                const str = valParser.parse(data.slice(slice));
-                //For some reason @gmod/binary-parser stores the value differently
-                if (types[type].size > 4) return str.result.value;
-                return str.value;
+                let valParser = new Parser().endianess('big')[types[type].func]('value', opts);
+                const parsed = valParser.parse(data.slice(slice)).result;
+                return parsed.value;
 
                 //Data is complex but did not find axes
               } else throw new Error('Complex type ? with only one axis');
