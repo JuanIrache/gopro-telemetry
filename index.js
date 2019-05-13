@@ -28,17 +28,13 @@ function parse(data, options = {}, start = 0, end = data.length) {
         else if (types[ks.type].nested) partialResult = parse(data, options, start + 8, start + 8 + length);
         //We can parse the Value
         else if (types[ks.type].func || (types[ks.type].complex && complexType)) {
-          let opts = {};
-          //Add options required by type
-          if (types[ks.type].opt) for (const key in types[ks.type].opt) opts[key] = types[ks.type].opt[key];
-          let axes = 1;
-
           //Detect data with multiple axes
+          let axes = 1;
           if (types[ks.type].size > 1) axes = ks.size / types[ks.type].size;
           //Detect them when the type is complex
           else if (types[ks.type].complex && complexType && complexType.length) axes = complexType.length;
 
-          //Human readable strings shoulb de merged for readability
+          //Human readable strings should de merged for readability
           if (fourCCs[ks.fourCC] && fourCCs[ks.fourCC].merge) {
             ks.size = length;
             ks.repeat = 1;
@@ -65,28 +61,25 @@ function parse(data, options = {}, start = 0, end = data.length) {
 
                 //Otherwise, read a single value
               } else if (!types[type].complex) {
+                //Add options required by type
+                if (types[type].opt) for (const key in types[type].opt) op[key] = types[type].opt[key];
+
                 //We pick the necessary function based on data format (stored in types)
                 const valParser = new Parser().endianess('big')[types[type].func]('value', op);
                 const str = valParser.parse(data.slice(slice));
                 //Return the value
                 return str.value;
-              } else {
-                throw new Error('Complex type ? with just one axis');
-              }
+
+                //Data is complex but did not find axes
+              } else throw new Error('Complex type ? with only one axis');
             }
           };
 
           //Access the values or single value
           if (ks.repeat > 1) {
-            //explicit length necessary?
-            opts.length = ks.size;
             partialResult = [];
-            for (let i = 0; i < ks.repeat; i++) partialResult.push(getPartial(start + 8 + i * ks.size, opts, axes));
-          } else {
-            //explicit length necessary?
-            opts.length = length;
-            partialResult = getPartial(start + 8, opts, axes);
-          }
+            for (let i = 0; i < ks.repeat; i++) partialResult.push(getPartial(start + 8 + i * ks.size, { length: ks.size }, axes));
+          } else partialResult = getPartial(start + 8, { length }, axes);
 
           //If we just read a TYPE value, store it. Will be necessary in this nest
           if (ks.fourCC === 'TYPE') complexType = partialResult;
@@ -98,9 +91,9 @@ function parse(data, options = {}, start = 0, end = data.length) {
         if (result[ks.fourCC] == null) result[ks.fourCC] = partialResult;
         else if (Array.isArray(result[ks.fourCC])) result[ks.fourCC].push(partialResult);
         else result[ks.fourCC] = [result[ks.fourCC], partialResult];
-      } else {
-        throw new Error('Error, negative length');
-      }
+
+        //Something is wrong
+      } else throw new Error('Error, negative length');
     } catch (err) {
       setImmediate(() => console.error(err));
     }
