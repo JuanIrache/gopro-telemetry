@@ -19,6 +19,7 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 
 ## To-Do
 
+- Debug null values (Hero6)
 - Add information on known types
 - Take potential nested arrays into account f[8]
 - Add filtering options (GPS, Accel, Gyro...)
