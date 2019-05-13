@@ -4,7 +4,7 @@ const { promisify } = require('util');
 const readFileAsync = promisify(fs.readFile); // (A)
 const writeFileAsync = promisify(fs.writeFile); // (A)
 
-async function toJSON() {
+async function toJSON(filename) {
   try {
     const file = await readFileAsync(__dirname + filename);
     const result = goproTelemetry(file, { debug: true });
