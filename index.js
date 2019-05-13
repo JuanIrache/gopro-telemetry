@@ -1,4 +1,5 @@
 const Parser = require('binary-parser').Parser;
+const Parser64 = require('@gmod/binary-parser').Parser;
 const { keyAndStructParser, types, fourCCs } = require('./keys');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
@@ -65,9 +66,13 @@ function parse(data, options = {}, start = 0, end = data.length) {
                 let opts = { length: len };
                 if (types[type].opt) for (const key in types[type].opt) opts[key] = types[type].opt[key];
                 //We pick the necessary function based on data format (stored in types)
-                const valParser = new Parser().endianess('big')[types[type].func]('value', opts);
+                let valParser;
+                //binary-parser does not support 64bits use @gmod/binary-parser
+                if (types[type].size > 4) valParser = new Parser64().endianess('big')[types[type].func]('value', opts);
+                else valParser = new Parser().endianess('big')[types[type].func]('value', opts);
                 const str = valParser.parse(data.slice(slice));
-                //Return the value
+                //For some reason @gmod/binary-parser stores the value differently
+                if (types[type].size > 4) return str.result.value;
                 return str.value;
 
                 //Data is complex but did not find axes
