@@ -17,5 +17,5 @@ async function toJSON(filename) {
 
 //Available files
 //Fusion.raw, hero5.raw, hero6.raw, hero6+ble.raw, karma.raw
-const filename = '/hero6.raw';
+const filename = '/Fusion.raw';
 toJSON(filename);
