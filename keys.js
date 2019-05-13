@@ -1,6 +1,6 @@
 const Parser = require('binary-parser').Parser;
 
-//First 2 sections (64 bits) of each KLV
+//First 2 sections (64 bits) of each KLV (Key, Length, Value)
 const keyAndStructParser = new Parser()
   .string('fourCC', { length: 4, encoding: 'ascii' })
   .string('type', { length: 1, encoding: 'ascii' })
