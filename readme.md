@@ -20,6 +20,7 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 ## To-Do
 
 - Face in hero7 broken
+- Some fourCCs should always be arrays (devc,strm)
 - Take potential nested arrays into account f[8]
 - Add filtering options (GPS, Accel, Gyro...)
 - Automated testing
