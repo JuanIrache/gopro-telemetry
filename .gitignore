@@ -1,3 +1,4 @@
 node_modules/
 samples/out.json
+samples/ignore/
 out.json
