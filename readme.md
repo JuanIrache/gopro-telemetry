@@ -25,6 +25,8 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 - Take potential nested arrays into account f[8]? Never found one to test
 - Add filtering options (GPS, Accel, Gyro...)
 - Interpret data
+  - Calculate time
+  - What to do with EMPT, TSMP?
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
 - Refactoring for performance?
