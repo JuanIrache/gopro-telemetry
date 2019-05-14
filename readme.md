@@ -19,12 +19,10 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 
 ## To-Do
 
-- Face in hero7 broken
-- Testing
-- Some fourCCs should always be arrays (devc,strm)
-- Take potential nested arrays into account f[8]
-- Add filtering options (GPS, Accel, Gyro...)
 - Automated testing
+- Some fourCCs should always be arrays (devc,strm)
+- Take potential nested arrays into account f[8]? Never found one to test
+- Add filtering options (GPS, Accel, Gyro...)
 - Interpret data
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
