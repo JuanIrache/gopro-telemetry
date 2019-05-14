@@ -38,7 +38,9 @@ const fourCCs = {
   STNM: { merge: true },
   RMRK: { merge: true },
   TYPE: { merge: true },
-  DVNM: { merge: true }
+  DVNM: { merge: true },
+  DEVC: { array: true },
+  STRM: { array: true }
 };
 
 module.exports = { keyAndStructParser, types, fourCCs };
