@@ -37,6 +37,7 @@ const types = {
 const fourCCs = {
   STNM: { merge: true },
   RMRK: { merge: true },
+  TYPE: { merge: true },
   DVNM: { merge: true }
 };
 

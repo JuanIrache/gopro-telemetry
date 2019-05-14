@@ -37,16 +37,15 @@ function parse(data, options = {}, start = 0, end = data.length) {
           if (types[ks.type].size > 1) axes = ks.size / types[ks.type].size;
           //Detect them when the type is complex
           else if (types[ks.type].complex && complexType && complexType.length) axes = complexType.length;
-
           //Human readable strings should de merged for readability
           if (fourCCs[ks.fourCC] && fourCCs[ks.fourCC].merge) {
             ks.size = length;
             ks.repeat = 1;
           }
 
-          //Main data accessing function
+          //Main data accessing function. Reads the V in KLV
           //Refactor for performance/memory?
-          const getPartial = function(slice, len, ax = 1, type = ks.type) {
+          const readValue = function(slice, len, ax = 1, type = ks.type) {
             //Log unknown types for future implementation
             if (!types[type]) unknown.add(type);
             else {
@@ -59,7 +58,7 @@ function parse(data, options = {}, start = 0, end = data.length) {
                   let innerType = type;
                   //Pick type from previously read data if needed
                   if (types[type].complex) innerType = complexType[i];
-                  res.push(getPartial(slice + (i * ks.size) / ax, len / ax, 1, innerType));
+                  res.push(readValue(slice + (i * ks.size) / ax, len / ax, 1, innerType));
                 }
                 return res;
 
@@ -71,6 +70,7 @@ function parse(data, options = {}, start = 0, end = data.length) {
                 //We pick the necessary function based on data format (stored in types)
                 let valParser = new Parser().endianess('big')[types[type].func]('value', opts);
                 const parsed = valParser.parse(data.slice(slice)).result;
+
                 return parsed.value;
 
                 //Data is complex but did not find axes
@@ -81,17 +81,17 @@ function parse(data, options = {}, start = 0, end = data.length) {
           //Access the values or single value
           if (ks.repeat > 1) {
             partialResult = [];
-            for (let i = 0; i < ks.repeat; i++) partialResult.push(getPartial(start + 8 + i * ks.size, ks.size, axes));
-          } else partialResult = getPartial(start + 8, length, axes);
-
+            for (let i = 0; i < ks.repeat; i++) partialResult.push(readValue(start + 8 + i * ks.size, ks.size, axes));
+          } else partialResult = readValue(start + 8, length, axes);
           //If we just read a TYPE value, store it. Will be necessary in this nest
           if (ks.fourCC === 'TYPE') complexType = partialResult;
 
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
 
-        //Save value un result or add to results array
-        if (result[ks.fourCC] == null) result[ks.fourCC] = partialResult;
+        //Identify keys or results meant to be array before assigning the value, to avoid nesting successive array results
+        if (result[ks.fourCC] == null && !Array.isArray(partialResult)) result[ks.fourCC] = partialResult;
+        else if (result[ks.fourCC] == null) result[ks.fourCC] = [partialResult];
         else if (Array.isArray(result[ks.fourCC])) result[ks.fourCC].push(partialResult);
         else result[ks.fourCC] = [result[ks.fourCC], partialResult];
 
