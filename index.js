@@ -11,7 +11,8 @@ function parse(data, options = {}, start = 0, end = data.length) {
   let unknown = new Set();
   //Will store complex type definitions
   let complexType;
-
+  //Track if we are repeating keys, to organise arrays correctly
+  let lastCC = { key: null, times: 0 };
   while (start < end) {
     let length;
 
@@ -89,12 +90,24 @@ function parse(data, options = {}, start = 0, end = data.length) {
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
 
-        //Identify keys or results meant to be array before assigning the value, to avoid nesting successive array results
-        if (result[ks.fourCC] == null && !Array.isArray(partialResult) && (!fourCCs[ks.fourCC] || !fourCCs[ks.fourCC].array))
-          result[ks.fourCC] = partialResult;
-        else if (result[ks.fourCC] == null) result[ks.fourCC] = [partialResult];
-        else if (Array.isArray(result[ks.fourCC])) result[ks.fourCC].push(partialResult);
-        else result[ks.fourCC] = [result[ks.fourCC], partialResult];
+        //Count times we are saving to the same fourCC key, to avoid overwriting or nesting arrays
+        if (lastCC.key === ks.fourCC) lastCC.times++;
+        else lastCC = { key: ks.fourCC, times: 0 };
+
+        //Identify keys or results meant to be array
+        const shouldArray = key => fourCCs[key] && fourCCs[key].array;
+
+        //First occurence of the fourCC
+        if (lastCC.times === 0) {
+          if (shouldArray(ks.fourCC)) result[ks.fourCC] = [partialResult];
+          else result[ks.fourCC] = partialResult;
+          //First repetition. Create array if not done. Then always push
+        } else if (lastCC.times === 1) {
+          if (shouldArray(ks.fourCC)) result[ks.fourCC].push(partialResult);
+          else result[ks.fourCC] = [result[ks.fourCC], partialResult];
+        } else result[ks.fourCC].push(partialResult);
+
+        //Parsing error
       } else throw new Error('Error, negative length');
     } catch (err) {
       setImmediate(() => console.error(err));
