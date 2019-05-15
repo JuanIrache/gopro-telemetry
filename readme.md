@@ -22,6 +22,8 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 ## To-Do
 
 - Automated testing
+- refactor index a bit and move to ParseRaw or similar
+- specify as much as possible which keys should array and/or which don't. Or maybe keep the last item of each nest arrayed and flatten the rest
 - Scale data even in raw? (i think so, leave matrix for other stages? not sure)
 - Enable raw option
 - Add filtering options (GPS, Accel, Gyro...)
