@@ -22,7 +22,6 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 ## To-Do
 
 - Automated testing
-- Take potential nested arrays into account f[8]? Never found one to test
 - Add filtering options (GPS, Accel, Gyro...)
 - Interpret data
   - Calculate time
@@ -30,3 +29,12 @@ Made possible thanks to https://github.com/gopro/gpmf-parser
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
 - Refactoring for performance?
+
+## Maybe To-Do
+
+- Take potential nested arrays into account f[8]? Never found one to test
+- Pending types:
+  - d | 64-bit double precision (IEEE 754) | double
+  - G | 128-bit ID (like UUID) | uint8_t guid[16]
+  - q | 32-bit Q Number Q15.16 | uint32_t | 16-bit integer (A) with 16-bit fixed point (B) for A.B value (range -32768.0 to 32767.99998)
+  - Q | 64-bit Q Number Q31.32 | uint64_t | 32-bit integer (A) with 32-bit fixed point (B) for A.B value.

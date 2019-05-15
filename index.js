@@ -95,8 +95,6 @@ function parse(data, options = {}, start = 0, end = data.length) {
         else if (result[ks.fourCC] == null) result[ks.fourCC] = [partialResult];
         else if (Array.isArray(result[ks.fourCC])) result[ks.fourCC].push(partialResult);
         else result[ks.fourCC] = [result[ks.fourCC], partialResult];
-
-        //Something is wrong
       } else throw new Error('Error, negative length');
     } catch (err) {
       setImmediate(() => console.error(err));
@@ -115,6 +113,10 @@ function parse(data, options = {}, start = 0, end = data.length) {
     if (options.tolerant) setImmediate(() => console.error(err));
     else throw new Error(`${err}. Use the 'tolerant' option to return anyway`);
   }
+
+  //Clean up
+  // if (result.TYPE) delete result.TYPE;
+
   return result;
 }
 
