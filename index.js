@@ -115,7 +115,7 @@ function parse(data, options = {}, start = 0, end = data.length) {
   }
 
   //Clean up
-  // if (result.TYPE) delete result.TYPE;
+  if (result.TYPE) delete result.TYPE;
 
   return result;
 }
