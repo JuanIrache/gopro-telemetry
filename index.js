@@ -90,7 +90,8 @@ function parse(data, options = {}, start = 0, end = data.length) {
         } else unknown.add(ks.type);
 
         //Identify keys or results meant to be array before assigning the value, to avoid nesting successive array results
-        if (result[ks.fourCC] == null && (!Array.isArray(partialResult) || fourCCs[ks.fourCC].array)) result[ks.fourCC] = partialResult;
+        if (result[ks.fourCC] == null && (!Array.isArray(partialResult) || (fourCCs[ks.fourCC] && fourCCs[ks.fourCC].array)))
+          result[ks.fourCC] = partialResult;
         else if (result[ks.fourCC] == null) result[ks.fourCC] = [partialResult];
         else if (Array.isArray(result[ks.fourCC])) result[ks.fourCC].push(partialResult);
         else result[ks.fourCC] = [result[ks.fourCC], partialResult];
