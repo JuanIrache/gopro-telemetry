@@ -36,14 +36,14 @@ function parseV(environment, slice, len, specifics) {
       let valParser = new Parser().endianess('big')[types[type].func]('value', opts);
       const parsed = valParser.parse(data.slice(slice)).result;
 
+      //If debugging, print unexpected types
+      if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
+
       return parsed.value;
 
       //Data is complex but did not find axes
     } else throw new Error('Complex type ? with only one axis');
   }
-
-  //If debugging, print unexpected types
-  if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
 }
 
 module.exports = parseV;
