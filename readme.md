@@ -1,35 +1,67 @@
 # GoPro Telemetry
 
-Work in progress. Don't rely on it for important stuff yet.
+**Work in progress. Don't rely on it for important stuff yet.**
 
 Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later).
 
+Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-telemetry-extractor/).
+
+Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.com/watch?v=V4eJDQik-so&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
+
 Accepts binary data and returns a JavaScript object. See samples/example.js for a basic implementation.
 
-Extracting the raw data from the video file is not covered yet.
+Extracting the raw data track from the video file is not covered yet.
+
+Install:
 
 ```shell
 $ npm i gopro-telemetry
 ```
 
+Use:
+
 ```js
 const goproTelemetry = require('gopro-telemetry');
-const telemetry = goproTelemetry(rawData);
+const telemetry = goproTelemetry(rawData, options);
 ```
 
-Made possible thanks to https://github.com/gopro/gpmf-parser
+## Options (optional)
+
+Some options may be incompatible with others.
+
+- **debug** (boolean) Outputs some feeback. Default: _false_
+- **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
+- **interpret** (boolean) If false, returns the data as close to raw as possible. No matrix transformations, no scaling. The following options only apply if interpret is true. Default: _true_
+- **interpolate** (boolean) Interpolates time values to samples without them. Default: _true_
+- **style** (string) Formats the output following some standard. For example, _geoJSON_. Implementation pending. Default: _null_
+- **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Implementation pending. Default: _null_
+- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
+
+Example:
+
+```js
+const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpret: false, filter: ['GPS'] });
+```
+
+This project is possible thanks to the [gpmf-parser documentation](https://github.com/gopro/gpmf-parser), open sourced by GoPro.
+
+## More creative coding
+
+If you liked this you might like other [creative coding projects](https://tailorandwayne.com/coding-projects/).
 
 ## To-Do
 
 - Automated testing
 - refactor index a bit and move to ParseRaw or similar
 - specify as much as possible which keys should array and/or which don't. Or maybe keep the last item of each nest arrayed and flatten the rest
-- Scale data even in raw? (i think so, leave matrix for other stages? not sure)
-- Enable raw option
-- Add filtering options (GPS, Accel, Gyro...)
+- Enable non processed option
 - Interpret data
+  - process matrix and scaling
+  - Add filtering options (GPS, Accel, Gyro...)
   - Calculate time (take reference from mp4 file?)
   - What to do with EMPT, TSMP?
+  - Enable per-frame packets
+  - Enable grouping packets per time unit
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
 - Refactoring for performance?
