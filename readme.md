@@ -51,7 +51,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- refactor index a bit and move to ParseRaw or similar
 - specify as much as possible which keys should array and/or which don't. Or maybe keep the last item of each nest arrayed and flatten the rest
 - Enable non processed option
 - Make public
