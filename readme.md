@@ -8,7 +8,7 @@ Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-tel
 
 Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.com/watch?v=V4eJDQik-so&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
 
-Accepts binary data and returns a JavaScript object. See samples/example.js for a basic implementation.
+Accepts binary data and returns a JavaScript object. See **samples/example.js** for a basic implementation.
 
 Extracting the raw data track from the video file is not covered yet.
 
@@ -29,7 +29,7 @@ const telemetry = goproTelemetry(rawData, options);
 
 Some options may be incompatible with others.
 
-- **debug** (boolean) Outputs some feeback. Default: _false_
+- **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
 - **interpret** (boolean) If false, returns the data as close to raw as possible. No matrix transformations, no scaling. The following options only apply if interpret is true. Default: _true_
 - **interpolate** (boolean) Interpolates time values to samples without them. Default: _true_
