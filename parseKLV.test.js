@@ -1,4 +1,4 @@
-const goproTelemetry = require('./parseKLV');
+const parseKLV = require('./parseKLV');
 const fs = require('fs');
 
 let filename, file, result;
@@ -7,7 +7,7 @@ describe('Testing with Fusion file', () => {
   beforeAll(() => {
     filename = 'Fusion';
     file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
-    result = goproTelemetry(file);
+    result = parseKLV(file);
   });
 
   test(`Fusion should return valid metadata (DEVC)`, () => {
@@ -37,7 +37,7 @@ describe('Testing with hero5 file', () => {
   beforeAll(() => {
     filename = 'hero5';
     file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
-    result = goproTelemetry(file);
+    result = parseKLV(file);
   });
 
   test(`hero5 should return valid metadata (DEVC)`, () => {
@@ -64,7 +64,7 @@ describe('Testing with hero6 file', () => {
   beforeAll(() => {
     filename = 'hero6';
     file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
-    result = goproTelemetry(file);
+    result = parseKLV(file);
   });
 
   test(`hero6 should return valid metadata (DEVC)`, () => {
@@ -91,7 +91,7 @@ describe('Testing with hero6+ble file', () => {
   beforeAll(() => {
     filename = 'hero6+ble';
     file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
-    result = goproTelemetry(file);
+    result = parseKLV(file);
   });
 
   test(`hero6+ble should contain two devices (DEVC)`, () => {
@@ -118,7 +118,7 @@ describe('Testing with karma file', () => {
   beforeAll(() => {
     filename = 'karma';
     file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
-    result = goproTelemetry(file);
+    result = parseKLV(file);
   });
 
   test(`karma should contain two devices (DEVC)`, () => {
@@ -136,7 +136,7 @@ describe('Testing with hero7 file', () => {
   beforeAll(() => {
     filename = 'hero7';
     file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
-    result = goproTelemetry(file);
+    result = parseKLV(file);
   });
 
   test(`hero7 should contain multiple device entries (DEVC)`, () => {
