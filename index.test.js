@@ -13,25 +13,25 @@ describe('Testing with Fusion file', () => {
   });
 
   test(`${filename} should return valid metadata (DEVC)`, () => {
-    expect(result.DEVC).toBeDefined();
+    expect(result.DEVC[0]).toBeDefined();
   });
   test(`${filename} should have a data stream (STRM)`, () => {
-    expect(result.DEVC.STRM.length).toBeGreaterThan(0);
+    expect(result.DEVC[0].STRM.length).toBeGreaterThan(0);
   });
   test(`${filename} should have shutter speed data (SHUT)`, () => {
-    expect(result.DEVC.STRM[5].SHUT.length).toBeGreaterThan(0);
+    expect(result.DEVC[0].STRM[5].SHUT.length).toBeGreaterThan(0);
   });
   test(`${filename} should have stream names (STNM)`, () => {
-    expect(typeof result.DEVC.STRM[4].STNM).toBe('string');
+    expect(typeof result.DEVC[0].STRM[4].STNM).toBe('string');
   });
   test(`${filename} should have scaling data (SCAL)`, () => {
-    expect(typeof result.DEVC.STRM[3].SCAL[0]).toBe('number');
+    expect(typeof result.DEVC[0].STRM[3].SCAL[0]).toBe('number');
   });
   test(`${filename} should have units (SIUN)`, () => {
-    expect(typeof result.DEVC.STRM[2].SIUN).toBe('string');
+    expect(typeof result.DEVC[0].STRM[2].SIUN).toBe('string');
   });
   test(`${filename} should contain ticks (TICK)`, () => {
-    expect(typeof result.DEVC.STRM[1].TICK).toBe('number');
+    expect(typeof result.DEVC[0].STRM[1].TICK).toBe('number');
   });
 });
 
@@ -43,24 +43,24 @@ describe('Testing with hero5 file', () => {
   });
 
   test(`${filename} should return valid metadata (DEVC)`, () => {
-    expect(result.DEVC).toBeDefined();
+    expect(result.DEVC[0]).toBeDefined();
   });
   test(`${filename} should have a data stream (STRM)`, () => {
-    expect(result.DEVC.STRM.length).toBeGreaterThan(0);
+    expect(result.DEVC[0].STRM.length).toBeGreaterThan(0);
   });
   // test(`${filename} should have shutter speed data (SHUT)`, () => {
-  //   expect(result.DEVC.STRM[5].SHUT.length).toBeGreaterThan(0);
+  //   expect(result.DEVC[0].STRM[5].SHUT.length).toBeGreaterThan(0);
   // });
   // test(`${filename} should have stream names (STNM)`, () => {
-  //   expect(typeof result.DEVC.STRM[4].STNM).toBe('string');
+  //   expect(typeof result.DEVC[0].STRM[4].STNM).toBe('string');
   // });
   // test(`${filename} should have scaling data (SCAL)`, () => {
-  //   expect(typeof result.DEVC.STRM[3].SCAL[0]).toBe('number');
+  //   expect(typeof result.DEVC[0].STRM[3].SCAL[0]).toBe('number');
   // });
   // test(`${filename} should have units (SIUN)`, () => {
-  //   expect(typeof result.DEVC.STRM[2].SIUN).toBe('string');
+  //   expect(typeof result.DEVC[0].STRM[2].SIUN).toBe('string');
   // });
   // test(`${filename} should contain ticks (TICK)`, () => {
-  //   expect(typeof result.DEVC.STRM[1].TICK).toBe('number');
+  //   expect(typeof result.DEVC[0].STRM[1].TICK).toBe('number');
   // });
 });
