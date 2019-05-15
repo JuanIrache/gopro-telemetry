@@ -1,4 +1,4 @@
-const goproTelemetry = require('./');
+const goproTelemetry = require('./parseKLV');
 const fs = require('fs');
 
 let filename, file, result;

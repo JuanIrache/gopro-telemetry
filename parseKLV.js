@@ -1,10 +1,8 @@
-//binary-parser does not support 64bits use @gmod/binary-parser
-const Parser = require('@gmod/binary-parser').Parser;
-// const Parser64 = require('@gmod/binary-parser').Parser;
 const { keyAndStructParser, types, fourCCs } = require('./keys');
+const parseV = require('./parseV');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
-function parse(data, options = {}, start = 0, end = data.length) {
+function parseKLV(data, options = {}, start = 0, end = data.length) {
   const root = start === 0;
   let result = {};
   //Will store unknown types
@@ -30,7 +28,7 @@ function parse(data, options = {}, start = 0, end = data.length) {
         //Log unknown types for future implementation
         else if (!types[ks.type]) unknown.add(ks.type);
         //Recursive call to parse nested data
-        else if (types[ks.type].nested) partialResult = parse(data, options, start + 8, start + 8 + length);
+        else if (types[ks.type].nested) partialResult = parseKLV(data, options, start + 8, start + 8 + length);
         //We can parse the Value
         else if (types[ks.type].func || (types[ks.type].complex && complexType)) {
           //Detect data with multiple axes
@@ -44,46 +42,16 @@ function parse(data, options = {}, start = 0, end = data.length) {
             ks.repeat = 1;
           }
 
-          //Main data accessing function. Reads the V in KLV
-          //Refactor for performance/memory?
-          const readValue = function(slice, len, ax = 1, type = ks.type) {
-            //Log unknown types for future implementation
-            if (!types[type]) unknown.add(type);
-            else {
-              //Split data when axes present
-              if (ax > 1) {
-                //Will return array of values
-                let res = [];
-
-                for (let i = 0; i < ax; i++) {
-                  let innerType = type;
-                  //Pick type from previously read data if needed
-                  if (types[type].complex) innerType = complexType[i];
-                  res.push(readValue(slice + (i * ks.size) / ax, len / ax, 1, innerType));
-                }
-                return res;
-
-                //Otherwise, read a single value
-              } else if (!types[type].complex) {
-                //Add options required by type
-                let opts = { length: len };
-                if (types[type].opt) for (const key in types[type].opt) opts[key] = types[type].opt[key];
-                //We pick the necessary function based on data format (stored in types)
-                let valParser = new Parser().endianess('big')[types[type].func]('value', opts);
-                const parsed = valParser.parse(data.slice(slice)).result;
-
-                return parsed.value;
-
-                //Data is complex but did not find axes
-              } else throw new Error('Complex type ? with only one axis');
-            }
-          };
+          const environment = { data, options, ks };
+          const specifics = { ax: axes, complexType };
 
           //Access the values or single value
           if (ks.repeat > 1) {
             partialResult = [];
-            for (let i = 0; i < ks.repeat; i++) partialResult.push(readValue(start + 8 + i * ks.size, ks.size, axes));
-          } else partialResult = readValue(start + 8, length, axes);
+            for (let i = 0; i < ks.repeat; i++) {
+              partialResult.push(parseV(environment, start + 8 + i * ks.size, ks.size, specifics));
+            }
+          } else partialResult = parseV(environment, start + 8, length, specifics);
           //If we just read a TYPE value, store it. Will be necessary in this nest
           if (ks.fourCC === 'TYPE') complexType = partialResult;
 
@@ -127,10 +95,10 @@ function parse(data, options = {}, start = 0, end = data.length) {
     else throw new Error(`${err}. Use the 'tolerant' option to return anyway`);
   }
 
-  //Clean up
+  //Clean up after applying types
   if (result.TYPE) delete result.TYPE;
 
   return result;
 }
 
-module.exports = parse;
+module.exports = parseKLV;
