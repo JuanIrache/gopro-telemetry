@@ -55,6 +55,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
 
+        if (ks.fourCC === 'FACE') console.log(ks.repeat, ks.size);
         //Count times we are saving to the same fourCC key, to avoid overwriting or nesting arrays
         if (lastCC.key === ks.fourCC) lastCC.times++;
         else lastCC = { key: ks.fourCC, times: 0 };
@@ -71,8 +72,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
         //   //   if (shouldArray(ks.fourCC)) result[ks.fourCC].push(partialResult);
         //   //   else result[ks.fourCC] = [result[ks.fourCC], partialResult];
         // } else result[ks.fourCC].push(partialResult);
-        if (result[ks.fourCC]) result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
-        else result[ks.fourCC] = partialResult;
+        if (result.hasOwnProperty(ks.fourCC)) {
+          result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
+        } else result[ks.fourCC] = partialResult;
 
         //Parsing error
       } else throw new Error('Error, negative length');
