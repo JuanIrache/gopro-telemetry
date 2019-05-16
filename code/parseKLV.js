@@ -8,7 +8,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
   //Will store unknown types
   let unknown = new Set();
   //Will store complex type definitions
-  let complexType;
+  let complexType = [];
   //Track if we are repeating keys, to organise arrays correctly
   let lastCC = { key: null, times: 0 };
   while (start < end) {
@@ -35,7 +35,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
           let axes = 1;
           if (types[ks.type].size > 1) axes = ks.size / types[ks.type].size;
           //Detect them when the type is complex
-          else if (types[ks.type].complex && complexType && complexType.length) axes = complexType.length;
+          else if (types[ks.type].complex && complexType.length) axes = complexType.length;
           //Human readable strings should de merged for readability
           if (fourCCs[ks.fourCC] && fourCCs[ks.fourCC].merge) {
             ks.size = length;
@@ -96,7 +96,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
   }
 
   //Clean up after applying types
-  if (result.TYPE) delete result.TYPE;
+  if (result.hasOwnProperty('TYPE')) delete result.TYPE;
 
   return result;
 }
