@@ -1,9 +1,9 @@
-const parseV = require('./parseV');
+const parseV = require('../code/parseV');
 const fs = require('fs');
 const buffers = [];
 
 for (let i = 0; i < 9; i++) {
-  const buff = fs.readFileSync(`./samples/buffer${i}`);
+  const buff = fs.readFileSync(`${__dirname}/../samples/buffer${i}`);
   buffers[i] = buff;
 }
 

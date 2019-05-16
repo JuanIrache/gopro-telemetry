@@ -4,7 +4,7 @@
 $ node example.js
 ```
 
-exports q sample to JSON
+Exports sample data to JSON
 
 ## Sample files with GPMF
 

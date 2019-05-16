@@ -1,4 +1,4 @@
-const parseKLV = require('./parseKLV');
+const parseKLV = require('../code/parseKLV');
 const fs = require('fs');
 
 let filename, file, result;
@@ -6,7 +6,7 @@ let filename, file, result;
 describe('Testing with Fusion file', () => {
   beforeAll(() => {
     filename = 'Fusion';
-    file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = parseKLV(file);
   });
 
@@ -36,7 +36,7 @@ describe('Testing with Fusion file', () => {
 describe('Testing with hero5 file', () => {
   beforeAll(() => {
     filename = 'hero5';
-    file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = parseKLV(file);
   });
 
@@ -63,7 +63,7 @@ describe('Testing with hero5 file', () => {
 describe('Testing with hero6 file', () => {
   beforeAll(() => {
     filename = 'hero6';
-    file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = parseKLV(file);
   });
 
@@ -90,7 +90,7 @@ describe('Testing with hero6 file', () => {
 describe('Testing with hero6+ble file', () => {
   beforeAll(() => {
     filename = 'hero6+ble';
-    file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = parseKLV(file);
   });
 
@@ -117,7 +117,7 @@ describe('Testing with hero6+ble file', () => {
 describe('Testing with karma file', () => {
   beforeAll(() => {
     filename = 'karma';
-    file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = parseKLV(file);
   });
 
@@ -135,7 +135,7 @@ describe('Testing with karma file', () => {
 describe('Testing with hero7 file', () => {
   beforeAll(() => {
     filename = 'hero7';
-    file = fs.readFileSync(`${__dirname}/samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = parseKLV(file);
   });
 
