@@ -10,7 +10,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
   //Will store complex type definitions
   let complexType = [];
   //Track if we are repeating keys, to organise arrays correctly
-  let lastCC = { key: null, times: 0 };
+  let lastCC;
   while (start < end) {
     let length;
 
@@ -55,22 +55,11 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
 
-        //Count times we are saving to the same fourCC key, to avoid overwriting or nesting arrays
-        if (lastCC.key === ks.fourCC) lastCC.times++;
-        else lastCC = { key: ks.fourCC, times: 0 };
+        if (ks.fourCC === 'KBAT') console.log(ks.repeat, ks.size, ks.type, complexType);
 
-        //Identify keys or results meant to be array
-        const shouldArray = key => fourCCs[key] && fourCCs[key].array;
+        //Remember last key to keep ir as array
+        lastCC = ks.fourCC;
 
-        // //First occurence of the fourCC
-        // if (lastCC.times === 0) {
-        //   if (shouldArray(ks.fourCC)) result[ks.fourCC] = [partialResult];
-        //   else result[ks.fourCC] = partialResult;
-        //   //First repetition. Create array if not done. Then always push
-        //   // } else if (lastCC.times === 1) {
-        //   //   if (shouldArray(ks.fourCC)) result[ks.fourCC].push(partialResult);
-        //   //   else result[ks.fourCC] = [result[ks.fourCC], partialResult];
-        // } else result[ks.fourCC].push(partialResult);
         if (result.hasOwnProperty(ks.fourCC)) {
           result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
         } else result[ks.fourCC] = partialResult;
@@ -87,7 +76,8 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
     while (start < reached) start += 4;
   }
 
-  for (const key in result) if (key !== lastCC.key && result[key].length === 1) result[key] = result[key][0];
+  //Undo all arrays except the last key, which should be the array of samples
+  for (const key in result) if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
@@ -96,10 +86,6 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
     if (options.tolerant) setImmediate(() => console.error(err));
     else throw new Error(`${err}. Use the 'tolerant' option to return anyway`);
   }
-
-  // console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
-
-  // console.log(lastCC.key, result[lastCC.key]);
 
   //Clean up after applying types
   if (result.hasOwnProperty('TYPE')) delete result.TYPE;
