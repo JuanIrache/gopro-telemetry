@@ -70,9 +70,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- report on missing types with throw and inside parseV on obth returns
-
-- Enable non processed option
+- trycatch interpretation
 - Make public
 - Interpret data
   - process matrix and scaling
@@ -81,6 +79,7 @@ If you liked this you might like other [creative coding projects](https://tailor
   - What to do with EMPT, TSMP?
   - Enable per-frame packets
   - Enable grouping packets per time unit
+- Review consol.log/error usage
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
 - Refactoring for performance?
