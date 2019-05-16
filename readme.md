@@ -46,8 +46,8 @@ const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpr
 
 Depending on the camera, model, settings and accessories, these are some of the available data:
 
-- GPS location
-- GPS speed
+- GPS location (deg, m)
+- GPS speed (m/s)
 - Accelerometer (m/s²)
 - Gyroscope (rad/s)
 - ISO
