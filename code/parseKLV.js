@@ -50,12 +50,11 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
             for (let i = 0; i < ks.repeat; i++) partialResult.push(parseV(environment, start + 8 + i * ks.size, ks.size, specifics));
           } else partialResult.push(parseV(environment, start + 8, length, specifics));
           //If we just read a TYPE value, store it. Will be necessary in this nest
-          if (ks.fourCC === 'TYPE') complexType = partialResult[partialResult.lenght - 1];
+          if (ks.fourCC === 'TYPE') complexType = partialResult[0];
 
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
 
-        if (ks.fourCC === 'FACE') console.log(ks.repeat, ks.size);
         //Count times we are saving to the same fourCC key, to avoid overwriting or nesting arrays
         if (lastCC.key === ks.fourCC) lastCC.times++;
         else lastCC = { key: ks.fourCC, times: 0 };
