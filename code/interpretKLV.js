@@ -8,7 +8,7 @@ function interpretKLV(klv, options) {
         result[result.interpretSamples] = result[result.interpretSamples].map(s => {
           //If single value, scale, otherwise loop through array
           if (typeof s === 'number') return s / result.SCAL;
-          else {
+          else if (s != null) {
             //If scaling is array, apply to each "axis", otherwise apply to all
             if (result.SCAL.length === s.length) return s.map((ss, i) => ss / result.SCAL[i]);
             else return s.map((ss, i) => ss / result.SCAL);
