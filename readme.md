@@ -73,7 +73,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 - trycatch interpretation
 - Make public
 - Interpret data
-  - process matrix and scaling
   - Add filtering options (GPS, Accel, Gyro...)
   - Calculate time (take reference from mp4 file?)
   - What to do with EMPT, TSMP?
