@@ -31,8 +31,7 @@ Some options may be incompatible with others.
 
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
-- **interpret** (boolean) If false, returns the data as close to raw as possible. No matrix transformations, no scaling. The following options only apply if interpret is true. Default: _true_
-- **interpolate** (boolean) Interpolates time values to samples without them. Default: _true_
+- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. Disables the following options. Default: _false_
 - **style** (string) Formats the output following some standard. For example, _geoJSON_. Implementation pending. Default: _null_
 - **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Implementation pending. Default: _null_
 - **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
