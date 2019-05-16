@@ -128,7 +128,7 @@ describe('Testing with karma file', () => {
     expect(result.DEVC[1].DVNM).toBe('GoPro Karma v1.0');
   });
   test(`karma should have battery samples`, () => {
-    expect(result.DEVC[1].STRM[1].KBAT.length).toBe(15);
+    expect(result.DEVC[1].STRM[1].KBAT[0].length).toBe(15);
   });
 });
 
