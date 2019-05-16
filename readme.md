@@ -70,7 +70,8 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- specify as much as possible which keys should array and/or which don't. Or maybe keep the last item of each nest arrayed and flatten the rest
+- report on missing types with throw and inside parseV on obth returns
+
 - Enable non processed option
 - Make public
 - Interpret data
@@ -86,6 +87,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## Maybe To-Do
 
+- Automatically detect which keys should be arrays of samples?
 - Take potential nested arrays into account f[8]? Never found one to test
 - Pending types:
   - d | 64-bit double precision (IEEE 754) | double
