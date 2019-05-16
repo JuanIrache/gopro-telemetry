@@ -44,7 +44,7 @@ const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpr
 
 ## Available data
 
-Depending on the camera, model, settings and accessories, these are some og the available data:
+Depending on the camera, model, settings and accessories, these are some of the available data:
 
 - GPS location
 - GPS speed
