@@ -6,6 +6,10 @@
   "scripts": {
     "test": "jest"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanIrache/gopro-telemetry.git"
+  },
   "keywords": [
     "GoPro",
     "GPS",
