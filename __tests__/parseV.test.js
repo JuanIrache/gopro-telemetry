@@ -3,7 +3,7 @@ const fs = require('fs');
 const buffers = [];
 
 for (let i = 0; i < 9; i++) {
-  const buff = fs.readFileSync(`${__dirname}/../samples/buffer${i}`);
+  const buff = fs.readFileSync(`${__dirname}/../samples/buffers/buffer${i}`);
   buffers[i] = buff;
 }
 
