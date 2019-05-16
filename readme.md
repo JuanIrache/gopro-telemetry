@@ -75,7 +75,8 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Calculate time (take reference from mp4 file?)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
-- Review consol.log/error usage
+- Test interpretation
+- Review console.log/error usage
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
 - Refactoring for performance?
