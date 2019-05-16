@@ -34,7 +34,7 @@ Some options may be incompatible with others.
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. Disables the following options. Default: _false_
 - **style** (string) Formats the output following some standard. For example, _geoJSON_. Implementation pending. Default: _null_
 - **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Implementation pending. Default: _null_
-- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
+- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Implementation pending. Default: _null_
 
 Example:
 
@@ -70,14 +70,11 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- trycatch interpretation
-- Make public
 - Interpret data
   - Add filtering options (GPS, Accel, Gyro...)
   - Calculate time (take reference from mp4 file?)
   - What to do with EMPT, TSMP?
-  - Enable per-frame packets
-  - Enable grouping packets per time unit
+  - Enable grouping packets per time unit / frame
 - Review consol.log/error usage
 - Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
