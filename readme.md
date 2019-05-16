@@ -42,6 +42,26 @@ Example:
 const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpret: false, filter: ['GPS'] });
 ```
 
+## Available data
+
+Depending on the camera, model, settings and accessories, these are some og the available data:
+
+- GPS location
+- GPS speed
+- Accelerometer (m/s²)
+- Gyroscope (rad/s)
+- ISO
+- Shutter Speed (s)
+- Timestamps (µs)
+- Magnetometer (µT)
+- Face detection
+- Highlights (manual and computed)
+- White balance
+- Luma
+- Hue
+- Image uniformity
+- Scene classifier
+
 This project is possible thanks to the [gpmf-parser documentation](https://github.com/gopro/gpmf-parser), open sourced by GoPro.
 
 ## More creative coding
