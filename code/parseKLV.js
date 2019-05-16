@@ -55,8 +55,6 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
 
-        if (ks.fourCC === 'KBAT') console.log(ks.repeat, ks.size, ks.type, complexType);
-
         //Remember last key to keep ir as array
         lastCC = ks.fourCC;
 
