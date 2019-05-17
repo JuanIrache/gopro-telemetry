@@ -7,7 +7,7 @@ const writeFileAsync = promisify(fs.writeFile);
 async function toJSON(filename) {
   try {
     const file = await readFileAsync(__dirname + filename);
-    const result = goproTelemetry(file, {});
+    const result = goproTelemetry({ rawData: file }, {});
     await writeFileAsync('./out.json', JSON.stringify(result));
     console.log('File saved');
   } catch (error) {

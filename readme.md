@@ -8,9 +8,14 @@ Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-tel
 
 Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.com/watch?v=V4eJDQik-so&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
 
-Accepts binary data and returns a JavaScript object. See **samples/example.js** for a basic implementation.
+Accepts an object with binary data and timing data. Returns a JavaScript object. See **samples/example.js** for a basic implementation.
 
 You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
+
+**gpmf-extract** will provide you with an object ready to import. It contains:
+
+- **rawData** (buffer) Is the GPMF track of the video file.
+- **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
 Install:
 
@@ -22,7 +27,7 @@ Use:
 
 ```js
 const goproTelemetry = require('gopro-telemetry');
-const telemetry = goproTelemetry(rawData, options);
+const telemetry = goproTelemetry(input, options); //Get your input with gpmf-extract
 ```
 
 ## Options (optional)
@@ -32,10 +37,12 @@ Some options may be incompatible with others.
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. Disables the following options. Default: _false_
-- **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract). See a sample below. Default: _null_
-- **style** (string) Formats the output following some standard. For example, _geoJSON_. Implementation pending. Default: _null_
-- **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Implementation pending. Default: _null_
-- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Implementation pending. Default: _null_
+
+Not yet implemented:
+
+- **style** (string) Formats the output following some standard. For example, _geoJSON_. Default: _null_
+- **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Default: _null_
+- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
 
 Example:
 
@@ -54,7 +61,7 @@ const file = fs.readFileSync('path_to_your_file.mp4');
 
 gpmfExtract(file)
   .then(extracted => {
-    let telemetry = goproTelemetry(extracted.rawData, { timing: extracted.timing });
+    let telemetry = goproTelemetry(extracted);
     fs.writeFileSync('output_path.json', JSON.stringify(telemetry));
     console.log('Telemetry saved as JSON');
   })
