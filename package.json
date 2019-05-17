@@ -1,6 +1,6 @@
 {
   "name": "gopro-telemetry",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "GoPro telemetry and metadata extraction in JavaScript",
   "main": "index.js",
   "scripts": {
