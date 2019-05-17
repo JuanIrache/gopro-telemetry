@@ -90,6 +90,7 @@ If you liked this you might like other [creative coding projects](https://tailor
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
 - Test interpretation
+- Document output
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
 - Remove Work-in-progress warning
