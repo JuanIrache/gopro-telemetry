@@ -10,7 +10,7 @@ Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.co
 
 Accepts binary data and returns a JavaScript object. See **samples/example.js** for a basic implementation.
 
-You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract)
+You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
 Install:
 
@@ -45,7 +45,7 @@ const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpr
 
 **timing** option example:
 
-```js
+```
 { frameSpeed: 0.03336666666666667,
   start: 2017-04-17T19:27:57.000Z,//Date object
   samples:
@@ -92,6 +92,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Test interpretation
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
+- Remove Work-in-progress warning
 - Refactoring for performance?
 
 ## Maybe To-Do
