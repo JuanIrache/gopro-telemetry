@@ -40,10 +40,28 @@ Some options may be incompatible with others.
 Example:
 
 ```js
-const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpret: false, filter: ['GPS'] });
+const telemetry = goproTelemetry(rawData, { raw: true, tolerant: true, filter: ['GPS'] });
 ```
 
-**timing** option example:
+This slightly more comprehensive example includes the data extraction step with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
+
+```js
+const gpmfExtract = require('gpmf-extract');
+const goproTelemetry = require(`gopro-telemetry`);
+const fs = require('fs');
+
+const file = fs.readFileSync('path_to_your_file.mp4');
+
+gpmfExtract(file)
+  .then(extracted => {
+    let telemetry = goproTelemetry(extracted.rawData, { timing: extracted.timing });
+    fs.writeFileSync('output_path.json', JSON.stringify(telemetry));
+    console.log('Telemetry saved as JSON');
+  })
+  .catch(error => console.log(error));
+```
+
+**timing** option structure:
 
 ```
 { frameDuration: 0.03336666666666667,
