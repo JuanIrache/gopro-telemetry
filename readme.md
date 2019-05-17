@@ -46,7 +46,7 @@ const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpr
 **timing** option example:
 
 ```
-{ frameSpeed: 0.03336666666666667,
+{ frameDuration: 0.03336666666666667,
   start: 2017-04-17T19:27:57.000Z,//Date object
   samples:
    [ { cts: 0, duration: 1001 },//Starting point and duration in milliseconds
