@@ -76,7 +76,7 @@ function interpretKLV(klv, options) {
       setImmediate(() => console.error(error));
     }
     //Done with interpretation
-    delete result.interpretSamples;
+    // delete result.interpretSamples;
   }
   return result;
 }
