@@ -10,7 +10,7 @@ Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.co
 
 Accepts binary data and returns a JavaScript object. See **samples/example.js** for a basic implementation.
 
-Extracting the raw data track from the video file is not covered yet.
+You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract)
 
 Install:
 
@@ -32,6 +32,7 @@ Some options may be incompatible with others.
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. Disables the following options. Default: _false_
+- **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract). See a sample below. Default: _null_
 - **style** (string) Formats the output following some standard. For example, _geoJSON_. Implementation pending. Default: _null_
 - **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Implementation pending. Default: _null_
 - **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Implementation pending. Default: _null_
@@ -40,6 +41,19 @@ Example:
 
 ```js
 const telemetry = goproTelemetry(rawData, { debug: true, tolerant: true, interpret: false, filter: ['GPS'] });
+```
+
+**timing** option example:
+
+```js
+{ frameSpeed: 0.03336666666666667,
+  start: 2017-04-17T19:27:57.000Z,//Date object
+  samples:
+   [ { cts: 0, duration: 1001 },//Starting point and duration in milliseconds
+     { cts: 1001, duration: 1001 },
+     { cts: 2002, duration: 1001 },
+     { cts: 3003, duration: 1001 },
+     { cts: 4004, duration: 1001 } ] }
 ```
 
 ## Available data
@@ -71,19 +85,17 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
+  - Calculate time (take reference from mp4 file if gps missing)
   - Add filtering options (GPS, Accel, Gyro...)
-  - Calculate time (take reference from mp4 file?)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
 - Test interpretation
 - Review console.log/error usage
-- Create additional package for extracting the binary data form mp4/mov files
 - Create additional package for converting the data to other formats
 - Refactoring for performance?
 
 ## Maybe To-Do
 
-- Automatically detect which keys should be arrays of samples?
 - Take potential nested arrays into account f[8]? Never found one to test
 - Pending types:
   - d | 64-bit double precision (IEEE 754) | double
