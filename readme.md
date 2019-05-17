@@ -68,7 +68,7 @@ gpmfExtract(file)
   .catch(error => console.log(error));
 ```
 
-**timing** option structure:
+**timing** object structure:
 
 ```
 { frameDuration: 0.03336666666666667,
