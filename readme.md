@@ -111,6 +111,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Interpret data
   - Calculate time (take reference from mp4 file if gps missing)
+    - Compare dates from file and gps
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
