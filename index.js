@@ -18,6 +18,6 @@ module.exports = function(input, options = {}) {
   let timed = {};
   for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
   let merged = {};
-  for (const key in timed) merged[key] = mergeDEVCs(timed[key], input.timing, options);
+  for (const key in timed) merged[key] = mergeDEVCs(timed[key], options);
   return merged;
 };

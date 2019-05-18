@@ -39,6 +39,7 @@ Some options may be incompatible with others.
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
 - **device** (number) Filters the results by device id. Default: _null_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
+- **sensor** (string) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 
 Not yet implemented:
 
