@@ -1,6 +1,6 @@
 function interpretKLV(klv, options) {
   let result = JSON.parse(JSON.stringify(klv));
-  if (result.interpretSamples) {
+  if (result != null && result.interpretSamples) {
     let interpreted = false;
     try {
       if (result.hasOwnProperty('SCAL')) {
