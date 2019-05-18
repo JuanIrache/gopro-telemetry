@@ -82,12 +82,18 @@ function timeKLV(klv, timing, options) {
       const mp4Times = fillMP4Time(klv, timing);
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
+      let dateSDur = {};
       //Loop through packets of samples
       result.DEVC.forEach((d, i) => {
-        //Choose timing type for time (relative to the video start) data
+        //Choose timing type for time (relative to the video start) data. TODO apply user preference
         const { cts, duration } = (() => {
           if (mp4Times.length) return mp4Times[i];
           else if (gpsTimes.length) return gpsTimes[i];
+        })();
+        //Choose timing type for dates (ideally based on GPS). TODO apply user preference
+        let { date, duration: dateDur } = (() => {
+          if (gpsTimes.length) return gpsTimes[i];
+          else if (mp4Times.length) return mp4Times[i];
         })();
         //Loop streams if present
         (d.STRM || []).forEach(s => {
@@ -95,15 +101,18 @@ function timeKLV(klv, timing, options) {
           if (s.interpretSamples && s[s.interpretSamples].length) {
             //Divide duration of packet by samples in packet to get sample duration per fourCC type
             if (duration != null) sDuration[s.STNM] = duration / s[s.interpretSamples].length; //TODO. see if TSMP and //EMPT are useful here
+            //The same for duration of dates
+            if (dateDur != null) dateSDur[s.STNM] = dateDur / s[s.interpretSamples].length; //TODO. see if TSMP and //EMPT are useful here
             //We know the time of the first sample
             let time = cts;
             //Loop samples and replace them with timed samples
             s[s.interpretSamples] = s[s.interpretSamples].map(value => {
               //If timing data avaiable
               if (cts != null && sDuration[s.STNM] != null) {
-                let timedSample = { time, value };
-                //increment time for the next sample
+                let timedSample = { time, date, value };
+                //increment time adn date for the next sample
                 time += sDuration[s.STNM];
+                date = new Date(date.getTime() + dateSDur[s.STNM]);
                 return timedSample;
                 //Otherwise return value without timing data
               } else return { value };
