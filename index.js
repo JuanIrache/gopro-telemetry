@@ -5,12 +5,17 @@ const interpretKLV = require('./code/interpretKLV');
 
 module.exports = function(input, options = {}) {
   const parsed = parseKLV(input.rawData, options);
-  if (!options.raw) {
-    let result = {};
-    const interpreted = interpretKLV(parsed, options);
-    const grouped = groupDevices(interpreted, options);
-    for (const key in grouped) result[key] = timeKLV(grouped[key], input.timing, options);
-    return result;
+  const grouped = groupDevices(parsed, options);
+  if (options.deviceList) {
+    let devices = {};
+    for (const key in grouped) if (grouped[key].DEVC.length) devices[key] = grouped[key].DEVC[0].DVNM;
+    return devices;
   }
-  return parsed;
+  if (options.device != null) for (const key in grouped) if (key != options.device) delete grouped[key];
+  if (options.raw) return grouped;
+  let interpreted = {};
+  for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], options);
+  let timed = {};
+  for (const key in grouped) timed[key] = timeKLV(grouped[key], input.timing, options);
+  return timed;
 };

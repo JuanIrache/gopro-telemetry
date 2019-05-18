@@ -36,7 +36,9 @@ Some options may be incompatible with others.
 
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
-- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. Disables the following options. Default: _false_
+- **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
+- **device** (number) Filters the results by device id. Default: _null_
+- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
 
 Not yet implemented:
 
@@ -113,14 +115,15 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Handle files with multiple devices BEFORE times
   - Calculate time (take reference from mp4 file if gps missing)
     - Merge timed DEVC by fourCC
-    - Remove used values
     - Document time inputs and outputs (gps time is utc, mp4 time is local) (explain sticky values)
     - Check time in second device (karma)
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
+  - Remove used values
+  - Delete interpretsamples
 - Test interpretation
-- Delete interpretsamples
+- Comment index
 - Document output
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
