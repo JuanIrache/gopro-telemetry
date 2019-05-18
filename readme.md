@@ -8,13 +8,13 @@ Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-tel
 
 Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.com/watch?v=V4eJDQik-so&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
 
-Accepts an object with binary data and timing data. Returns a JavaScript object. See **samples/example.js** for a basic implementation.
+Accepts an object with binary data and timing data. Returns a JavaScript object with a key for each device that was found. See **samples/example.js** for a basic implementation.
 
 You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
 **gpmf-extract** will provide you with an object ready to import. It contains:
 
-- **rawData** (buffer) Is the GPMF track of the video file.
+- **rawData** (buffer) The GPMF track of the video file.
 - **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
 Install:
