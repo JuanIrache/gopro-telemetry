@@ -44,8 +44,7 @@ Some options may be incompatible with others.
 Not yet implemented:
 
 - **style** (string) Formats the output following some standard. For example, _geoJSON_. Default: _null_
-- **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Default: _null_
-- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
+- **time** (string) Averages samples to time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
 
 Example:
 
