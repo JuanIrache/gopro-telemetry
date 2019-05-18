@@ -16,6 +16,6 @@ module.exports = function(input, options = {}) {
   let interpreted = {};
   for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], options);
   let timed = {};
-  for (const key in grouped) timed[key] = timeKLV(grouped[key], input.timing, options);
+  for (const key in grouped) timed[key] = timeKLV(interpreted[key], input.timing, options);
   return timed;
 };

@@ -15,6 +15,7 @@ function interpretKLV(klv, options) {
             else return s.map((ss, i) => ss / result.SCAL);
           }
         });
+
         //Done with scaling data
         delete result.SCAL;
         interpreted = true;
