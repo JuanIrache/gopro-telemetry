@@ -99,20 +99,21 @@ function timeKLV(klv, timing, options) {
         (d.STRM || []).forEach(s => {
           //If group of samples found
           if (s.interpretSamples && s[s.interpretSamples].length) {
+            const fourCC = s.interpretSamples;
             //Divide duration of packet by samples in packet to get sample duration per fourCC type
-            if (duration != null) sDuration[s.STNM] = duration / s[s.interpretSamples].length; //TODO. see if TSMP and //EMPT are useful here
+            if (duration != null) sDuration[fourCC] = duration / s[fourCC].length; //TODO. see if TSMP and //EMPT are useful here
             //The same for duration of dates
-            if (dateDur != null) dateSDur[s.STNM] = dateDur / s[s.interpretSamples].length; //TODO. see if TSMP and //EMPT are useful here
+            if (dateDur != null) dateSDur[fourCC] = dateDur / s[fourCC].length; //TODO. see if TSMP and //EMPT are useful here
             //We know the time of the first sample
             let time = cts;
             //Loop samples and replace them with timed samples
-            s[s.interpretSamples] = s[s.interpretSamples].map(value => {
+            s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
-              if (cts != null && sDuration[s.STNM] != null) {
+              if (cts != null && sDuration[fourCC] != null) {
                 let timedSample = { time, date, value };
                 //increment time adn date for the next sample
-                time += sDuration[s.STNM];
-                date = new Date(date.getTime() + dateSDur[s.STNM]);
+                time += sDuration[fourCC];
+                date = new Date(date.getTime() + dateSDur[fourCC]);
                 return timedSample;
                 //Otherwise return value without timing data
               } else return { value };
