@@ -6,13 +6,12 @@ function mergeDEVCs(klv, options) {
         const fourCC = s.interpretSamples;
         if (options.sensor == null || options.sensor === fourCC) {
           //TODO do something with the descprition that changes, sticky props?
-          if (result.sensors[fourCC]) result.sensors[fourCC].samples.concat(s[fourCC]);
+          if (result.sensors[fourCC]) result.sensors[fourCC].samples.push(...s[fourCC]);
           else {
             result.sensors[fourCC] = { samples: s[fourCC] };
             delete s[fourCC];
             delete s.interpretSamples;
-            result.sensors[fourCC].description = {};
-            for (const key in s) result.sensors[fourCC].description[key] = s[key];
+            for (const key in s) result.sensors[fourCC][key] = s[key];
           }
         }
       }
