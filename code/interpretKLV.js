@@ -1,3 +1,4 @@
+//Apply scale and matrix transformations to data
 function interpretKLV(klv, options) {
   let result = JSON.parse(JSON.stringify(klv));
   if (result != null && result.interpretSamples) {
