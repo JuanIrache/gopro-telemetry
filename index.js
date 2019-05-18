@@ -2,6 +2,7 @@ const parseKLV = require('./code/parseKLV');
 const groupDevices = require('./code/groupDevices');
 const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
+const mergeDEVCs = require('./code/mergeDEVCs');
 
 module.exports = function(input, options = {}) {
   const parsed = parseKLV(input.rawData, options);
@@ -15,6 +16,8 @@ module.exports = function(input, options = {}) {
   let interpreted = {};
   for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], options);
   let timed = {};
-  for (const key in grouped) timed[key] = timeKLV(interpreted[key], input.timing, options);
-  return timed;
+  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
+  let merged = {};
+  for (const key in timed) merged[key] = mergeDEVCs(timed[key], input.timing, options);
+  return merged;
 };
