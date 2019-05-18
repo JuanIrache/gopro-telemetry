@@ -48,7 +48,7 @@ function fillGPSTime(klv) {
 //Create date, time, duration list based on mp4 date and timing data
 function fillMP4Time(klv, timing) {
   let res = [];
-  if (timing.samples.length) {
+  if (timing && timing.samples && timing.samples.length) {
     //Set the initial date, the only one provided by mp4
     const initialDate = timing.start.getTime();
     klv.DEVC.forEach((d, i) => {
