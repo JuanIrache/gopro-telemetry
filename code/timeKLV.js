@@ -24,6 +24,8 @@ function fillGPSTime(klv) {
     (d.STRM || []).forEach(s => {
       //Find the GPSU date in the GPS5 stream
       if (s.GPSU != null) date = toDate(s.GPSU);
+      //Done with GPSU
+      delete s.GPSU;
     });
     if (date) {
       //Set date for first packet
@@ -111,7 +113,7 @@ function timeKLV(klv, timing, options) {
             s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
               if (currCts != null && sDuration[fourCC] != null) {
-                let timedSample = { cts:currCts, date:currDate, value };
+                let timedSample = { cts: currCts, date: currDate, value };
                 //increment time adn date for the next sample
                 currCts += sDuration[fourCC];
                 currDate = new Date(currDate.getTime() + dateSDur[fourCC]);
