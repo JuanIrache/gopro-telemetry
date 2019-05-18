@@ -121,6 +121,7 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Enable grouping packets per time unit / frame
   - Remove used values
   - What to do with tick, tock, siun, tsmp, empt....? then delete them
+  - translate known fourCCs to human readable
 - Test interpretation
 - Comment index
 - Document output
