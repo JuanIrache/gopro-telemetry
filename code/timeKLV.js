@@ -61,35 +61,38 @@ function providedTimes(klv, timing) {
 
 function timeKLV(klv, timing, options) {
   let result = JSON.parse(JSON.stringify(klv));
-  if (result.DEVC && result.DEVC.length) {
-    const gpsTimes = GPSUtimes(klv);
-    const pTimes = providedTimes(klv, timing);
-    result.DEVC.forEach((d, i) => {
-      let cts, duration;
-      if (pTimes.length) {
-        cts = pTimes[i].cts;
-        duration = pTimes[i].duration;
-      } else if (gpsTimes.length) {
-        cts = gpsTimes[i].cts;
-        duration = gpsTimes[i].duration;
-      }
-      if (d.STRM && d.STRM.length) {
-        d.STRM.forEach(s => {
-          if (s.interpretSamples && s[s.interpretSamples].length) {
-            const sDur = duration / s[s.interpretSamples].length; //see if TSMP and //EMPT are useful here
-            let sCts = cts;
-            s[s.interpretSamples] = s[s.interpretSamples].map(ss => {
-              if (cts != null) {
-                const time = sCts;
-                sCts += sDur;
-                return { time, value: ss };
-              } else return { value: ss };
-            });
-          }
-        });
-      }
-    });
-  } else throw new Error('Invalid data, no DEVC');
+  try {
+    if (result.DEVC && result.DEVC.length) {
+      const gpsTimes = GPSUtimes(klv);
+      const pTimes = providedTimes(klv, timing);
+      let sDuration = {};
+      result.DEVC.forEach((d, i) => {
+        let cts, duration;
+        if (pTimes.length) {
+          cts = pTimes[i].cts;
+          duration = pTimes[i].duration;
+        } else if (gpsTimes.length) {
+          cts = gpsTimes[i].cts;
+          duration = gpsTimes[i].duration;
+        }
+        if (d.STRM)
+          d.STRM.forEach(s => {
+            if (s.interpretSamples && s[s.interpretSamples].length) {
+              if (duration != null) sDuration[s.STNM] = duration / s[s.interpretSamples].length; //see if TSMP and //EMPT are useful here
+              let time = cts;
+              s[s.interpretSamples] = s[s.interpretSamples].map(value => {
+                if (cts != null && sDuration[s.STNM] != null) {
+                  time += sDuration[s.STNM];
+                  return { time, value };
+                } else return { value };
+              });
+            }
+          });
+      });
+    } else throw new Error('Invalid data, no DEVC');
+  } catch (error) {
+    setimmediate(() => console.error(error));
+  }
   return result;
 }
 
