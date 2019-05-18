@@ -11,7 +11,7 @@ function toDate(d) {
   return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL]));
 }
 
-function GPSUtimes(klv) {
+function fillGPSTime(klv) {
   let res = [];
   let initialDate;
   klv.DEVC.forEach((d, i) => {
@@ -39,7 +39,7 @@ function GPSUtimes(klv) {
   return res;
 }
 
-function providedTimes(klv, timing) {
+function fillMP4Time(klv, timing) {
   let res = [];
   if (timing.samples.length) {
     const initialDate = timing.start.getTime();
@@ -63,14 +63,14 @@ function timeKLV(klv, timing, options) {
   let result = JSON.parse(JSON.stringify(klv));
   try {
     if (result.DEVC && result.DEVC.length) {
-      const gpsTimes = GPSUtimes(klv);
-      const pTimes = providedTimes(klv, timing);
+      const gpsTimes = fillGPSTime(klv);
+      const mp4Times = fillMP4Time(klv, timing);
       let sDuration = {};
       result.DEVC.forEach((d, i) => {
         let cts, duration;
-        if (pTimes.length) {
-          cts = pTimes[i].cts;
-          duration = pTimes[i].duration;
+        if (mp4Times.length) {
+          cts = mp4Times[i].cts;
+          duration = mp4Times[i].duration;
         } else if (gpsTimes.length) {
           cts = gpsTimes[i].cts;
           duration = gpsTimes[i].duration;
@@ -82,8 +82,9 @@ function timeKLV(klv, timing, options) {
               let time = cts;
               s[s.interpretSamples] = s[s.interpretSamples].map(value => {
                 if (cts != null && sDuration[s.STNM] != null) {
+                  let sample = { time, value };
                   time += sDuration[s.STNM];
-                  return { time, value };
+                  return sample;
                 } else return { value };
               });
             }
