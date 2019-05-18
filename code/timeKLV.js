@@ -53,7 +53,7 @@ function fillMP4Time(klv, timing) {
     const initialDate = timing.start.getTime();
     klv.DEVC.forEach((d, i) => {
       //Will contain the timing data about the packet
-      let partialRes;
+      let partialRes = {};
       //Copy cts and duration from mp4 if present
       if (timing.samples[i] != null) partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
       else {
@@ -113,7 +113,7 @@ function timeKLV(klv, timing, options) {
       });
     } else throw new Error('Invalid data, no DEVC');
   } catch (error) {
-    setimmediate(() => console.error(error));
+    setImmediate(() => console.error(error));
   }
   return result;
 }
