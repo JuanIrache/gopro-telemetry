@@ -113,9 +113,10 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
+  - Comment recent woek
   - Handle sticky data
   - Use known keys in a smart way: UNIT, SIUN, STNM... outside of description?
-  - Document time inputs and outputs (gps time is utc, mp4 time is local) (explain sticky values)
+  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
