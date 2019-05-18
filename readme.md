@@ -110,10 +110,10 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
+  - Handle files with multiple devices BEFORE times
   - Calculate time (take reference from mp4 file if gps missing)
-    - Handle files with multiple devices BEFORE times
     - Document time inputs and outputs (gps time is utc, mp4 time is local)
-    - Comment time code
+    - Post dates
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
