@@ -80,22 +80,27 @@ function timeKLV(klv, timing, options) {
   if (result.DEVC && result.DEVC.length) {
     result.DEVC.forEach((d, i) => {
       let cts, duration;
+      let skip;
       if (timingPresent) {
         cts = pTimes[i].cts;
         duration = pTimes[i].duration;
       } else if (GPSUPresent) {
         cts = gpsTimes[i].cts;
         duration = gpsTimes[i].duration;
-      }
+      } else skip = true;
       if (d.STRM && d.STRM.length) {
         d.STRM.forEach(s => {
           if (s.interpretSamples && s[s.interpretSamples].length) {
             const sDur = duration / s[s.interpretSamples].length; //see if TSMP and //EMPT are useful here
             let sCts = cts;
             s[s.interpretSamples] = s[s.interpretSamples].map(ss => {
-              const time = sCts;
-              sCts += sDur;
-              return { time, value: ss };
+              if (!skip) {
+                const time = sCts;
+                sCts += sDur;
+                return { time, value: ss };
+              } else {
+                return { value: ss };
+              }
             });
           }
         });
