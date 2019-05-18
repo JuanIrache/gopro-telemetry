@@ -115,11 +115,12 @@ If you liked this you might like other [creative coding projects](https://tailor
     - Merge timed DEVC by fourCC
     - Remove used values
     - Document time inputs and outputs (gps time is utc, mp4 time is local) (explain sticky values)
-    - Post dates
+    - Check time in second device (karma)
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
 - Test interpretation
+- Delete interpretsamples
 - Document output
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
