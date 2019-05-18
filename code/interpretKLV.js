@@ -1,6 +1,7 @@
+//Apply scale and matrix transformations to data
 function interpretKLV(klv, options) {
   let result = JSON.parse(JSON.stringify(klv));
-  if (result.interpretSamples) {
+  if (result != null && result.interpretSamples) {
     let interpreted = false;
     try {
       if (result.hasOwnProperty('SCAL')) {
@@ -14,6 +15,7 @@ function interpretKLV(klv, options) {
             else return s.map((ss, i) => ss / result.SCAL);
           }
         });
+
         //Done with scaling data
         delete result.SCAL;
         interpreted = true;
@@ -76,7 +78,7 @@ function interpretKLV(klv, options) {
       setImmediate(() => console.error(error));
     }
     //Done with interpretation
-    delete result.interpretSamples;
+    // delete result.interpretSamples;
   }
   return result;
 }

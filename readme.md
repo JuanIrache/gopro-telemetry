@@ -8,13 +8,13 @@ Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-tel
 
 Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.com/watch?v=V4eJDQik-so&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
 
-Accepts an object with binary data and timing data. Returns a JavaScript object. See **samples/example.js** for a basic implementation.
+Accepts an object with binary data and timing data. Returns a JavaScript object with a key for each device that was found. See **samples/example.js** for a basic implementation.
 
 You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
 **gpmf-extract** will provide you with an object ready to import. It contains:
 
-- **rawData** (buffer) Is the GPMF track of the video file.
+- **rawData** (buffer) The GPMF track of the video file.
 - **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
 Install:
@@ -36,7 +36,10 @@ Some options may be incompatible with others.
 
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
-- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. Disables the following options. Default: _false_
+- **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
+- **device** (number) Filters the results by device id. Default: _null_
+- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
+- **sensor** (string) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 
 Not yet implemented:
 
@@ -110,11 +113,18 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
-  - Calculate time (take reference from mp4 file if gps missing)
+  - Comment recent woek
+  - Handle sticky data
+  - Use known keys in a smart way: UNIT, SIUN, STNM... outside of description?
+  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
+  - Remove used values
+  - What to do with tick, tock, siun, tsmp, empt....? then delete them
+  - translate known fourCCs to human readable
 - Test interpretation
+- Comment index
 - Document output
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
