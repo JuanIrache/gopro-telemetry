@@ -111,11 +111,10 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Interpret data
   - Calculate time (take reference from mp4 file if gps missing)
-    - Compare dates from file and gps
     - only send to times() after checking DEVC
     - don't assume duration in tumes(), do it for each sample
     - Handle files with multiple devices BEFORE times
-    - Document time inputs and outputs
+    - Document time inputs and outputs (gps time is utc, mp4 time is local)
     - Comment time code
   - Add filtering options (GPS, Accel, Gyro...)
   - What to do with EMPT, TSMP?
