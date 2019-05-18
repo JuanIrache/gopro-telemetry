@@ -11,7 +11,6 @@ module.exports = function(input, options = {}) {
     for (const key in grouped) if (grouped[key].DEVC.length) devices[key] = grouped[key].DEVC[0].DVNM;
     return devices;
   }
-  if (options.device != null) for (const key in grouped) if (key != options.device) delete grouped[key];
   if (options.raw) return grouped;
   let interpreted = {};
   for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], options);
