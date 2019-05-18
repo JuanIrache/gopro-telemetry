@@ -85,10 +85,10 @@ function timeKLV(klv, timing, options) {
       //Loop through packets of samples
       result.DEVC.forEach((d, i) => {
         //Choose timing type for time (relative to the video start) data
-        const { cts, duration } = () => {
+        const { cts, duration } = (() => {
           if (mp4Times.length) return mp4Times[i];
           else if (gpsTimes.length) return gpsTimes[i];
-        };
+        })();
         //Loop streams if present
         (d.STRM || []).forEach(s => {
           //If group of samples found
@@ -101,10 +101,10 @@ function timeKLV(klv, timing, options) {
             s[s.interpretSamples] = s[s.interpretSamples].map(value => {
               //If timing data avaiable
               if (cts != null && sDuration[s.STNM] != null) {
-                let sample = { time, value };
+                let timedSample = { time, value };
                 //increment time for the next sample
                 time += sDuration[s.STNM];
-                return sample;
+                return timedSample;
                 //Otherwise return value without timing data
               } else return { value };
             });
