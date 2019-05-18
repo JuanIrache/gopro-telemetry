@@ -91,7 +91,7 @@ function timeKLV(klv, timing, options) {
           else if (gpsTimes.length) return gpsTimes[i];
         })();
         //Choose timing type for dates (ideally based on GPS). TODO apply user preference
-        let { date, duration: dateDur } = (() => {
+        const { date, duration: dateDur } = (() => {
           if (gpsTimes.length) return gpsTimes[i];
           else if (mp4Times.length) return mp4Times[i];
         })();
@@ -104,16 +104,17 @@ function timeKLV(klv, timing, options) {
             if (duration != null) sDuration[fourCC] = duration / s[fourCC].length; //TODO. see if TSMP and //EMPT are useful here
             //The same for duration of dates
             if (dateDur != null) dateSDur[fourCC] = dateDur / s[fourCC].length; //TODO. see if TSMP and //EMPT are useful here
-            //We know the time of the first sample
-            let time = cts;
+            //We know the time and date of the first sample
+            let currCts = cts;
+            let currDate = date;
             //Loop samples and replace them with timed samples
             s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
-              if (cts != null && sDuration[fourCC] != null) {
-                let timedSample = { time, date, value };
+              if (currCts != null && sDuration[fourCC] != null) {
+                let timedSample = { cts:currCts, date:currDate, value };
                 //increment time adn date for the next sample
-                time += sDuration[fourCC];
-                date = new Date(date.getTime() + dateSDur[fourCC]);
+                currCts += sDuration[fourCC];
+                currDate = new Date(currDate.getTime() + dateSDur[fourCC]);
                 return timedSample;
                 //Otherwise return value without timing data
               } else return { value };
