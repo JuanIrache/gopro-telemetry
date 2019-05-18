@@ -113,6 +113,8 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Interpret data
   - Comment recent woek
+  - Make filters array
+  - hero6+ble produces strange stnm sensor
   - Handle sticky data
   - Use known keys in a smart way: UNIT, SIUN, STNM... outside of description?
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
@@ -122,6 +124,7 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Remove used values
   - What to do with tick, tock, siun, tsmp, empt....? then delete them
   - translate known fourCCs to human readable
+  - Use STPM fro time if available?
 - Test interpretation
 - Comment index
 - Document output
