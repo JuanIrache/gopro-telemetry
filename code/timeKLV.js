@@ -1,7 +1,6 @@
 let GPSUPresent, timingPresent;
 
 function toDate(d) {
-  //source https://stackoverflow.com/posts/44298522/revisions
   let regex = /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.(\d{3})/;
   let YEAR = 1,
     MONTH = 2,
@@ -11,7 +10,7 @@ function toDate(d) {
     SEC = 6,
     MIL = 7;
   let parts = d.match(regex);
-  return new Date(`20${parts[YEAR]}-${parts[MONTH]}-${parts[DAY]} ${parts[HOUR]}:${parts[MIN]}:${parts[SEC]}.${parts[MIL]}`);
+  return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL]));
 }
 
 function GPSUtimes(klv) {
@@ -37,15 +36,16 @@ function GPSUtimes(klv) {
           }
         });
       }
-      if (GPSUPresent && !found) {
-        partialRes.duration = res[i - 1].duration;
-        partialRes.date = res[i - 1].date + res[i - 1].duration;
+      if (GPSUPresent) {
+        if (!found) {
+          partialRes.duration = res[i - 1].duration;
+          partialRes.date = res[i - 1].date + res[i - 1].duration;
+        }
+        partialRes.cts = partialRes.date.getTime() - initialDate;
+        res.push(partialRes);
       }
-      partialRes.cts = partialRes.date.getTime() - initialDate;
-      res.push(partialRes);
     });
   }
-  console.log(res);
 
   return res;
 }
@@ -58,7 +58,7 @@ function providedTimes(klv, timing) {
       klv.DEVC.forEach((d, i) => {
         let partialRes;
         if (timing.samples[i] != null) {
-          timingPresent = true;
+          if (!timingPresent) timingPresent = true;
           partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
         } else {
           partialRes.duration = res[i - 1].duration;
