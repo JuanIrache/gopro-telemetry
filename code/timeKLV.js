@@ -25,7 +25,7 @@ function fillGPSTime(klv) {
       //Find the GPSU date in the GPS5 stream
       if (s.GPSU != null) date = toDate(s.GPSU);
       //Done with GPSU
-      delete s.GPSU;
+      delete s.GPSU; //TODO not deleting
     });
     if (date) {
       //Set date for first packet
@@ -80,8 +80,8 @@ function timeKLV(klv, timing, options) {
     //If valid data
     if (result.DEVC && result.DEVC.length) {
       //Gather and deduce both types of timing info
-      const gpsTimes = fillGPSTime(klv);
-      const mp4Times = fillMP4Time(klv, timing);
+      const gpsTimes = fillGPSTime(result);
+      const mp4Times = fillMP4Time(result, timing);
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
       let dateSDur = {};
