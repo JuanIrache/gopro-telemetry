@@ -2,7 +2,7 @@ const parseKLV = require('./code/parseKLV');
 const groupDevices = require('./code/groupDevices');
 const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
-const mergeDEVCs = require('./code/mergeDEVCs');
+const mergeDEVCs = require('./code/mergeSensor');
 
 module.exports = function(input, options = {}) {
   const parsed = parseKLV(input.rawData, options);
