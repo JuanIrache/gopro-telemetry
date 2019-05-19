@@ -21,17 +21,10 @@ function deepEqual(a, b) {
   return true;
 }
 
-function getPrevSticky(arr) {
-  let prevSticky = {};
-  (arr || []).forEach(s => {
-    if (s.sticky) for (const key in s.sticky) prevSticky[key] = s.sticky[key];
-  });
-  return prevSticky;
-}
-
 function mergeDEVCs(klv, options) {
   let result = { sensors: {} };
   (klv.DEVC || []).forEach(d => {
+    let stickies = {};
     (d.STRM || []).forEach(s => {
       if (s.interpretSamples) {
         const fourCC = s.interpretSamples;
@@ -47,19 +40,20 @@ function mergeDEVCs(klv, options) {
             else if (ignore.includes(key)) description[key] = s[key];
             else sticky[key] = s[stickyTranslations[key] || key];
           }
+          sticky = { ...stickies, ...sticky };
           if (options.repeatSticky) {
             samples = samples.map(s => {
               return { ...s, ...sticky };
             });
           } else if (Object.keys(sticky).length && samples.length) {
-            const prevSticky = getPrevSticky(result.sensors[fourCC] && result.sensors[fourCC].samples);
             for (let key in sticky) {
-              if (!deepEqual(sticky[key], prevSticky[key])) {
+              if (!deepEqual(sticky[key], stickies[key])) {
                 samples[0].sticky = samples[0].sticky || {};
                 samples[0].sticky[key] = sticky[key];
               }
             }
           }
+          stickies = { ...stickies, ...sticky };
           if (options.repeatHeaders) {
             let head = [];
             if (description.name) {
