@@ -60,6 +60,16 @@ function mergeDEVCs(klv, options) {
               }
             }
           }
+          if (options.repeatHeaders) {
+            let headers = [];
+            if (result.sensors[fourCC].name) {
+              let name = result.sensors[fourCC].name;
+              let parts = name.match(/.*\((.+?)\).*/);
+              if (parts.length) parts = parts[1].split(',').map(p => p.trim());
+              name = name.replace(/\((.+?)\)/, '');
+              // for (const elt of samples
+            }
+          }
           if (result.sensors[fourCC]) result.sensors[fourCC].samples.push(...samples);
           else result.sensors[fourCC] = { samples, ...description };
         }

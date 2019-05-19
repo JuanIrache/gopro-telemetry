@@ -148,8 +148,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Interpret data
   - Comment recent woek
   - hero6+ble produces strange stnm sensor
-  - Handle sticky data
-  - Use known keys in a smart way: UNIT, SIUN, STNM... outside of description?
+  - allow repeat headers
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
