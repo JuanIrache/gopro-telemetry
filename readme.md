@@ -40,6 +40,7 @@ Some options may be incompatible with others.
 - **device** (array of numbers) Filters the results by device id. Default: _null_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
 - **sensor** (array of sstring) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
+- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the sticky object. Default: _false_
 
 Not yet implemented:
 
@@ -82,6 +83,39 @@ gpmfExtract(file)
      { cts: 3003, duration: 1001 },
      { cts: 4004, duration: 1001 } ] }
 ```
+
+## Output
+
+The output with the default options looks like this:
+
+```
+{ deviceId : {
+    data about the device : values,
+    sensors : {
+      sensor_key : {
+        data about the samples : values,
+        samples : [
+          {
+            cts : time from start,
+            date : time and date,
+            value : sample
+            sticky : {
+              name : value
+            }
+          },
+          {
+            cts : time from start,
+            date : time and date,
+            value : sample
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Sticky values apply to all successive samples. You can export them to the outer object of all samples with the **repeatSticky** option.
 
 ## Available data
 
