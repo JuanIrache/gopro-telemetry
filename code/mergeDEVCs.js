@@ -4,7 +4,7 @@ function mergeDEVCs(klv, options) {
     (d.STRM || []).forEach(s => {
       if (s.interpretSamples) {
         const fourCC = s.interpretSamples;
-        if (options.sensor == null || options.sensor === fourCC) {
+        if (options.sensor == null || options.sensor.includes(fourCC)) {
           //TODO do something with the descprition that changes, sticky props?
           if (result.sensors[fourCC]) result.sensors[fourCC].samples.push(...s[fourCC]);
           else {
