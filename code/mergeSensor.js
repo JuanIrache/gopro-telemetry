@@ -2,16 +2,16 @@ const translations = {
   SIUN: 'units',
   UNIT: 'units',
   STNM: 'name',
-  RMRK: 'comment',
-  TIMO: 'offset'
+  RMRK: 'comment'
 };
 
 const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
 
 const stickyTranslations = {
   TMPC: 'temperature',
-  GPSF: 'Fix',
-  GPSP: 'Precision'
+  GPSF: 'fix',
+  GPSP: 'precision',
+  TIMO: 'offset'
 };
 
 function deepEqual(a, b) {
@@ -61,14 +61,36 @@ function mergeDEVCs(klv, options) {
             }
           }
           if (options.repeatHeaders) {
-            let headers = [];
-            if (result.sensors[fourCC].name) {
-              let name = result.sensors[fourCC].name;
+            let head = [];
+            if (description.name) {
+              let name = description.name;
               let parts = name.match(/.*\((.+?)\).*/);
-              if (parts.length) parts = parts[1].split(',').map(p => p.trim());
-              name = name.replace(/\((.+?)\)/, '');
-              // for (const elt of samples
+              if (parts && parts.length) {
+                name = name.replace(/\((.+?)\)/, '').trim();
+                parts = parts[1].split(',').map(p => p.trim());
+                head = parts.map(p => `${name} (${p})`);
+              } else head.push(name);
             }
+            let units = [];
+            if (description.units) {
+              if (Array.isArray(description.units)) {
+                description.units.forEach((u, i) => {
+                  units.push(` (${u})`);
+                });
+              } else units[0] = (units[0] || '') + ` (${description.units})`;
+            }
+
+            for (let i = 0; i < Math.max(head.length, units.length); i++) {
+              head[i] = (head[i] || head[0] || '') + (units[i] || units[0] || '');
+            }
+            samples = samples.map(s => {
+              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[head[i] || head[0] || i] = v));
+              else if (head[0]) s[head[0]] = s.value;
+              if (head.length) delete s.value;
+              return s;
+            });
+            delete description.units;
+            delete description.name;
           }
           if (result.sensors[fourCC]) result.sensors[fourCC].samples.push(...samples);
           else result.sensors[fourCC] = { samples, ...description };
