@@ -45,7 +45,6 @@ Some options may be incompatible with others.
 
 Not yet implemented:
 
-- **style** (string) Formats the output following some standard. For example, _geoJSON_. Default: _null_
 - **time** (string) Averages samples to time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
 
 Example:
@@ -147,16 +146,13 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
-  - Comment recent woek
+  - Comment recent work
+  - Use STPM for time if available?
   - hero6+ble produces strange stnm sensor
-  - minimise big o when repeat sticky
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
-  - Remove used values
-  - translate known fourCCs to human readable
-  - Use STPM fro time if available?
-- Test interpretation
+- Automated test interpretation
 - Comment index
 - Document output
 - Review console.log/error usage
