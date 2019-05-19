@@ -38,7 +38,7 @@ function mergeDEVCs(klv, options) {
             if (translations[key]) description[translations[key]] = s[key];
             //TODO, discard these keys if not used
             else if (ignore.includes(key)) description[key] = s[key];
-            else sticky[key] = s[stickyTranslations[key] || key];
+            else sticky[stickyTranslations[key] || key] = s[key];
           }
           sticky = { ...stickies, ...sticky };
           if (options.repeatSticky) {
