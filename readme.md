@@ -40,7 +40,8 @@ Some options may be incompatible with others.
 - **device** (array of numbers) Filters the results by device id. Default: _null_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
 - **sensor** (array of sstring) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
-- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the sticky object. Default: _false_
+- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
+- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
 
 Not yet implemented:
 
@@ -148,7 +149,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Interpret data
   - Comment recent woek
   - hero6+ble produces strange stnm sensor
-  - allow repeat headers
+  - minimise big o when repeat sticky
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
