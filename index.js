@@ -8,6 +8,11 @@ const mergeStream = require('./code/mergeStream');
 module.exports = function(input, options = {}) {
   //Parse input
   const parsed = parseKLV(input.rawData, options);
+  if (!parsed.DEVC) {
+    setImmediate(() => console.error('Invalid GPMF data. Root object must contain DEVC key'));
+    if (options.tolerant) return parsed;
+    else return undefined;
+  }
   //Return list of devices only
   if (options.deviceList) return deviceList(parsed);
   //Return now if raw wanted

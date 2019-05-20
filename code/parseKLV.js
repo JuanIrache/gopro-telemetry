@@ -82,11 +82,6 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
-  if (root && !result.DEVC) {
-    const err = 'Invalid GPMF data. Root object must contain DEVC key';
-    if (options.tolerant) setImmediate(() => console.error(err));
-    else throw new Error(`${err}. Use the 'tolerant' option to return anyway`);
-  }
 
   return result;
 }
