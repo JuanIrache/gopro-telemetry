@@ -30,14 +30,9 @@ const types = {
   '\u0000': { nested: true }
 };
 
-//Instructions for reading known fourCC keys
-//is there no better way to know which strings to merge than hardcoding it?
-const fourCCs = {
-  STNM: { merge: true },
-  RMRK: { merge: true },
-  TYPE: { merge: true },
-  DVNM: { merge: true }
-};
+//Merge known fourCC strings
+//is there no better way than hardcoding it?
+const mergeStrings = ['STNM', 'RMRK', 'TYPE', 'DVNM'];
 
 //Make some fourCC keys human readable
 const translations = {
@@ -60,4 +55,4 @@ const stickyTranslations = {
   TIMO: 'offset [s]'
 };
 
-module.exports = { keyAndStructParser, types, fourCCs, translations, ignore, stickyTranslations };
+module.exports = { keyAndStructParser, types, mergeStrings, translations, ignore, stickyTranslations };

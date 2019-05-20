@@ -1,4 +1,4 @@
-const { keyAndStructParser, types, fourCCs } = require('./keys');
+const { keyAndStructParser, types, mergeStrings } = require('./keys');
 const parseV = require('./parseV');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
@@ -37,7 +37,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
           //Detect them when the type is complex
           else if (types[ks.type].complex && complexType.length) axes = complexType.length;
           //Human readable strings should de merged for readability
-          if (fourCCs[ks.fourCC] && fourCCs[ks.fourCC].merge) {
+          if (mergeStrings.includes(ks.fourCC)) {
             ks.size = length;
             ks.repeat = 1;
           }
