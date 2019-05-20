@@ -113,7 +113,10 @@ function timeKLV(klv, timing, options) {
             s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
               if (currCts != null && sDuration[fourCC] != null) {
-                let timedSample = { cts: currCts, date: currDate, value };
+                let timedSample = { value };
+                //Filter out if timeOut option
+                if (options.timeOut !== 'date') timedSample.cts = currCts;
+                if (options.timeOut !== 'cts') timedSample.date = currDate;
                 //increment time adn date for the next sample
                 currCts += sDuration[fourCC];
                 currDate = new Date(currDate.getTime() + dateSDur[fourCC]);
