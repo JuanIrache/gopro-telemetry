@@ -37,15 +37,15 @@ Some options may be incompatible with others.
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
-- **device** (number) Filters the results by device id. Default: _null_
+- **device** (array of numbers) Filters the results by device id. Default: _null_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
-- **sensor** (string) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
+- **sensor** (array of sstring) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
+- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
+- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
 
 Not yet implemented:
 
-- **style** (string) Formats the output following some standard. For example, _geoJSON_. Default: _null_
-- **filter** (array of string) Returns only the selected information (GPS, gyroscope...). Default: _null_
-- **time** (string) Groups samples in time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
+- **time** (string) Averages samples to time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
 
 Example:
 
@@ -84,6 +84,39 @@ gpmfExtract(file)
      { cts: 4004, duration: 1001 } ] }
 ```
 
+## Output
+
+The output with the default options looks like this:
+
+```
+{ deviceId : {
+    data about the device : values,
+    sensors : {
+      sensor_key : {
+        data about the samples : values,
+        samples : [
+          {
+            cts : time from start,
+            date : time and date,
+            value : sample
+            sticky : {
+              name : value
+            }
+          },
+          {
+            cts : time from start,
+            date : time and date,
+            value : sample
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Sticky values apply to all successive samples. You can export them to the outer object of all samples with the **repeatSticky** option.
+
 ## Available data
 
 Depending on the camera, model, settings and accessories, these are some of the available data:
@@ -113,17 +146,12 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
-  - Comment recent woek
-  - Handle sticky data
-  - Use known keys in a smart way: UNIT, SIUN, STNM... outside of description?
+  - Use STPM for time if available?
+  - hero6+ble produces strange stnm sensor
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
-  - Add filtering options (GPS, Accel, Gyro...)
-  - What to do with EMPT, TSMP?
   - Enable grouping packets per time unit / frame
-  - Remove used values
-  - What to do with tick, tock, siun, tsmp, empt....? then delete them
-  - translate known fourCCs to human readable
-- Test interpretation
+  - What to do with tick, tock, tsmp, empt....? then delete them
+- Automated test interpretation
 - Comment index
 - Document output
 - Review console.log/error usage
