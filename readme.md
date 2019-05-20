@@ -37,8 +37,8 @@ Some options may be incompatible with others.
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
-- **device** (array of numbers) Filters the results by device id. Default: _null_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
+- **device** (array of numbers) Filters the results by device id. Default: _null_
 - **sensor** (array of sstring) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
@@ -50,7 +50,7 @@ Not yet implemented:
 Example:
 
 ```js
-const telemetry = goproTelemetry(rawData, { raw: true, tolerant: true, filter: ['GPS'] });
+const telemetry = goproTelemetry(rawData, { sensor: ['ACCL'], repeatSticky: true });
 ```
 
 This slightly more comprehensive example includes the data extraction step with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
@@ -148,7 +148,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Interpret data
   - Use STPM for time if available?
   - hero6+ble produces strange stnm sensor
-  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
+  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
 - Automated test interpretation
