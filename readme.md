@@ -30,7 +30,7 @@ const goproTelemetry = require('gopro-telemetry');
 const telemetry = goproTelemetry(input, options); //Get your input with gpmf-extract
 ```
 
-## Options (optional)
+## Options
 
 Some options may be incompatible with others.
 
@@ -42,6 +42,8 @@ Some options may be incompatible with others.
 - **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
+- **timeIn** (string) By default the code uses MP4 time for _cts_ (milliseconds since first frame) and GPS time for _date_ (full date and time). Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
+- **timeOut** (string) By default the code exports both _cts_ and _date_. Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
 
 Not yet implemented:
 
@@ -144,6 +146,8 @@ This project is possible thanks to the [gpmf-parser documentation](https://githu
 If you liked this you might like other [creative coding projects](https://tailorandwayne.com/coding-projects/).
 
 ## To-Do
+
+- if only one filter, make array internally
 
 - Interpret data
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
