@@ -1,21 +1,4 @@
-//Make some fourCC keys human readable
-const translations = {
-  SIUN: 'units',
-  UNIT: 'units',
-  STNM: 'name',
-  RMRK: 'comment'
-};
-
-//Ignore some, for now
-const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
-
-//Make some fourCC keys sticky and human readable
-const stickyTranslations = {
-  TMPC: 'temperature',
-  GPSF: 'fix',
-  GPSP: 'precision',
-  TIMO: 'offset'
-};
+const { translations, ignore, stickyTranslations } = require('./keys');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
@@ -95,10 +78,10 @@ function mergeDEVCs(klv, options) {
               if (Array.isArray(description.units)) {
                 //Save units as string array
                 description.units.forEach((u, i) => {
-                  units.push(` (${u})`);
+                  units.push(` [${u}]`);
                 });
                 //Or single value string
-              } else units[0] = (units[0] || '') + ` (${description.units})`;
+              } else units[0] = (units[0] || '') + ` [${description.units}]`;
             }
 
             //Loop through all the names and units
