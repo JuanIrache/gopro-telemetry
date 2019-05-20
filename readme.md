@@ -145,19 +145,20 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- deepcompare not working with mfgi?
+
 - Interpret data
   - hero6+ble produces strange stnm sensor
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
   - Enable grouping packets per time unit / frame
-  - What to do with tick, tock, tsmp, empt....? then delete them
-  - Add all known fourCCs to interpretation
 - Automated test interpretation
-- Use tolerant in more places, o maybe return raw if failed checks
+- Use tolerant in more places, or maybe return raw if failed checks
 - Fix typos
 - Review console.log/error usage
-- Create additional package for converting the data to other formats
+- Create additional package/option for converting the data to other formats
 - Remove Work-in-progress warning
 
 ## Maybe To-Do
 
+- Do something with TICK and TOCK?
 - Take potential nested arrays into account f[8]? Never found one to test

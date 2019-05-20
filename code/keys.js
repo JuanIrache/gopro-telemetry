@@ -55,7 +55,7 @@ const stickyTranslations = {
   TMPC: 'temperature (Cº)',
   GPSF: 'fix',
   GPSP: 'precision',
-  STMP: 'timestamps (µs)', //Maybe useful for accurate timing, not sure
+  STMP: 'timestamps (µs)', //Maybe useful for accurate timing, but does not look consecutive or proportional
   TIMO: 'offset (s)'
 };
 
