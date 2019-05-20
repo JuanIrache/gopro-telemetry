@@ -39,4 +39,23 @@ const fourCCs = {
   DVNM: { merge: true }
 };
 
-module.exports = { keyAndStructParser, types, fourCCs };
+//Make some fourCC keys human readable
+const translations = {
+  SIUN: 'units',
+  UNIT: 'units',
+  STNM: 'name',
+  RMRK: 'comment'
+};
+
+//Ignore some, for now
+const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
+
+//Make some fourCC keys sticky and human readable
+const stickyTranslations = {
+  TMPC: 'temperature (Cº)',
+  GPSF: 'fix',
+  GPSP: 'precision',
+  TIMO: 'offset seconds'
+};
+
+module.exports = { keyAndStructParser, types, fourCCs, translations, ignore, stickyTranslations };
