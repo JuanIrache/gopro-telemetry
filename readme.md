@@ -148,7 +148,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Interpret data
   - Use STPM for time if available?
   - hero6+ble produces strange stnm sensor
-  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local) (explain sticky values)
+  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
 - Automated test interpretation
