@@ -18,8 +18,8 @@ function mergeStreams(klv, options) {
     //Remember stickies per stream, to avoid looping every time
 
     (d.STRM || []).forEach(s => {
-      //We will store the main samples of the nest
-      if (s.interpretSamples) {
+      //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
+      if (s.interpretSamples && s.interpretSamples !== 'STNM') {
         const fourCC = s.interpretSamples;
 
         //Filter out streams when using the stream option
