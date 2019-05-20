@@ -27,19 +27,19 @@ function deepEqual(a, b) {
 
 //Merges all samples of every device under the same key
 function mergeDEVCs(klv, options) {
-  //Will return a list of sensors for a device
-  let result = { sensors: {} };
+  //Will return a list of streams for a device
+  let result = { streams: {} };
 
   (klv.DEVC || []).forEach(d => {
-    //Remember stickies per sensor, to avoid looping every time
+    //Remember stickies per stream, to avoid looping every time
     let stickies = {};
     (d.STRM || []).forEach(s => {
       //We will store the main samples of the nest
       if (s.interpretSamples) {
         const fourCC = s.interpretSamples;
 
-        //Filter out sensors when using the sensor option
-        if (options.sensor == null || options.sensor.includes(fourCC)) {
+        //Filter out streams when using the stream option
+        if (options.stream == null || options.stream.includes(fourCC)) {
           //Get the array of samples
           let samples = s[fourCC];
           //Delete the samples from the original to avoid duplication
@@ -120,9 +120,9 @@ function mergeDEVCs(klv, options) {
             delete description.name;
           }
 
-          //Add samples to sensor entry
-          if (result.sensors[fourCC]) result.sensors[fourCC].samples.push(...samples);
-          else result.sensors[fourCC] = { samples, ...description };
+          //Add samples to stream entry
+          if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
+          else result.streams[fourCC] = { samples, ...description };
         }
       }
     });

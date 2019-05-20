@@ -3,7 +3,7 @@ const groupDevices = require('./code/groupDevices');
 const deviceList = require('./code/deviceList');
 const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
-const mergeSensor = require('./code/mergeSensor');
+const mergeStream = require('./code/mergeStream');
 
 module.exports = function(input, options = {}) {
   //Parse input
@@ -22,6 +22,6 @@ module.exports = function(input, options = {}) {
   for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
   let merged = {};
   //Merge samples in sensor entries
-  for (const key in timed) merged[key] = mergeSensor(timed[key], options);
+  for (const key in timed) merged[key] = mergeStream(timed[key], options);
   return merged;
 };

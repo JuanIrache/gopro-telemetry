@@ -39,7 +39,7 @@ Some options may be incompatible with others.
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
 - **device** (array of numbers) Filters the results by device id. Default: _null_
-- **sensor** (array of string) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
+- **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
 
@@ -50,7 +50,7 @@ Not yet implemented:
 Example:
 
 ```js
-const telemetry = goproTelemetry(rawData, { sensor: ['ACCL'], repeatSticky: true });
+const telemetry = goproTelemetry(rawData, { stream: ['ACCL'], repeatSticky: true });
 ```
 
 This slightly more comprehensive example includes the data extraction step with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
@@ -91,8 +91,8 @@ The output with the default options looks like this:
 ```
 { deviceId : {
     data about the device : values,
-    sensors : {
-      sensor_key : {
+    streams : {
+      stream_key : {
         data about the samples : values,
         samples : [
           {
@@ -145,16 +145,15 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Use tolerant in more places, o maybe return raw if failed checks
-- Fix typos
 - Interpret data
-  - Change sensor to stream?
   - Use STPM for time if available?
   - hero6+ble produces strange stnm sensor
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
 - Automated test interpretation
+- Use tolerant in more places, o maybe return raw if failed checks
+- Fix typos
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
 - Remove Work-in-progress warning
