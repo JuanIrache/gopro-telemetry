@@ -55,7 +55,8 @@ const stickyTranslations = {
   TMPC: 'temperature (Cº)',
   GPSF: 'fix',
   GPSP: 'precision',
-  TIMO: 'offset seconds'
+  STMP: 'timestamps (µs)', //Maybe useful for accurate timing, not sure
+  TIMO: 'offset (s)'
 };
 
 module.exports = { keyAndStructParser, types, fourCCs, translations, ignore, stickyTranslations };
