@@ -11,10 +11,10 @@ const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
 
 //Make some fourCC keys sticky and human readable
 const stickyTranslations = {
-  TMPC: 'temperature',
+  TMPC: 'temperature (Cº)',
   GPSF: 'fix',
   GPSP: 'precision',
-  TIMO: 'offset'
+  TIMO: 'offset seconds'
 };
 
 //Compare equality of values, including objects
@@ -95,10 +95,10 @@ function mergeDEVCs(klv, options) {
               if (Array.isArray(description.units)) {
                 //Save units as string array
                 description.units.forEach((u, i) => {
-                  units.push(` (${u})`);
+                  units.push(` [${u}]`);
                 });
                 //Or single value string
-              } else units[0] = (units[0] || '') + ` (${description.units})`;
+              } else units[0] = (units[0] || '') + ` [${description.units}]`;
             }
 
             //Loop through all the names and units
