@@ -44,7 +44,8 @@ const translations = {
   SIUN: 'units',
   UNIT: 'units',
   STNM: 'name',
-  RMRK: 'comment'
+  RMRK: 'comment',
+  DVNM: 'device name'
 };
 
 //Ignore some, for now
@@ -52,11 +53,11 @@ const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
 
 //Make some fourCC keys sticky and human readable
 const stickyTranslations = {
-  TMPC: 'temperature (Cº)',
+  TMPC: 'temperature [Cº]',
   GPSF: 'fix',
   GPSP: 'precision',
-  STMP: 'timestamps (µs)', //Maybe useful for accurate timing, but does not look consecutive or proportional
-  TIMO: 'offset (s)'
+  STMP: 'timestamps [µs]', //Maybe useful for accurate timing, but does not look consecutive or proportional
+  TIMO: 'offset [s]'
 };
 
 module.exports = { keyAndStructParser, types, fourCCs, translations, ignore, stickyTranslations };
