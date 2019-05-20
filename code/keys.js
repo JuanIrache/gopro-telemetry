@@ -25,7 +25,6 @@ const types = {
   f: { size: 4, func: 'float' },
   s: { size: 2, func: 'int16' },
   S: { size: 2, func: 'uint16' },
-  Q: { size: 16, func: 'uint8' }, //Never tested
   '': { size: 1, func: 'bit1' },
   '?': { complex: true },
   '\u0000': { nested: true }
