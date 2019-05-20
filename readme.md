@@ -146,7 +146,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
-  - hero6+ble produces strange stnm sensor
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
   - Enable grouping packets per time unit / frame
 - Automated test interpretation
