@@ -9,13 +9,14 @@ function deepEqual(a, b) {
 }
 
 //Merges all samples of every device under the same key
-function mergeDEVCs(klv, options) {
+function mergeStreams(klv, options) {
   //Will return a list of streams for a device
   let result = { streams: {} };
+  let stickies = {};
 
   (klv.DEVC || []).forEach(d => {
     //Remember stickies per stream, to avoid looping every time
-    let stickies = {};
+
     (d.STRM || []).forEach(s => {
       //We will store the main samples of the nest
       if (s.interpretSamples) {
@@ -124,4 +125,4 @@ function mergeDEVCs(klv, options) {
   return result;
 }
 
-module.exports = mergeDEVCs;
+module.exports = mergeStreams;
