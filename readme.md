@@ -155,12 +155,9 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Enable grouping packets per time unit / frame
   - What to do with tick, tock, tsmp, empt....? then delete them
 - Automated test interpretation
-- Comment index
-- Document output
 - Review console.log/error usage
 - Create additional package for converting the data to other formats
 - Remove Work-in-progress warning
-- Refactoring for performance?
 
 ## Maybe To-Do
 
