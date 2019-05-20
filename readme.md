@@ -148,7 +148,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Interpret data
   - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
   - Enable grouping packets per time unit / frame
-- Automated test interpretation
+  - Automated test interpretation
 - Fix typos
 - Review console.log/error usage
 - Create additional package/option for converting the data to other formats
