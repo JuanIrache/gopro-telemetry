@@ -17,11 +17,15 @@ const types = {
   B: { size: 1, func: 'uint8' },
   l: { size: 4, func: 'int32' },
   L: { size: 4, func: 'uint32' },
+  q: { size: 4, func: 'uint32' }, //Never tested
+  Q: { size: 8, func: 'uint64' }, //Never tested
+  d: { size: 8, func: 'double' }, //Never tested
   j: { size: 8, func: 'int64' },
   J: { size: 8, func: 'uint64' },
   f: { size: 4, func: 'float' },
   s: { size: 2, func: 'int16' },
   S: { size: 2, func: 'uint16' },
+  Q: { size: 16, func: 'uint8' }, //Never tested
   '': { size: 1, func: 'bit1' },
   '?': { complex: true },
   '\u0000': { nested: true }

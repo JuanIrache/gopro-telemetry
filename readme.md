@@ -162,8 +162,3 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## Maybe To-Do
 
 - Take potential nested arrays into account f[8]? Never found one to test
-- Pending types:
-  - d | 64-bit double precision (IEEE 754) | double
-  - G | 128-bit ID (like UUID) | uint8_t guid[16]
-  - q | 32-bit Q Number Q15.16 | uint32_t | 16-bit integer (A) with 16-bit fixed point (B) for A.B value (range -32768.0 to 32767.99998)
-  - Q | 64-bit Q Number Q31.32 | uint64_t | 32-bit integer (A) with 32-bit fixed point (B) for A.B value.
