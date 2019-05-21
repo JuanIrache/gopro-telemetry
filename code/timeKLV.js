@@ -130,6 +130,7 @@ function timeKLV(klv, timing, options) {
             });
           }
         });
+        d['frames/second'] = 1 / timing.frameDuration;
       });
     } else throw new Error('Invalid data, no DEVC');
   } catch (error) {
