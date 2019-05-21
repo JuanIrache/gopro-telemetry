@@ -9,6 +9,8 @@ module.exports = function(input, options = {}) {
   //Create filter arrays if user didn't
   if (options.device && !Array.isArray(options.device)) options.device = [options.device];
   if (options.stream && !Array.isArray(options.stream)) options.stream = [options.stream];
+  //Read framerate to convert groupTimes to number if needed
+  if (options.groupTimes === 'frames') options.groupTimes = input.timing.frameDuration;
   //Parse input
   const parsed = parseKLV(input.rawData, options);
   if (!parsed.DEVC) {

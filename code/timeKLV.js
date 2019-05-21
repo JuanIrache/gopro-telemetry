@@ -118,8 +118,8 @@ function timeKLV(klv, timing, options) {
               //If timing data avaiable
               if (currCts != null && sDuration[fourCC] != null) {
                 let timedSample = { value };
-                //Filter out if timeOut option
-                if (options.timeOut !== 'date') timedSample.cts = currCts;
+                //Filter out if timeOut option, but keep cts if needed for merging times
+                if (options.timeOut !== 'date' || options.groupTimes) timedSample.cts = currCts;
                 if (options.timeOut !== 'cts') timedSample.date = currDate;
                 //increment time adn date for the next sample
                 currCts += sDuration[fourCC];
