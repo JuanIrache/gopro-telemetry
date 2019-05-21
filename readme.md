@@ -145,8 +145,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- merge dates
-- merge arrays properly
+- broken repeat something
 - framerate gone
 - comment grouptimes
 
