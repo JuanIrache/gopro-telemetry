@@ -38,5 +38,7 @@ module.exports = function(input, options = {}) {
   if (options.groupTimes === 'frames') options.groupTimes = input.timing.frameDuration;
   //Group samples by time if necessary
   if (options.groupTimes) merged = groupTimes(merged, options);
+  //Add framerate to top level
+  merged['frames/second'] = 1 / input.timing.frameDuration;
   return merged;
 };
