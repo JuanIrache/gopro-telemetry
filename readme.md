@@ -148,9 +148,10 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Automated test interpretation
   - Convert elevation to mean sea level
 - Fix typos
+- Merge more than one video file
 - Do something with TICK and TOCK?
 - Review console.log/error usage
-- Create additional package/option for converting the data to other formats
+- Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
 
 ## Maybe To-Do
 
