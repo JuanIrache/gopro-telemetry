@@ -44,10 +44,7 @@ Some options may be incompatible with others.
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
 - **timeIn** (string) By default the code uses MP4 time for _cts_ (milliseconds since first frame) and GPS time for _date_ (full date and time). Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
 - **timeOut** (string) By default the code exports both _cts_ and _date_. Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
-
-Not yet implemented:
-
-- **time** (string) Averages samples to time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
+- **groupTimes** (number/string) Group samples by units of time (milliseconds) for example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. Default: _null_
 
 Example:
 
