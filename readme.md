@@ -42,8 +42,8 @@ Some options may be incompatible with others.
 - **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
-- **timeIn** (string) By default the code uses MP4 time for _cts_ (milliseconds since first frame) and GPS time for _date_ (full date and time). Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
-- **timeOut** (string) By default the code exports both _cts_ and _date_. Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
+- **timeOut** (string) By default the code exports both _cts_ (milliseconds since first frame) and _date_ (full date and time). Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
+- **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
 - **groupTimes** (number/string) Group samples by units of time (milliseconds) for example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. Default: _null_
 
 Example:
@@ -144,6 +144,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- List streams
 - Interpret data
   - Enable grouping packets per time unit / frame
   - Automated test interpretation
