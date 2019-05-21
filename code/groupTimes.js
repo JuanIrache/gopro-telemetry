@@ -1,30 +1,4 @@
-//Receives options from main function
-let timeOut;
-
-//From many samples, build one
-function mergeSamples(samples) {
-  //Get all unique keys
-  const keys = new Set(samples.reduce((acc, curr) => acc.concat(Object.keys(curr)), []));
-  let result = Array.isArray(samples[0]) ? [] : {};
-  //Loop the keys
-  keys.forEach(k => {
-    //With valid values
-    const validVals = samples.map(s => s[k]).filter(v => v != null);
-    //If number, calculate average dividing valid values by total
-    if (!isNaN(validVals[0])) result[k] = validVals.reduce((acc, curr, i, arr) => acc + curr / arr.length, 0);
-    //If date, calculate average dividing all by total
-    if (k === 'date') result[k] = new Date(validVals.reduce((acc, curr, i, arr) => acc + new Date(curr).getTime() / arr.length, 0));
-    //If object (or more likely array) merge the samples recursively
-    else if (typeof validVals[0] === 'object') result[k] = mergeSamples(validVals);
-    //Preserve null values
-    else if (validVals[0] === undefined) result[k] = null;
-    //If string or other, use the first valid value
-    else result[k] = validVals[0];
-  });
-  //If cts was temporary, remove it
-  if (timeOut === 'date') delete result.cts;
-  return result;
-}
+const reduceSamples = require('./reduceSamples');
 
 //Build one sample by interpolating the previous and the next
 function interpolateSample(samples, i, currentTime) {
@@ -52,9 +26,6 @@ function interpolateSample(samples, i, currentTime) {
     //If string or other, use the first valid value
     else result[k] = validVals[0];
   });
-
-  //If cts was temporary, remove it
-  if (timeOut === 'date') delete result.cts;
   return result;
 }
 
@@ -90,9 +61,11 @@ module.exports = function(klv, { groupTimes, timeOut }) {
               } else i++;
             }
             //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
-            if (group.length > 1) newSamples.push(mergeSamples(group));
+            if (group.length > 1) newSamples.push(reduceSamples(group));
             else if (group.length === 1) newSamples.push(group[0]);
             else if (i < samples.length) newSamples.push(interpolateSample(samples, i - 1, currentTime));
+            //If cts was temporary, remove it
+            if (timeOut === 'date') delete newSamples[newSamples.length - 1].cts;
             //Add time to analyse next chunk
             currentTime += groupTimes;
           }

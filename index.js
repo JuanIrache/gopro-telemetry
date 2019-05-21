@@ -6,6 +6,7 @@ const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
+const smoothSamples = require('./code/smoothSamples');
 
 module.exports = function(input, options = {}) {
   //Create filter arrays if user didn't
@@ -38,6 +39,8 @@ module.exports = function(input, options = {}) {
   if (options.groupTimes === 'frames') options.groupTimes = input.timing.frameDuration;
   //Group samples by time if necessary
   if (options.groupTimes) merged = groupTimes(merged, options);
+  //Group samples by time if necessary
+  if (options.smooth) merged = smoothSamples(merged, options);
   //Add framerate to top level
   merged['frames/second'] = 1 / input.timing.frameDuration;
   return merged;
