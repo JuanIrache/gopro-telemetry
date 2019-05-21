@@ -1,7 +1,5 @@
 # GoPro Telemetry
 
-**Work in progress. Don't rely on it for important stuff yet.**
-
 Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later).
 
 Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-telemetry-extractor/).
@@ -153,7 +151,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Do something with TICK and TOCK?
 - Review console.log/error usage
 - Create additional package/option for converting the data to other formats
-- Remove Work-in-progress warning
 
 ## Maybe To-Do
 
