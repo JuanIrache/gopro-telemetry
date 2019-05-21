@@ -58,32 +58,45 @@ function interpolateSample(samples, i, currentTime) {
   return result;
 }
 
+//Makes sure there is one sample per each specified time chunk
 module.exports = function(klv, { groupTimes, timeOut }) {
+  //Copy timeout value for other functions
   timeOut = timeOut;
+  //Copy input
   let result = JSON.parse(JSON.stringify(klv));
+  //Loop devices and streams
   for (const key in result) {
     if (result[key].streams) {
       for (const k in result[key].streams) {
+        //Gather samples
         const samples = result[key].streams[k].samples;
         if (samples) {
           let currentTime = 0;
           let newSamples = [];
           let reachedEnd = false;
           let i = 0;
+          //Loop until the end of the array
           while (!reachedEnd) {
             let group = [];
+            //Loop one time per each desired time chunk
             while (samples[i].cts < currentTime + groupTimes) {
+              //Gather all the samples within that chunk
               group.push(samples[i]);
               if (i + 1 === samples.length) {
+                //Until the end is reached
                 reachedEnd = true;
                 break;
+                //Check the next sample
               } else i++;
             }
+            //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
             if (group.length > 1) newSamples.push(mergeSamples(group));
             else if (group.length === 1) newSamples.push(group[0]);
             else if (i < samples.length) newSamples.push(interpolateSample(samples, i - 1, currentTime));
+            //Add time to analyse next chunk
             currentTime += groupTimes;
           }
+          //Replace samples with merged/interpolated ones
           result[key].streams[k].samples = newSamples;
         }
       }
