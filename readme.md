@@ -41,11 +41,11 @@ Some options may be incompatible with others.
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
 - **device** (array of numbers) Filters the results by device id. Default: _null_
 - **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
-- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
-- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
+- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size. Default: _false_
+- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. This will increase the output size. Default: _false_
 - **timeOut** (string) By default the code exports both _cts_ (milliseconds since first frame) and _date_ (full date and time). Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
 - **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
-- **groupTimes** (number/string) Group samples by units of time (milliseconds) for example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. Default: _null_
+- **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size. Default: _null_
 
 Example:
 
