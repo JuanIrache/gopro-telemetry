@@ -1,21 +1,4 @@
-//Make some fourCC keys human readable
-const translations = {
-  SIUN: 'units',
-  UNIT: 'units',
-  STNM: 'name',
-  RMRK: 'comment'
-};
-
-//Ignore some, for now
-const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
-
-//Make some fourCC keys sticky and human readable
-const stickyTranslations = {
-  TMPC: 'temperature',
-  GPSF: 'fix',
-  GPSP: 'precision',
-  TIMO: 'offset'
-};
+const { translations, ignore, stickyTranslations } = require('./keys');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
@@ -26,20 +9,25 @@ function deepEqual(a, b) {
 }
 
 //Merges all samples of every device under the same key
-function mergeDEVCs(klv, options) {
-  //Will return a list of sensors for a device
-  let result = { sensors: {} };
+function mergeStreams(klv, options) {
+  //Will return a list of streams for a device
+  let result = { streams: {} };
+
+  //Remember stickies per device and stream, to avoid looping every time
+  let stickies = {};
 
   (klv.DEVC || []).forEach(d => {
-    //Remember stickies per sensor, to avoid looping every time
-    let stickies = {};
+    //Initialise stickies per device and stream if not done yet
+    stickies[d['device name']] = stickies[d['device name']] || {};
     (d.STRM || []).forEach(s => {
-      //We will store the main samples of the nest
-      if (s.interpretSamples) {
+      //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
+      if (s.interpretSamples && s.interpretSamples !== 'STNM') {
         const fourCC = s.interpretSamples;
+        //Initialise stickies
+        stickies[d['device name']][fourCC] = stickies[d['device name']][fourCC] || {};
 
-        //Filter out sensors when using the sensor option
-        if (options.sensor == null || options.sensor.includes(fourCC)) {
+        //Filter out streams when using the stream option
+        if (options.stream == null || options.stream.includes(fourCC)) {
           //Get the array of samples
           let samples = s[fourCC];
           //Delete the samples from the original to avoid duplication
@@ -56,21 +44,21 @@ function mergeDEVCs(klv, options) {
             else if (!ignore.includes(key)) sticky[stickyTranslations[key] || key] = s[key];
           }
           //Remember previous sticky values, that's why they're sticky
-          sticky = { ...stickies, ...sticky };
+          sticky = { ...stickies[d['device name']][fourCC], ...sticky };
           //If repeatSticky, add the sticky values to every sample
           if (options.repeatSticky) samples = samples.map(s => ({ ...s, ...sticky }));
           //If have both samples and stickies
           else if (Object.keys(sticky).length && samples.length) {
             for (let key in sticky) {
               //Save sticky values that have changed, discard the rest
-              if (!deepEqual(sticky[key], stickies[key])) {
+              if (!deepEqual(sticky[key], stickies[d['device name']][fourCC][key])) {
                 samples[0].sticky = samples[0].sticky || {};
                 samples[0].sticky[key] = sticky[key];
               }
             }
           }
           //Remember the new sticky values
-          stickies = { ...stickies, ...sticky };
+          stickies[d['device name']][fourCC] = { ...stickies[d['device name']][fourCC], ...sticky };
 
           //Use name and units to describe every sample
           if (options.repeatHeaders) {
@@ -95,10 +83,10 @@ function mergeDEVCs(klv, options) {
               if (Array.isArray(description.units)) {
                 //Save units as string array
                 description.units.forEach((u, i) => {
-                  units.push(` (${u})`);
+                  units.push(` [${u}]`);
                 });
                 //Or single value string
-              } else units[0] = (units[0] || '') + ` (${description.units})`;
+              } else units[0] = (units[0] || '') + ` [${description.units}]`;
             }
 
             //Loop through all the names and units
@@ -120,9 +108,9 @@ function mergeDEVCs(klv, options) {
             delete description.name;
           }
 
-          //Add samples to sensor entry
-          if (result.sensors[fourCC]) result.sensors[fourCC].samples.push(...samples);
-          else result.sensors[fourCC] = { samples, ...description };
+          //Add samples to stream entry
+          if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
+          else result.streams[fourCC] = { samples, ...description };
         }
       }
     });
@@ -141,4 +129,4 @@ function mergeDEVCs(klv, options) {
   return result;
 }
 
-module.exports = mergeDEVCs;
+module.exports = mergeStreams;

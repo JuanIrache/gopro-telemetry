@@ -13,8 +13,10 @@ function toDate(d) {
 }
 
 //Create list of GPS dates, times and duration for each packet of samples
-function fillGPSTime(klv) {
+function fillGPSTime(klv, options) {
   let res = [];
+  //Ignore if timeIn selects the other time input
+  if (options.timeIn === 'MP$') return res;
   let initialDate;
   klv.DEVC.forEach((d, i) => {
     //Object with partial result
@@ -48,8 +50,10 @@ function fillGPSTime(klv) {
 }
 
 //Create date, time, duration list based on mp4 date and timing data
-function fillMP4Time(klv, timing) {
+function fillMP4Time(klv, timing, options) {
   let res = [];
+  //Ignore if timeIn selects the other time input
+  if (options.timeIn === 'GPS') return res;
   if (timing && timing.samples && timing.samples.length) {
     //Set the initial date, the only one provided by mp4
     const initialDate = timing.start.getTime();
@@ -80,8 +84,8 @@ function timeKLV(klv, timing, options) {
     //If valid data
     if (result.DEVC && result.DEVC.length) {
       //Gather and deduce both types of timing info
-      const gpsTimes = fillGPSTime(result);
-      const mp4Times = fillMP4Time(result, timing);
+      const gpsTimes = fillGPSTime(result, options);
+      const mp4Times = fillMP4Time(result, timing, options);
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
       let dateSDur = {};
@@ -113,7 +117,10 @@ function timeKLV(klv, timing, options) {
             s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
               if (currCts != null && sDuration[fourCC] != null) {
-                let timedSample = { cts: currCts, date: currDate, value };
+                let timedSample = { value };
+                //Filter out if timeOut option, but keep cts if needed for merging times
+                if (options.timeOut !== 'date' || options.groupTimes) timedSample.cts = currCts;
+                if (options.timeOut !== 'cts') timedSample.date = currDate;
                 //increment time adn date for the next sample
                 currCts += sDuration[fourCC];
                 currDate = new Date(currDate.getTime() + dateSDur[fourCC]);

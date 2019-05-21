@@ -1,7 +1,5 @@
 # GoPro Telemetry
 
-**Work in progress. Don't rely on it for important stuff yet.**
-
 Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later).
 
 Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-telemetry-extractor/).
@@ -30,27 +28,27 @@ const goproTelemetry = require('gopro-telemetry');
 const telemetry = goproTelemetry(input, options); //Get your input with gpmf-extract
 ```
 
-## Options (optional)
+## Options
 
 Some options may be incompatible with others.
 
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
+- **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**. Default: _false_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
 - **device** (array of numbers) Filters the results by device id. Default: _null_
-- **sensor** (array of sstring) Filters the results by device sensor name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
-- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
-- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. Default: _false_
-
-Not yet implemented:
-
-- **time** (string) Averages samples to time units. Ideally will accept things like _frames_, _milliseconds_, _seconds_, _timecode_. Default: _null_
+- **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
+- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size. Default: _false_
+- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. This will increase the output size. Default: _false_
+- **timeOut** (string) By default the code exports both _cts_ (milliseconds since first frame) and _date_ (full date and time). Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
+- **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
+- **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size. Default: _null_
 
 Example:
 
 ```js
-const telemetry = goproTelemetry(rawData, { sensor: ['ACCL'], repeatSticky: true });
+const telemetry = goproTelemetry(rawData, { stream: ['ACCL'], repeatSticky: true });
 ```
 
 This slightly more comprehensive example includes the data extraction step with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
@@ -91,8 +89,8 @@ The output with the default options looks like this:
 ```
 { deviceId : {
     data about the device : values,
-    sensors : {
-      sensor_key : {
+    streams : {
+      stream_key : {
         data about the samples : values,
         samples : [
           {
@@ -146,24 +144,14 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Interpret data
-  - Use STPM for time if available?
-  - hero6+ble produces strange stnm sensor
-  - Create and document time inputs, Document outputs (gps time is utc, mp4 time is local)
-  - Enable grouping packets per time unit / frame
-  - What to do with tick, tock, tsmp, empt....? then delete them
-- Automated test interpretation
-- Comment index
-- Document output
+  - Enable smoothing data
+  - Automated test interpretation
+  - Convert elevation to mean sea level
+- Fix typos
+- Do something with TICK and TOCK?
 - Review console.log/error usage
-- Create additional package for converting the data to other formats
-- Remove Work-in-progress warning
-- Refactoring for performance?
+- Create additional package/option for converting the data to other formats
 
 ## Maybe To-Do
 
 - Take potential nested arrays into account f[8]? Never found one to test
-- Pending types:
-  - d | 64-bit double precision (IEEE 754) | double
-  - G | 128-bit ID (like UUID) | uint8_t guid[16]
-  - q | 32-bit Q Number Q15.16 | uint32_t | 16-bit integer (A) with 16-bit fixed point (B) for A.B value (range -32768.0 to 32767.99998)
-  - Q | 64-bit Q Number Q31.32 | uint64_t | 32-bit integer (A) with 32-bit fixed point (B) for A.B value.
