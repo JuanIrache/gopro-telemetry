@@ -1,4 +1,4 @@
-const { keyAndStructParser, types, fourCCs } = require('./keys');
+const { keyAndStructParser, types, mergeStrings } = require('./keys');
 const parseV = require('./parseV');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
@@ -37,7 +37,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
           //Detect them when the type is complex
           else if (types[ks.type].complex && complexType.length) axes = complexType.length;
           //Human readable strings should de merged for readability
-          if (fourCCs[ks.fourCC] && fourCCs[ks.fourCC].merge) {
+          if (mergeStrings.includes(ks.fourCC)) {
             ks.size = length;
             ks.repeat = 1;
           }
@@ -77,16 +77,11 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
   //Undo all arrays except the last key, which should be the array of samples
   for (const key in result) if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
 
-  //Remember las key for interpreting data later
-  if (!options.raw && lastCC) result.interpretSamples = lastCC;
+  //Remember last key for interpreting data later
+  if ((!options.raw || options.deviceList || options.streamList) && lastCC) result.interpretSamples = lastCC;
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
-  if (root && !result.DEVC) {
-    const err = 'Invalid GPMF data. Root object must contain DEVC key';
-    if (options.tolerant) setImmediate(() => console.error(err));
-    else throw new Error(`${err}. Use the 'tolerant' option to return anyway`);
-  }
 
   return result;
 }

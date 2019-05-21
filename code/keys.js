@@ -17,6 +17,9 @@ const types = {
   B: { size: 1, func: 'uint8' },
   l: { size: 4, func: 'int32' },
   L: { size: 4, func: 'uint32' },
+  q: { size: 4, func: 'uint32' }, //Never tested
+  Q: { size: 8, func: 'uint64' }, //Never tested
+  d: { size: 8, func: 'double' }, //Never tested
   j: { size: 8, func: 'int64' },
   J: { size: 8, func: 'uint64' },
   f: { size: 4, func: 'float' },
@@ -27,13 +30,29 @@ const types = {
   '\u0000': { nested: true }
 };
 
-//Instructions for reading known fourCC keys
-//is there no better way to know which strings to merge than hardcoding it?
-const fourCCs = {
-  STNM: { merge: true },
-  RMRK: { merge: true },
-  TYPE: { merge: true },
-  DVNM: { merge: true }
+//Merge known fourCC strings
+//is there no better way than hardcoding it?
+const mergeStrings = ['STNM', 'RMRK', 'TYPE', 'DVNM'];
+
+//Make some fourCC keys human readable
+const translations = {
+  SIUN: 'units',
+  UNIT: 'units',
+  STNM: 'name',
+  RMRK: 'comment',
+  DVNM: 'device name'
 };
 
-module.exports = { keyAndStructParser, types, fourCCs };
+//Ignore some, for now
+const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
+
+//Make some fourCC keys sticky and human readable
+const stickyTranslations = {
+  TMPC: 'temperature [Cº]',
+  GPSF: 'fix',
+  GPSP: 'precision',
+  STMP: 'timestamps [µs]', //Maybe useful for accurate timing, but does not look consecutive or proportional
+  TIMO: 'offset [s]'
+};
+
+module.exports = { keyAndStructParser, types, mergeStrings, translations, ignore, stickyTranslations };

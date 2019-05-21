@@ -1,6 +1,6 @@
 //Main data accessing function. Reads the V in KLV
 
-//binary-parser does not support 64bits use @gmod/binary-parser
+//Binary-parser does not support 64bits. Use @gmod/binary-parser
 const Parser = require('@gmod/binary-parser').Parser;
 const { types } = require('./keys');
 //Will store unknown types

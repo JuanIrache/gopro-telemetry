@@ -1,8 +1,10 @@
+//Groups DEVC entries by device
 function groupDevices(klv, options) {
-  //Todo, select which device
   result = {};
   (klv.DEVC || []).forEach(d => {
-    if (options.device == null || d.DVID == options.device) {
+    //Filter out when using the device options
+    if (options.device == null || options.device.includes(d.DVID)) {
+      //Save to results inside device id key
       if (result[d.DVID]) result[d.DVID].DEVC.push(d);
       else result[d.DVID] = { DEVC: [d], interpretSamples: 'DEVC' };
     }
