@@ -12,15 +12,19 @@ function deepEqual(a, b) {
 function mergeStreams(klv, options) {
   //Will return a list of streams for a device
   let result = { streams: {} };
+
+  //Remember stickies per device and stream, to avoid looping every time
   let stickies = {};
 
   (klv.DEVC || []).forEach(d => {
-    //Remember stickies per stream, to avoid looping every time
-
+    //Initialise stickies per device and stream if not done yet
+    stickies[d['device name']] = stickies[d['device name']] || {};
     (d.STRM || []).forEach(s => {
       //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
       if (s.interpretSamples && s.interpretSamples !== 'STNM') {
         const fourCC = s.interpretSamples;
+        //Initialise stickies
+        stickies[d['device name']][fourCC] = stickies[d['device name']][fourCC] || {};
 
         //Filter out streams when using the stream option
         if (options.stream == null || options.stream.includes(fourCC)) {
@@ -40,21 +44,21 @@ function mergeStreams(klv, options) {
             else if (!ignore.includes(key)) sticky[stickyTranslations[key] || key] = s[key];
           }
           //Remember previous sticky values, that's why they're sticky
-          sticky = { ...stickies, ...sticky };
+          sticky = { ...stickies[d['device name']][fourCC], ...sticky };
           //If repeatSticky, add the sticky values to every sample
           if (options.repeatSticky) samples = samples.map(s => ({ ...s, ...sticky }));
           //If have both samples and stickies
           else if (Object.keys(sticky).length && samples.length) {
             for (let key in sticky) {
               //Save sticky values that have changed, discard the rest
-              if (!deepEqual(sticky[key], stickies[key])) {
+              if (!deepEqual(sticky[key], stickies[d['device name']][fourCC][key])) {
                 samples[0].sticky = samples[0].sticky || {};
                 samples[0].sticky[key] = sticky[key];
               }
             }
           }
           //Remember the new sticky values
-          stickies = { ...stickies, ...sticky };
+          stickies[d['device name']][fourCC] = { ...stickies[d['device name']][fourCC], ...sticky };
 
           //Use name and units to describe every sample
           if (options.repeatHeaders) {
