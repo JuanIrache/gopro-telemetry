@@ -17,7 +17,7 @@
     "gyroscope",
     "telemetry",
     "metadata",
-    "seonsors",
+    "sensors",
     "converter",
     "reader",
     "parser"
