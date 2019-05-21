@@ -77,8 +77,8 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
   //Undo all arrays except the last key, which should be the array of samples
   for (const key in result) if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
 
-  //Remember las key for interpreting data later
-  if (!options.raw && lastCC) result.interpretSamples = lastCC;
+  //Remember last key for interpreting data later
+  if ((!options.raw || options.deviceList || options.streamList) && lastCC) result.interpretSamples = lastCC;
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
