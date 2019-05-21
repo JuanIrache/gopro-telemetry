@@ -1,6 +1,7 @@
 const parseKLV = require('./code/parseKLV');
 const groupDevices = require('./code/groupDevices');
 const deviceList = require('./code/deviceList');
+const streamList = require('./code/streamList');
 const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
@@ -18,8 +19,9 @@ module.exports = function(input, options = {}) {
     if (options.tolerant) return parsed;
     else return undefined;
   }
-  //Return list of devices only
+  //Return list of devices/streams only
   if (options.deviceList) return deviceList(parsed);
+  if (options.streamList) return streamList(parsed);
   //Return now if raw wanted
   if (options.raw) return parsed;
   //Group it by device

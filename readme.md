@@ -36,8 +36,9 @@ Some options may be incompatible with others.
 
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
-- **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
+- **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
+- **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**. Default: _false_
 - **device** (array of numbers) Filters the results by device id. Default: _null_
 - **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. Default: _false_
@@ -144,7 +145,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- List streams
 - Interpret data
   - Enable grouping packets per time unit / frame
   - Automated test interpretation
