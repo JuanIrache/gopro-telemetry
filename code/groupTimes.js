@@ -34,23 +34,30 @@ function interpolateSample(samples, i, currentTime) {
   const proportion = (currentTime - baseTime) / difference;
   //Get all unique keys
   const keys = new Set([samples[i], samples[i + 1]].reduce((acc, curr) => acc.concat(Object.keys(curr)), []));
-  let result = {};
+  let result = Array.isArray(samples[0]) ? [] : {};
   //Loop the keys
   keys.forEach(k => {
-    const validVals = twoSamples.map(s => s[k]).filter(v => v != null);
+    const validVals = [samples[i], samples[i + 1]].map(s => s[k]).filter(v => v != null);
     if (typeof validVals[0] === 'number') {
       //If number, calculate proportion
-      //With two valid values, otherwise assign the valid one
       if (validVals.length > 1) result[k] = validVals[0] + (validVals[1] - validVals[0]) * proportion;
+      //If no 2 valid values, assign the first
       else result[k] = validVals[0];
-    } else if (typeof validVals[0] === 'object') {
       //If object (or more likely array) interpolate the samples recursively
-      result[k] = interpolateSample(validVals, i, currentTime);
-    } else {
-      //If string or other, use the first valid value
-      result[k] = validVals[0];
-    }
+    } else if (k === 'date') {
+      //If number, calculate proportion
+      if (validVals.length > 1)
+        result[k] = new Date(
+          new Date(validVals[0]).getTime() + (new Date(validVals[1]).getTime() - new Date(validVals[0]).getTime()) * proportion
+        );
+      //If no 2 valid values, assign the first
+      else result[k] = validVals[0];
+      //If object (or more likely array) interpolate the samples recursively
+    } else if (typeof validVals[0] === 'object') result[k] = interpolateSample(validVals, i, currentTime);
+    //If string or other, use the first valid value
+    else result[k] = validVals[0];
   });
+
   //If cts was temporary, remove it
   if (timeOut === 'date') delete result.cts;
   return result;
@@ -77,8 +84,8 @@ module.exports = function(klv, { groupTimes, timeOut }) {
                 break;
               } else i++;
             }
-            if (samples.length > 1) newSamples.push(mergeSamples(group));
-            else if (samples.lenght === 1) newSamples.push(group[0]);
+            if (group.length > 1) newSamples.push(mergeSamples(group));
+            else if (group.length === 1) newSamples.push(group[0]);
             else if (i < samples.length) newSamples.push(interpolateSample(samples, i - 1, currentTime));
             currentTime += groupTimes;
           }
