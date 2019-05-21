@@ -38,20 +38,15 @@ function interpolateSample(samples, i, currentTime) {
   //Loop the keys
   keys.forEach(k => {
     const validVals = [samples[i], samples[i + 1]].map(s => s[k]).filter(v => v != null);
-    if (typeof validVals[0] === 'number') {
-      //If number, calculate proportion
-      if (validVals.length > 1) result[k] = validVals[0] + (validVals[1] - validVals[0]) * proportion;
-      //If no 2 valid values, assign the first
-      else result[k] = validVals[0];
-      //If object (or more likely array) interpolate the samples recursively
-    } else if (k === 'date') {
-      //If number, calculate proportion
-      if (validVals.length > 1)
-        result[k] = new Date(
-          new Date(validVals[0]).getTime() + (new Date(validVals[1]).getTime() - new Date(validVals[0]).getTime()) * proportion
-        );
-      //If no 2 valid values, assign the first
-      else result[k] = validVals[0];
+    //If no 2 valid values, assign the first. This covers nulls too
+    if (validVals.length < 2) result[k] = validVals[0] || null;
+    //If number, calculate proportion
+    else if (typeof validVals[0] === 'number') result[k] = validVals[0] + (validVals[1] - validVals[0]) * proportion;
+    //If date, calculate proportion
+    else if (k === 'date') {
+      result[k] = new Date(
+        new Date(validVals[0]).getTime() + (new Date(validVals[1]).getTime() - new Date(validVals[0]).getTime()) * proportion
+      );
       //If object (or more likely array) interpolate the samples recursively
     } else if (typeof validVals[0] === 'object') result[k] = interpolateSample(validVals, i, currentTime);
     //If string or other, use the first valid value
