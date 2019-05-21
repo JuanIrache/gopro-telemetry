@@ -145,9 +145,15 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- merge dates
+- merge arrays properly
+- framerate gone
+- comment grouptimes
+
 - Interpret data
-  - Enable grouping packets per time unit / frame
+  - Enable smoothing data
   - Automated test interpretation
+  - Convert elevation to mean sea level
 - Fix typos
 - Do something with TICK and TOCK?
 - Review console.log/error usage
