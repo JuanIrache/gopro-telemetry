@@ -10,7 +10,7 @@ function reduceSamples(samples) {
     //If number, calculate average dividing valid values by total
     if (!isNaN(validVals[0])) result[k] = validVals.reduce((acc, curr, i, arr) => acc + curr / arr.length, 0);
     //If date, calculate average dividing all by total
-    if (k === 'date') result[k] = new Date(validVals.reduce((acc, curr, i, arr) => acc + new Date(curr).getTime() / arr.length, 0));
+    else if (k === 'date') result[k] = new Date(validVals.reduce((acc, curr, i, arr) => acc + new Date(curr).getTime() / arr.length, 0));
     //If object (or more likely array) merge the samples recursively
     else if (typeof validVals[0] === 'object') result[k] = reduceSamples(validVals);
     //Preserve null values
