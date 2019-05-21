@@ -7,6 +7,7 @@ const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
+const correctHeight = require('./code/correctHeight');
 
 module.exports = function(input, options = {}) {
   //Create filter arrays if user didn't
@@ -17,6 +18,7 @@ module.exports = function(input, options = {}) {
   if (!parsed.DEVC) {
     setImmediate(() => console.error('Invalid GPMF data. Root object must contain DEVC key'));
     if (options.tolerant) return parsed;
+    //ToDo crash if not tolerant?
     else return undefined;
   }
   //Return list of devices/streams only
@@ -32,8 +34,10 @@ module.exports = function(input, options = {}) {
   let timed = {};
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
-  let merged = {};
+  //Correct GPS height
+  if (!options.ellipsoid) for (const key in timed) timed[key] = correctHeight(timed[key]);
   //Merge samples in sensor entries
+  let merged = {};
   for (const key in timed) merged[key] = mergeStream(timed[key], options);
   //Read framerate to convert groupTimes to number if needed
   if (options.groupTimes === 'frames') options.groupTimes = input.timing.frameDuration;
@@ -42,6 +46,6 @@ module.exports = function(input, options = {}) {
   //Group samples by time if necessary
   if (options.smooth) merged = smoothSamples(merged, options);
   //Add framerate to top level
-  merged['frames/second'] = 1 / input.timing.frameDuration;
+  if (input.timing) merged['frames/second'] = 1 / input.timing.frameDuration;
   return merged;
 };
