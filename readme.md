@@ -45,6 +45,7 @@ Some options may be incompatible with others.
 - **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
 - **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size. Default: _null_
 - **smooth** (number) Uses the adjacent values of a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process. Default: _null_
+- **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with the EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS 84 ellipsoid. Use this option to. Default: _false_
 
 Example:
 
@@ -146,11 +147,12 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Interpret data
   - Automated test interpretation
-  - Convert elevation to mean sea level
+  - filter gps by precision and fix
 - Fix typos
 - Merge more than one video file
 - Do something with TICK and TOCK?
 - Review console.log/error usage
+- Add try catches where / if necessary
 - Compute properties? Distance, turns...?
 - Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
 
