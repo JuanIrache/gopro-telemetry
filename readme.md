@@ -145,8 +145,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- comment grouptimes
-
 - Interpret data
   - Enable smoothing data
   - Automated test interpretation
