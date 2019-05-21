@@ -1,7 +1,7 @@
 const reduceSamples = require('./reduceSamples');
 
 //Smoothens contrast between samples by averaging the specified number of them
-module.exports = function(klv, { smooth }) {
+module.exports = function(klv, { smooth, repeatSticky }) {
   //Copy input
   let result = JSON.parse(JSON.stringify(klv));
   //Loop devices and streams
@@ -20,6 +20,11 @@ module.exports = function(klv, { smooth }) {
             //Preserve original times
             if (samples[i].cts != null) newSample.cts = samples[i].cts;
             if (samples[i].date != null) newSample.date = samples[i].date;
+            //Preserve original sticky
+            if (!repeatSticky) {
+              delete newSample.sticky;
+              if (samples[i].sticky) newSample.sticky = samples[i].sticky;
+            }
             newSamples.push(newSample);
           }
         }
