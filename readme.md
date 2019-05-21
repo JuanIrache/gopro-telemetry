@@ -151,6 +151,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Merge more than one video file
 - Do something with TICK and TOCK?
 - Review console.log/error usage
+- Compute properties? Distance, turns...?
 - Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
 
 ## Maybe To-Do
