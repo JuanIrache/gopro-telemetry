@@ -145,6 +145,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Promisify
 - Interpret data
   - Automated test interpretation
   - filter gps by precision and fix
