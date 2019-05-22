@@ -145,6 +145,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Get a GPS height correction value that's closer to the center and, pick the best one in fix and precision
 - Promisify
 - Interpret data
   - Automated test interpretation
