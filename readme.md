@@ -34,6 +34,7 @@ Some options may be incompatible with others.
 
 - **debug** (boolean) Outputs some feedback. Default: _false_
 - **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
+- **promisify** (boolean) Runs code asynchronously and returns a Promise that will resolve to the data when ready. Default: _false_
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
 - **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**. Default: _false_
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
@@ -145,7 +146,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Promisify
 - Interpret data
   - Automated test interpretation
   - filter gps by precision and fix
