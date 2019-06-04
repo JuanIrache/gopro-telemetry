@@ -9,15 +9,17 @@ function toDate(d) {
     SEC = 6,
     MIL = 7;
   let parts = d.match(regex);
-  return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL]));
+  if (parts) return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL]));
+  return null;
 }
 
 //Create list of GPS dates, times and duration for each packet of samples
 function fillGPSTime(klv, options) {
   let res = [];
   //Ignore if timeIn selects the other time input
-  if (options.timeIn === 'MP$') return res;
+  if (options.timeIn === 'MP4') return res;
   let initialDate;
+  let missingDates = [];
   klv.DEVC.forEach((d, i) => {
     //Object with partial result
     let partialRes;
@@ -34,18 +36,58 @@ function fillGPSTime(klv, options) {
       if (!initialDate) initialDate = date.getTime();
       partialRes = { date };
       // Assign duration for previous pack. The last one will lack it
-      if (res.length) res[res.length - 1].duration = partialRes.date - res[res.length - 1].date;
-    } else if (res.length > 1) {
-      //If no date but previous packets have one, deduce from them
-      res[i - 1].duration = res[i - 2].duration;
-      partialRes.date = res[i - 1].date + res[i - 1].duration;
+      if (res.length && res[res.length - 1] && res[res.length - 1].date)
+        res[res.length - 1].duration = partialRes.date - res[res.length - 1].date;
     }
     if (partialRes) {
       //Deduce starting time from date and push result
       partialRes.cts = partialRes.date.getTime() - initialDate;
       res.push(partialRes);
+    } else {
+      res.push(null);
+      missingDates.push(i);
     }
   });
+
+  let missingDurations = [];
+
+  //Deduce null results as accurately as possible
+  missingDates.forEach(i => {
+    //If a previous date is present
+    if (res[i] === null && res[i - 1] && res[i - 1].date) {
+      let foundNext = false;
+      for (let x = 1; i + x < res.length; x++) {
+        // Look for the next valild date
+        if (res[i + x] && res[i + x].date) {
+          //And interpolate to find the previous one
+          res[i - 1].duration = (res[i + x].date.getTime() - res[i - 1].date.getTime()) / x;
+          //Duration set, remove from missingDurations
+          const index = missingDurations.indexOf(i - 1);
+          if (index !== -1) missingDurations.splice(index, 1);
+          foundNext = true;
+          break;
+        }
+      }
+
+      if (!foundNext && res[i - 2] && res[i - 2].duration) {
+        //If no date but previous packets have one, deduce from them
+        res[i - 1].duration = res[i - 2].duration;
+      }
+      if (res[i - 1].duration != null) {
+        // Deduce date and starting time form previous date and duration
+        res[i] = { date: new Date(res[i - 1].date.getTime() + res[i - 1].duration) };
+        res[i].cts = res[i].date.getTime() - initialDate;
+        missingDurations.push(i);
+      }
+    }
+  });
+
+  //Fill missing durations
+  missingDurations.forEach(i => {
+    if (res[i + 1] && res[i + 1].date) res[i].duration = res[i + 1].date.getTime() - res[i].date.getTime();
+  });
+
+  //return results except null ones
   return res;
 }
 
@@ -91,15 +133,17 @@ function timeKLV(klv, timing, options) {
       let dateSDur = {};
       //Loop through packets of samples
       result.DEVC.forEach((d, i) => {
-        //Choose timing type for time (relative to the video start) data. TODO apply user preference
+        //Choose timing type for time (relative to the video start) data.
         const { cts, duration } = (() => {
-          if (mp4Times.length) return mp4Times[i];
-          else if (gpsTimes.length) return gpsTimes[i];
+          if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
+          else if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[i];
+          return { cts: null, duration: null };
         })();
-        //Choose timing type for dates (ideally based on GPS). TODO apply user preference
+        //Choose timing type for dates (ideally based on GPS).
         const { date, duration: dateDur } = (() => {
-          if (gpsTimes.length) return gpsTimes[i];
-          else if (mp4Times.length) return mp4Times[i];
+          if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[i];
+          else if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
+          return { date: null, duration: null };
         })();
         //Loop streams if present
         (d.STRM || []).forEach(s => {
