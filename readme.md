@@ -152,11 +152,12 @@ If you liked this you might like other [creative coding projects](https://tailor
   - Automated test interpretation
   - filter gps by precision and fix
 - Fix typos
+- Optimise for performance
 - Merge more than one video file
 - Do something with TICK and TOCK?
 - Review console.log/error usage
 - Add try catches where / if necessary
-- Compute properties? Distance, turns...?
+- Compute properties? Distance, turns, vibration...?
 - Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
 
 ## Maybe To-Do
