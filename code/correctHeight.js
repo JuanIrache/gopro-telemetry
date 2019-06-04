@@ -11,7 +11,7 @@ module.exports = function(klv) {
     if (d.STRM) {
       for (const elt of d.STRM) {
         //Arbitrary values to identify acceptable location
-        if (elt.GPSF >= 2 && elt.GPSP < 1000 && elt.GPSP && elt.GPS5.length && elt.GPS5[0].value) {
+        if (elt.GPSF >= 2 && elt.GPSP < 1000 && elt.GPSP && elt.GPS5[0] && elt.GPS5[0].value) {
           //Use latitude and longitude to find the altitude offset in this location
           correction = egm96(elt.GPS5[0].value[0], elt.GPS5[0].value[1]);
           break;
