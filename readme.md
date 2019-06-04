@@ -47,6 +47,8 @@ Some options may be incompatible with others.
 - **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size. Default: _null_
 - **smooth** (number) Uses the adjacent values of a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process. Default: _null_
 - **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS84 (World Geodetic System) ellipsoid. Default: _false_
+- **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good). Default: _null_
+- **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock). Default: _null_
 
 Example:
 
@@ -146,9 +148,8 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Interpret data
-  - Automated test interpretation
-  - filter gps by precision and fix
+- Test interpreted data
+- filter gps by precision and fix
 - Fix typos
 - Optimise for performance
 - Merge more than one video file
