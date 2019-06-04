@@ -148,7 +148,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- filter gps by precision and fix
 - Test interpreted data
 - Fix typos
 - Optimise for performance
