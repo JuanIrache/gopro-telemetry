@@ -30,24 +30,24 @@ function process(input, options) {
   if (options.raw) return parsed;
   //Group it by device
   const grouped = groupDevices(parsed, options);
-  let interpreted = {};
 
+  let interpreted = {};
   //Apply scale and matrix transformations
   for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], options);
-  let timed = {};
 
+  let timed = {};
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
-  //Correct GPS height
 
+  //Correct GPS height
   if (!options.ellipsoid || options.GPS5Precision != null || options.GPS5Fix != null)
-    for (const key in timed) timed[key] = processGPS5(timed[key]);
+    for (const key in timed) timed[key] = processGPS5(timed[key], options);
+
   //Merge samples in sensor entries
   let merged = {};
-
   for (const key in timed) merged[key] = mergeStream(timed[key], options);
-  //Read framerate to convert groupTimes to number if needed
 
+  //Read framerate to convert groupTimes to number if needed
   if (options.groupTimes === 'frames') options.groupTimes = input.timing.frameDuration;
   //Group samples by time if necessary
   if (options.groupTimes) merged = groupTimes(merged, options);
