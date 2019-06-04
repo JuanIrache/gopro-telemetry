@@ -7,7 +7,7 @@ const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
-const correctHeight = require('./code/correctHeight');
+const processGPS5 = require('./code/processGPS5');
 
 function process(input, options) {
   //Create filter arrays if user didn't
@@ -40,7 +40,8 @@ function process(input, options) {
   for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
   //Correct GPS height
 
-  if (!options.ellipsoid) for (const key in timed) timed[key] = correctHeight(timed[key]);
+  if (!options.ellipsoid || options.GPS5Precision != null || options.GPS5Fix != null)
+    for (const key in timed) timed[key] = processGPS5(timed[key]);
   //Merge samples in sensor entries
   let merged = {};
 
