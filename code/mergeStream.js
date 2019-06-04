@@ -51,7 +51,7 @@ function mergeStreams(klv, options) {
           else if (Object.keys(sticky).length && samples.length) {
             for (let key in sticky) {
               //Save sticky values that have changed, discard the rest
-              if (!deepEqual(sticky[key], stickies[d['device name']][fourCC][key]) && samples[0]) {
+              if (!deepEqual(sticky[key], stickies[d['device name']][fourCC][key])) {
                 samples[0].sticky = samples[0].sticky || {};
                 samples[0].sticky[key] = sticky[key];
               }
