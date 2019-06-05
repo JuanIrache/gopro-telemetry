@@ -88,7 +88,7 @@ function fillGPSTime(klv, options) {
   });
 
   //If only one group of samples, invent duration to get at least some useful results
-  if (res.length === 1 && res[0].duration == null) res[0].duration = 1001;
+  if (res.length === 1 && res[0] != null && res[0].duration == null) res[0].duration = 1001;
 
   return res;
 }
