@@ -29,8 +29,9 @@ function fillGPSTime(klv, options) {
       //Find the GPSU date in the GPS5 stream
       if (s.GPSU != null) date = toDate(s.GPSU);
       //Done with GPSU
-      delete s.GPSU; //TODO not deleting
+      delete s.GPSU;
     });
+
     if (date) {
       //Set date for first packet
       if (!initialDate) initialDate = date.getTime();
