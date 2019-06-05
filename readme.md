@@ -6,11 +6,11 @@ Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-tel
 
 Here's a [playlist with cool uses of the GoPro metadata ](https://www.youtube.com/watch?v=V4eJDQik-so&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
 
-Accepts an object with binary data and timing data. Returns a JavaScript object with a key for each device that was found. See **samples/example.js** for a basic implementation.
+Accepts an object with binary data and timing data. Returns a JavaScript object (or optionally other file formats) with a key for each device that was found. See **samples/example.js** for a basic implementation.
 
 You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
-**gpmf-extract** will provide you with an object ready to import. It contains:
+**gopro-telemetry** expects an object with the following properties:
 
 - **rawData** (buffer) The GPMF track of the video file.
 - **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
@@ -30,25 +30,25 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 
 ## Options
 
-Some options may be incompatible with others.
+- **debug** (boolean) Outputs some feedback.
+- **tolerant** (boolean) Returns data even if format does not match expectations.
+- **promisify** (boolean) Runs code asynchronously and returns a Promise that will resolve to the data when ready.
+- **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**.
+- **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**.
+- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling, no filtering. **Disables the following options**.
+- **device** (array of numbers) Filters the results by device id.
+- **stream** (array of strings) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data).
+- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size.
+- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be returned under their keys, based on the available name and units. This might increase the output size.
+- **timeOut** (string) By default the code exports both _cts_ (milliseconds since first frame) and _date_ (full date and time). Specify one (**cts** or **date**) in order to ignore the other.
+- **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other.
+- **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size.
+- **smooth** (number) Uses the adjacent values of a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process.
+- **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS84 (World Geodetic System) ellipsoid.
+- **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
+- **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
 
-- **debug** (boolean) Outputs some feedback. Default: _false_
-- **tolerant** (boolean) Returns data even if format does not match expectations. Default: _false_
-- **promisify** (boolean) Runs code asynchronously and returns a Promise that will resolve to the data when ready. Default: _false_
-- **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**. Default: _false_
-- **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**. Default: _false_
-- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling. **Disables the following options**. Default: _false_
-- **device** (array of numbers) Filters the results by device id. Default: _null_
-- **stream** (array of string) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). Default: _null_
-- **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size. Default: _false_
-- **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be return under their keys, based on the available name and units. This will increase the output size. Default: _false_
-- **timeOut** (string) By default the code exports both _cts_ (milliseconds since first frame) and _date_ (full date and time). Specify one (**cts** or **date**) in order to ignore the other. Default: _null_ (exports both)
-- **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other. Default: _null_ (imports both)
-- **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size. Default: _null_
-- **smooth** (number) Uses the adjacent values of a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process. Default: _null_
-- **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS84 (World Geodetic System) ellipsoid. Default: _false_
-- **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good). Default: _null_
-- **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock). Default: _null_
+All options default to _null/false_.
 
 Example:
 
@@ -134,7 +134,7 @@ Depending on the camera, model, settings and accessories, these are some of the 
 - Magnetometer (µT)
 - Face detection
 - Highlights (manual and computed)
-- White balance
+- White balance (ºK or RGB)
 - Luma
 - Hue
 - Image uniformity
@@ -148,7 +148,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Fix typos
 - Optimise for performance
 - Do something with TICK and TOCK?
 - Review console.log/error usage
