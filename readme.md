@@ -148,7 +148,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Test interpreted data
 - Fix typos
 - Optimise for performance
 - Do something with TICK and TOCK?
