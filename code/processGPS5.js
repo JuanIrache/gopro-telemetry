@@ -23,13 +23,13 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
   if (!ellipsoid || GPS5Fix != null || GPS5Precision != null) {
     (result.DEVC || []).forEach((d, i, { length }) => {
       //First loop to find a suitable value
-      (d.STRM || []).forEach(elt => {
+      for (let i = d.STRM.length - 1; i >= 0; i--) {
         //Delete streams that do not pass the test
-        if (elt.GPS5 && !approveStream(elt)) delete elt['GPS5'];
-        else if (!ellipsoid && elt.GPSF != null && elt.GPSP != null && elt.GPS5[0] && elt.GPS5[0].value != null) {
+        if (d.STRM[i].GPS5 && !approveStream(d.STRM[i])) d.STRM.splice(i, 1);
+        else if (!ellipsoid && d.STRM[i].GPSF != null && d.STRM[i].GPSP != null && d.STRM[i].GPS5[0] && d.STRM[i].GPS5[0].value != null) {
           // Analyse quality of GPS data, and how centered in the dataset time it is
-          const fixQuality = elt.GPSF / 3;
-          const precision = (9999 - elt.GPSP) / 9999;
+          const fixQuality = d.STRM[i].GPSF / 3;
+          const precision = (9999 - d.STRM[i].GPSP) / 9999;
           const centered = (length / 2 - Math.abs(length / 2 - i)) / (length / 2);
           //Arbitrary weight for each factor
           const rating = fixQuality * 10 + precision * 20 + centered;
@@ -37,10 +37,10 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
           if (correction.rating == null || rating > correction.rating) {
             //Use latitude and longitude to find the altitude offset in this location
             correction.rating = rating;
-            correction.source = [elt.GPS5[0].value[0], elt.GPS5[0].value[1]];
+            correction.source = [d.STRM[i].GPS5[0].value[0], d.STRM[i].GPS5[0].value[1]];
           }
         }
-      });
+      }
     });
     if (correction.source) correction.value = egm96(correction.source[0], correction.source[1]);
   }
