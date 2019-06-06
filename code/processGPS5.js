@@ -37,9 +37,8 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
           if (correction.rating == null || rating > correction.rating) {
             //Use latitude and longitude to find the altitude offset in this location
             correction.rating = rating;
-            correction.source = [d.STRM[i].GPS5[0][0], d.STRM[i].GPS5[0][1]];
-
-            // correction.source = [d.STRM[i].GPS5[0][0], d.STRM[i].GPS5[0][1]];
+            const scaling = d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1 ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]] : [1, 1];
+            correction.source = [d.STRM[i].GPS5[0][0] / scaling[0], d.STRM[i].GPS5[0][1] / scaling[1]];
           }
         }
       }
@@ -47,19 +46,14 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
     if (correction.source) correction.value = egm96(correction.source[0], correction.source[1]);
   }
 
-  // if (correction.value != null) {
-  //   //Loop streams to make the height adjustments
-  //   (result.DEVC || []).forEach(d => {
-  //     (d.STRM || []).forEach(s => {
-  //       //Find GPS data
-  //       if (s.GPS5) {
-  //         // s.GPS5.forEach(g => {
-  //         //   //Apply height correction
-  //         //   if (g.length) g[2] = g[2] - correction.value;
-  //         // });
-  //       }
-  //     });
-  //   });
-  // }
+  if (correction.value != null) {
+    //Loop streams to make the height adjustments
+    (result.DEVC || []).forEach(d => {
+      (d.STRM || []).forEach(s => {
+        //Find GPS data
+        if (s.GPS5) s.altitudeFix = correction.value;
+      });
+    });
+  }
   return result;
 };

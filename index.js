@@ -81,11 +81,11 @@ function process(input, options) {
   //Add framerate to top level
   if (input.timing && input.timing.frameDuration != null) merged['frames/second'] = 1 / input.timing.frameDuration;
   const totalTime = Date.now() - timing.start;
-  console.log('total', totalTime);
-  for (const key in timing.parts) {
-    const partTime = timing.parts[key];
-    console.log(key, partTime, (100 * partTime) / totalTime + '%');
-  }
+  // console.log('total', totalTime);
+  // for (const key in timing.parts) {
+  //   const partTime = timing.parts[key];
+  //   console.log(key, partTime, (100 * partTime) / totalTime + '%');
+  // }
 
   return merged;
 }

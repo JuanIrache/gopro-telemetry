@@ -21,6 +21,18 @@ function interpretKLV(klv, options) {
         interpreted = true;
       }
 
+      if (result.hasOwnProperty('altitudeFix') && result.GPS5) {
+        //Loop through the samples and fix altitude them
+        result[result.interpretSamples].forEach(s => {
+          if (s && s.length > 2) s[2] = s[2] - result.altitudeFix;
+        });
+
+        //Done with altitude data
+        delete result.altitudeFix;
+
+        interpreted = true;
+      }
+
       if (result.hasOwnProperty('ORIN') && result.hasOwnProperty('ORIO')) {
         //set label for transformation Matrix
         const labels = `(${result.ORIO.map(o => o.toLowerCase()).join(',')})`;
