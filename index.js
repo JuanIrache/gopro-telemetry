@@ -54,7 +54,7 @@ function process(input, options) {
   //Group samples by time if necessary
   if (options.smooth) merged = smoothSamples(merged, options);
   //Add framerate to top level
-  if (input.timing) merged['frames/second'] = 1 / input.timing.frameDuration;
+  if (input.timing && input.timing.frameDuration != null) merged['frames/second'] = 1 / input.timing.frameDuration;
   return merged;
 }
 
