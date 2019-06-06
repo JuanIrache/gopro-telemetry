@@ -3,7 +3,6 @@ const parseV = require('./parseV');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
 function parseKLV(data, options = {}, start = 0, end = data.length) {
-  const root = start === 0;
   let result = {};
   //Will store unknown types
   let unknown = new Set();
