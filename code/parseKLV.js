@@ -2,7 +2,7 @@ const { keyAndStructParser, types, mergeStrings } = require('./keys');
 const parseV = require('./parseV');
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
-function parseKLV(data, options = {}, start = 0, end = data.length) {
+function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   let result = {};
   //Will store unknown types
   let unknown = new Set();
@@ -12,22 +12,35 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
   let lastCC;
   while (start < end) {
     let length;
-
+    let reached;
+    let tempStart;
     try {
       //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
       const ks = keyAndStructParser.parse(data.slice(start)).result;
 
       //Get the length of the value (or values, or nested values)
       length = ks.size * ks.repeat;
-      let partialResult = [];
 
-      if (length >= 0) {
+      //Advance to the next KLV, at least 64 bits
+      reached = start + 8 + (length >= 0 ? length : 0);
+      tempStart = start;
+      //Align to 32 bits
+      while (tempStart < reached) tempStart += 4;
+      let partialResult = [];
+      //Find if this is the last CC of the nest
+      const lastPortion = tempStart >= end;
+      //Check if the lastCC is to be filtered out by options
+      if (lastPortion && parent === 'STRM' && options.stream && !options.stream.includes(ks.fourCC)) return null;
+      else if (length >= 0) {
         //If empty, we still want to store the fourCC
         if (length === 0) partialResult.push(null);
         //Log unknown types for future implementation
         else if (!types[ks.type]) unknown.add(ks.type);
         //Recursive call to parse nested data
-        else if (types[ks.type].nested) partialResult.push(parseKLV(data, options, start + 8, start + 8 + length));
+        else if (types[ks.type].nested) {
+          const parsed = parseKLV(data, options, start + 8, start + 8 + length, ks.fourCC);
+          if (parsed != null) partialResult.push(parsed);
+        }
         //We can parse the Value
         else if (types[ks.type].func || (types[ks.type].complex && complexType)) {
           //Detect data with multiple axes
@@ -67,10 +80,12 @@ function parseKLV(data, options = {}, start = 0, end = data.length) {
       setImmediate(() => console.error(err));
     }
 
-    //Advance to the next KLV, at least 64 bits
-    const reached = start + 8 + (length >= 0 ? length : 0);
-    //Align to 32 bits
-    while (start < reached) start += 4;
+    //If crashed reached is null, advance to the next KLV, at least 64 bits
+    if (reached == null) {
+      reached = start + 8 + (length >= 0 ? length : 0);
+      //Align to 32 bits
+      while (start < reached) start += 4;
+    } else start = tempStart;
   }
 
   //Undo all arrays except the last key, which should be the array of samples
