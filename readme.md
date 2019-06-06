@@ -149,7 +149,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Optimise for performance
-- Automate tests in github
 - Do something with TICK and TOCK?
 - Review console.log/error usage
 - Add try catches where / if necessary
