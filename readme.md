@@ -148,7 +148,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Optimise for performance
+- parseKLV is by far the slowest process, run partially depending on options?
 - Do something with TICK and TOCK?
 - Review console.log/error usage
 - Add try catches where / if necessary

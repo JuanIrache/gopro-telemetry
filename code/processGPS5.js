@@ -26,7 +26,7 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
       for (let i = d.STRM.length - 1; i >= 0; i--) {
         //Delete streams that do not pass the test
         if (d.STRM[i].GPS5 && !approveStream(d.STRM[i])) d.STRM.splice(i, 1);
-        else if (!ellipsoid && d.STRM[i].GPSF != null && d.STRM[i].GPSP != null && d.STRM[i].GPS5[0] && d.STRM[i].GPS5[0].value != null) {
+        else if (!ellipsoid && d.STRM[i].GPSF != null && d.STRM[i].GPSP != null && d.STRM[i].GPS5[0] && d.STRM[i].GPS5[0] != null) {
           // Analyse quality of GPS data, and how centered in the dataset time it is
           const fixQuality = d.STRM[i].GPSF / 3;
           const precision = (9999 - d.STRM[i].GPSP) / 9999;
@@ -37,7 +37,9 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
           if (correction.rating == null || rating > correction.rating) {
             //Use latitude and longitude to find the altitude offset in this location
             correction.rating = rating;
-            correction.source = [d.STRM[i].GPS5[0].value[0], d.STRM[i].GPS5[0].value[1]];
+            correction.source = [d.STRM[i].GPS5[0][0], d.STRM[i].GPS5[0][1]];
+
+            // correction.source = [d.STRM[i].GPS5[0][0], d.STRM[i].GPS5[0][1]];
           }
         }
       }
@@ -45,19 +47,19 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix }) {
     if (correction.source) correction.value = egm96(correction.source[0], correction.source[1]);
   }
 
-  if (correction.value != null) {
-    //Loop streams to make the height adjustments
-    (result.DEVC || []).forEach(d => {
-      (d.STRM || []).forEach(s => {
-        //Find GPS data
-        if (s.GPS5) {
-          s.GPS5.forEach(g => {
-            //Apply height correction
-            if (g.value && g.value.length) g.value[2] = g.value[2] - correction.value;
-          });
-        }
-      });
-    });
-  }
+  // if (correction.value != null) {
+  //   //Loop streams to make the height adjustments
+  //   (result.DEVC || []).forEach(d => {
+  //     (d.STRM || []).forEach(s => {
+  //       //Find GPS data
+  //       if (s.GPS5) {
+  //         // s.GPS5.forEach(g => {
+  //         //   //Apply height correction
+  //         //   if (g.length) g[2] = g[2] - correction.value;
+  //         // });
+  //       }
+  //     });
+  //   });
+  // }
   return result;
 };
