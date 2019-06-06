@@ -67,6 +67,8 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
           } else partialResult.push(parseV(environment, start + 8, length, specifics));
           //If we just read a TYPE value, store it. Will be necessary in this nest
           if (ks.fourCC === 'TYPE') complexType = partialResult[0];
+          //Abort out if we are selecting devices and this one is not selected
+          else if (ks.fourCC === 'DVID' && parent === 'DEVC' && options.device && !options.device.includes(partialResult[0])) return null;
 
           //Something went wrong, store type for debugging
         } else unknown.add(ks.type);
