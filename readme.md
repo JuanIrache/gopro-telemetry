@@ -148,6 +148,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Loop through samples just once in interpretsamples?
 - parseKLV is by far the slowest process, run partially depending on options?
 - Do something with TICK and TOCK?
 - Review console.log/error usage
