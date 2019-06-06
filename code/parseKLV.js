@@ -18,21 +18,22 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
       const ks = keyAndStructParser.parse(data.slice(start)).result;
 
+      //Get the length of the value (or values, or nested values)
+      length = ks.size * ks.repeat;
+      //Advance to the next KLV, at least 64 bits
+      reached = start + 8 + (length >= 0 ? length : 0);
+      tempStart = start;
+      //Align to 32 bits
+      while (tempStart < reached) tempStart += 4;
+      //Find if this is the last CC of the nest and emember it to keep it as array
+      if (tempStart >= end) lastCC = ks.fourCC;
+
       //Abort if we are creating a device list. We have enough info
-      if (ks.fourCC === 'STRM' && options.deviceList) {
+      if ((options.deviceList && ks.fourCC === 'STRM') || (parent === 'STRM' && options.streamList && lastCC)) {
+        //Force final data manipulation
         lastCC = ks.fourCC;
+        result.interpretSamples = ks.fourCC;
       } else {
-        //Get the length of the value (or values, or nested values)
-        length = ks.size * ks.repeat;
-
-        //Advance to the next KLV, at least 64 bits
-        reached = start + 8 + (length >= 0 ? length : 0);
-        tempStart = start;
-        //Align to 32 bits
-        while (tempStart < reached) tempStart += 4;
-        //Find if this is the last CC of the nest and emember it to keep it as array
-        if (tempStart >= end) lastCC = ks.fourCC;
-
         let partialResult = [];
         //Check if the lastCC is to be filtered out by options
         if (lastCC && parent === 'STRM' && options.stream && !options.stream.includes(ks.fourCC)) return null;
