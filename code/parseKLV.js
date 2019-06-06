@@ -32,6 +32,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       //Check if the lastCC is to be filtered out by options
       if (lastPortion && parent === 'STRM' && options.stream && !options.stream.includes(ks.fourCC)) return null;
       else if (length >= 0) {
+        //Remember last key for interpreting data later
+        if (lastPortion) result.interpretSamples = ks.fourCC;
+
         //If empty, we still want to store the fourCC
         if (length === 0) partialResult.push(null);
         //Log unknown types for future implementation
@@ -90,9 +93,6 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
   //Undo all arrays except the last key, which should be the array of samples
   for (const key in result) if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
-
-  //Remember last key for interpreting data later
-  if ((!options.raw || options.deviceList || options.streamList) && lastCC) result.interpretSamples = lastCC;
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
