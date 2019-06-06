@@ -38,7 +38,7 @@ function process(input, options) {
   //Return now if raw wanted
   if (options.raw) return parsed;
   //Group it by device
-  const grouped = groupDevices(parsed, options);
+  const grouped = groupDevices(parsed);
   timing.parts.groupDevices = Date.now() - timing.prev;
   timing.prev = Date.now();
 
