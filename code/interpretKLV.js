@@ -89,8 +89,6 @@ function interpretKLV(klv, options) {
     } catch (error) {
       setImmediate(() => console.error(error));
     }
-    //Done with interpretation
-    // delete result.interpretSamples;
   }
   return result;
 }
