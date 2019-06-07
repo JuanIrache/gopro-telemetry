@@ -166,5 +166,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## Maybe To-Do
 
 - Compute properties? Distance, turns, vibration, statistics...?
+- Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
