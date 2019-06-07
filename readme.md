@@ -47,6 +47,7 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS84 (World Geodetic System) ellipsoid.
 - **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
 - **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
+- **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
 
@@ -148,10 +149,10 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Comment presetsOptions, toGpx...
-- Presets to export to other formats (CSV, GPX, KML, GEOJSON, AE)
-- Document name option
+- Comment new preset modules
+- Presets to export to other formats (CSV, Virb, KML, GEOJSON, AE)
 - Document presets
+- Unit tests for presets
 - Merge more than one video file
 
 ## Maybe To-Do
