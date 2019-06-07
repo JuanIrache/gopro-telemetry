@@ -25,7 +25,7 @@ function getGPGS5Data(data) {
           data[key].streams.GPS5.samples.forEach(s => {
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {
-              //Update and rememeber sticky data
+              //Update and remember sticky data
               if (s.sticky) sticky = { ...sticky, ...s.sticky };
               let partialSticky = [];
               let cmt = '';
@@ -60,6 +60,7 @@ function getGPGS5Data(data) {
               inner += `${partial}`;
             }
           });
+          //Create description of file/stream
           const description = [device, frameRate, name, units].filter(e => e != null).join('. ');
           return { inner, description };
         }
