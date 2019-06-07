@@ -1,7 +1,7 @@
 //Uses these specific terms for consistency with previous projects
 const translations = {
-  precision: 'GpsAccuracy',
-  fix: 'GpsFix'
+  precision: 'GPS Accuracy',
+  fix: 'GPS Fix'
 };
 
 //Returns the GPS data as a string
@@ -30,25 +30,20 @@ function getGPGS5Data(data) {
               let partialSticky = [];
               let cmt = '';
               let time = '';
-              let ele = '';
-              let speed = '';
               //Create comments for sample, in principle precision and fix
               for (const key in sticky) partialSticky.push(`${translations[key] || key}: ${sticky[key]}`);
-              if (s.value.length > 3) partialSticky.push(`2dSpeed: ${s.value[3]}`);
+              if (s.value.length > 3) partialSticky.push(`2D Speed: ${s.value[3]}`);
+              if (s.value.length > 4) partialSticky.push(`3D Speed: ${s.value[4]}`);
               //Create comment string
               if (partialSticky.length)
                 cmt = `
-                <cmt>${partialSticky.join('; ')}</cmt>`;
+            <description>${partialSticky.join('; ')}</description>`;
               //Set time if present
               if (s.date != null)
                 time = `
             <TimeStamp>
                 <when>${s.date.toISOString()}</when>
             </TimeStamp>`;
-              //Set speed if present
-              if (s.value.length > 4)
-                speed = `
-                <speed>${s.value[4]}</>`;
               //Prepare coordinates
               let coords = [s.value[1], s.value[0]];
               //Set elevation if present
@@ -56,6 +51,7 @@ function getGPGS5Data(data) {
               //Create sample string
               const partial = `
         <Placemark>
+            ${cmt.trim()}
             <Point>
                 <coordinates>${coords.join(',')}</coordinates>
             </Point>
@@ -81,6 +77,8 @@ module.exports = function(data, { name }) {
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.0">
     <Document>
+        <name>${name}</name>
+        <description>${converted.description}</description>
         ${converted.inner.trim()}
     </Document>
 </kml>`;
