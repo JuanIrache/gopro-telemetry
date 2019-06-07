@@ -17,10 +17,11 @@ function process(input, options) {
   //Parse input
   const parsed = parseKLV(input.rawData, options);
   if (!parsed.DEVC) {
-    setImmediate(() => console.error('Invalid GPMF data. Root object must contain DEVC key'));
-    if (options.tolerant) return parsed;
-    //ToDo crash if not tolerant?
-    else return undefined;
+    const error = new Error('Invalid GPMF data. Root object must contain DEVC key');
+    if (options.tolerant) {
+      setImmediate(() => console.error(error));
+      return parsed;
+    } else throw error;
   }
 
   //Return list of devices/streams only

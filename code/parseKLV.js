@@ -86,7 +86,8 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
         } else throw new Error('Error, negative length');
       }
     } catch (err) {
-      setImmediate(() => console.error(err));
+      if (options.tolerant) setImmediate(() => console.error(err));
+      else throw err;
     }
 
     //If crashed reached is null, advance to the next KLV, at least 64 bits

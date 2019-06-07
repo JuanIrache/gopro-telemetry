@@ -187,7 +187,8 @@ function timeKLV(klv, timing, options) {
       });
     } else throw new Error('Invalid data, no DEVC');
   } catch (error) {
-    setImmediate(() => console.error(error));
+    if (options.tolerant) setImmediate(() => console.error(error));
+    else throw error;
   }
   return result;
 }
