@@ -47,6 +47,7 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS84 (World Geodetic System) ellipsoid.
 - **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
 - **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
+- **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
@@ -142,6 +143,12 @@ Depending on the camera, model, settings and accessories, these are some of the 
 - Scene classifier
 
 This project is possible thanks to the [gpmf-parser documentation](https://github.com/gopro/gpmf-parser), open sourced by GoPro.
+
+## Presets
+
+These are the available preset formats:
+
+- **GPX** (.gpx) GPS Exchange format. Compatible with many maps systems. For quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_.
 
 ## More creative coding
 
