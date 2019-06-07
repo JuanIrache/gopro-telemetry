@@ -157,7 +157,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- See what additional info can fit in kml
+- Review already done presets format
 - Comment new preset modules (kml)
 - Presets to export to other formats (CSV, Virb, GEOJSON, AE)
 - Document presets
