@@ -8,8 +8,12 @@ const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
 const processGPS5 = require('./code/processGPS5');
+const presetsOptions = require('./code/presetsOptions');
 
 function process(input, options) {
+  //Prepare presets
+  if (presetsOptions[options.preset]) options = { ...options, ...presetsOptions.general, ...presetsOptions[options.preset] };
+
   //Create filter arrays if user didn't
   if (options.device && !Array.isArray(options.device)) options.device = [options.device];
   if (options.stream && !Array.isArray(options.stream)) options.stream = [options.stream];
