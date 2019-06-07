@@ -166,6 +166,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## Maybe To-Do
 
+- Stick to WS84 for GPX height and report geoidheight offset? http://www.alpinequest.net/forum/viewtopic.php?t=1442
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
 - Take potential nested arrays into account f[8]? Never found one to test

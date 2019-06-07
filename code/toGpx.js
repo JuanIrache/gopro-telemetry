@@ -1,5 +1,5 @@
 //Returns the GPS data as a string
-function getGPGS5Data(data, ellipsoid) {
+function getGPGS5Data(data) {
   let frameRate;
   if (data['frames/second'] != null) frameRate = `${Math.round(data['frames/second'])} fps`;
   for (const key in data) {
@@ -44,10 +44,9 @@ function getGPGS5Data(data, ellipsoid) {
                 cmt = `
                 <cmt>${partialSticky.join('; ')}</cmt>`;
               //Set elevation if present
-              const eleKey = ellipsoid ? 'geoidheight' : 'ele';
               if (s.value.length > 1)
                 ele = `
-                <${eleKey}>${s.value[2]}</${eleKey}>`;
+                <ele>${s.value[2]}</ele>`;
               //Set time if present
               if (s.date != null)
                 time = `
@@ -76,8 +75,8 @@ function getGPGS5Data(data, ellipsoid) {
 }
 
 //Converts the processed data to GPX
-module.exports = function(data, { name, ellipsoid }) {
-  const converted = getGPGS5Data(data, ellipsoid);
+module.exports = function(data, { name }) {
+  const converted = getGPGS5Data(data);
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="https://github.com/juanirache/gopro-telemetry">
