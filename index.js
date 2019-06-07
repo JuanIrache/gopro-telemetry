@@ -9,6 +9,7 @@ const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
 const processGPS5 = require('./code/processGPS5');
 const presetsOptions = require('./code/presetsOptions');
+const toGpx = require('./code/toGpx');
 
 function process(input, options) {
   //Prepare presets
@@ -65,6 +66,9 @@ function process(input, options) {
 
   //Add framerate to top level
   if (input.timing && input.timing.frameDuration != null) merged['frames/second'] = 1 / input.timing.frameDuration;
+
+  //Process presets
+  if (options.preset === 'gpx') return toGpx(merged, options);
 
   return merged;
 }
