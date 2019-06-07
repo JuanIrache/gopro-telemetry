@@ -148,9 +148,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- parseKLV is by far the slowest process, run partially depending on options?
-- Simplify lastCC even more? (Predict before)
-- Remove filters where not necessary
 - Document changes with filters
 - Do something with TICK and TOCK?
 - Review console.log/error usage
@@ -162,3 +159,4 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## Maybe To-Do
 
 - Take potential nested arrays into account f[8]? Never found one to test
+- Optimise parseKLV even more
