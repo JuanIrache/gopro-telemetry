@@ -156,8 +156,9 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Comment new preset modules
-- Presets to export to other formats (CSV, Virb, KML, GEOJSON, AE)
+- See what additional info can fit in kml
+- Comment new preset modules (kml)
+- Presets to export to other formats (CSV, Virb, GEOJSON, AE)
 - Document presets
 - Unit tests for presets
 - Merge more than one video file
