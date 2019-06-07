@@ -165,7 +165,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## Maybe To-Do
 
-- Do something with TICK?
 - Compute properties? Distance, turns, vibration, statistics...?
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
