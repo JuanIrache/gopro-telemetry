@@ -10,6 +10,7 @@ const smoothSamples = require('./code/smoothSamples');
 const processGPS5 = require('./code/processGPS5');
 const presetsOptions = require('./code/presetsOptions');
 const toGpx = require('./code/toGpx');
+const toKml = require('./code/toKml');
 
 function process(input, options) {
   //Prepare presets
@@ -69,6 +70,7 @@ function process(input, options) {
 
   //Process presets
   if (options.preset === 'gpx') return toGpx(merged, options);
+  if (options.preset === 'kml') return toKml(merged, options);
 
   return merged;
 }
