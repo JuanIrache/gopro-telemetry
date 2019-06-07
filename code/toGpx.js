@@ -28,6 +28,7 @@ function getGPGS5Data(data) {
               let speed = '';
               let fix = '';
               let hdop = '';
+              let geoidheight = '';
               //Use precision and fix tags
               for (const key in sticky) {
                 if (key === 'fix')
@@ -36,6 +37,10 @@ function getGPGS5Data(data) {
                 else if (key === 'precision')
                   hdop = `
                 <hdop>${sticky[key]}</hdop>`;
+                else if (key === 'geoidheight')
+                  geoidheight = `
+                <geoidheight>${sticky[key]}</geoidheight>`;
+                else partialSticky.push(`${key}: ${sticky[key]}`);
               }
               //Could potentially add other values to cmt
               if (s.value.length > 3) partialSticky.push(`2dSpeed: ${s.value[3]}`);
@@ -58,7 +63,7 @@ function getGPGS5Data(data) {
               //Create sample string
               const partial = `
             <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
-                ${(ele + time + speed + fix + hdop + cmt).trim()}
+                ${(ele + time + speed + fix + hdop + geoidheight + cmt).trim()}
             </trkpt>`;
               //Add it to samples
               inner += `${partial}`;
