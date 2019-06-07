@@ -35,9 +35,9 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **promisify** (boolean) Runs code asynchronously and returns a Promise that will resolve to the data when ready.
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**.
 - **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**.
-- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling, no filtering. **Disables the following options**.
 - **device** (array of numbers) Filters the results by device id.
 - **stream** (array of strings) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data).
+- **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling, no filtering. **Disables the following options**.
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size.
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be returned under their keys, based on the available name and units. This might increase the output size.
 - **timeOut** (string) By default the code exports both _cts_ (milliseconds since first frame) and _date_ (full date and time). Specify one (**cts** or **date**) in order to ignore the other.
@@ -48,7 +48,7 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
 - **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
 
-All options default to _null/false_.
+All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
 
 Example:
 
@@ -148,7 +148,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Optimise for performance
 - Do something with TICK and TOCK?
 - Review console.log/error usage
 - Add try catches where / if necessary
@@ -159,3 +158,4 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## Maybe To-Do
 
 - Take potential nested arrays into account f[8]? Never found one to test
+- Optimise parseKLV even more
