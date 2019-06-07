@@ -148,14 +148,12 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Do something with TICK and TOCK?
-- Review console.log/error usage
-- Add try catches where / if necessary
 - Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
 - Merge more than one video file
 - Compute properties? Distance, turns, vibration...?
 
 ## Maybe To-Do
 
+- Do something with TICK and TOCK?
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
