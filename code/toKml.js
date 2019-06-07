@@ -1,4 +1,4 @@
-//Uses these specific terms for consistency with previous projects
+//Change some terms to more human readable
 const translations = {
   precision: 'GPS Accuracy',
   fix: 'GPS Fix'
@@ -25,12 +25,12 @@ function getGPGS5Data(data) {
           data[key].streams.GPS5.samples.forEach(s => {
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {
-              //Update and rememeber sticky data
+              //Update and remember sticky data
               if (s.sticky) sticky = { ...sticky, ...s.sticky };
               let partialSticky = [];
               let cmt = '';
               let time = '';
-              //Create comments for sample, in principle precision and fix
+              //Create comments for sample
               for (const key in sticky) partialSticky.push(`${translations[key] || key}: ${sticky[key]}`);
               if (s.value.length > 3) partialSticky.push(`2D Speed: ${s.value[3]}`);
               if (s.value.length > 4) partialSticky.push(`3D Speed: ${s.value[4]}`);
@@ -61,6 +61,7 @@ function getGPGS5Data(data) {
               inner += `${partial}`;
             }
           });
+          //Create description of file/stream
           const description = [device, frameRate, name, units].filter(e => e != null).join('. ');
           return { inner, description };
         }
