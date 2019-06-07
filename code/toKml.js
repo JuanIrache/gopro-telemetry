@@ -30,6 +30,7 @@ function getGPGS5Data(data) {
               let partialSticky = [];
               let cmt = '';
               let time = '';
+              let altitudeMode = '';
               //Create comments for sample
               for (const key in sticky) partialSticky.push(`${translations[key] || key}: ${sticky[key]}`);
               if (s.value.length > 3) partialSticky.push(`2D Speed: ${s.value[3]}`);
@@ -47,11 +48,16 @@ function getGPGS5Data(data) {
               //Prepare coordinates
               let coords = [s.value[1], s.value[0]];
               //Set elevation if present
-              if (s.value.length > 2) coords.push(s.value[2]);
+              if (s.value.length > 2) {
+                coords.push(s.value[2]);
+                altitudeMode = `
+            <altitudeMode>absolute</altitudeMode>`;
+              }
               //Create sample string
               const partial = `
         <Placemark>
             ${cmt.trim()}
+            ${altitudeMode.trim()}
             <Point>
                 <coordinates>${coords.join(',')}</coordinates>
             </Point>
