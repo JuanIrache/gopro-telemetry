@@ -148,7 +148,7 @@ This project is possible thanks to the [gpmf-parser documentation](https://githu
 
 These are the available preset formats:
 
-- **GPX** (.gpx) GPS Exchange format. Compatible with many maps systems. For quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_.
+- **GPX** (.gpx) GPS Exchange format. Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_.
 
 ## More creative coding
 
