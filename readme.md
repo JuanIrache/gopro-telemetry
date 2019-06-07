@@ -148,12 +148,12 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
+- Presets to export to other formats (CSV, GPX, KML, GEOJSON, AE)
 - Merge more than one video file
-- Compute properties? Distance, turns, vibration...?
 
 ## Maybe To-Do
 
 - Do something with TICK and TOCK?
+- Compute properties? Distance, turns, vibration, statistics...?
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
