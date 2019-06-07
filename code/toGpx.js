@@ -1,11 +1,5 @@
-//Uses these specific terms for consistency with previous projects
-const translations = {
-  precision: 'GpsAccuracy',
-  fix: 'GpsFix'
-};
-
 //Returns the GPS data as a string
-function getGPGS5Data(data) {
+function getGPGS5Data(data, ellipsoid) {
   let frameRate;
   if (data['frames/second'] != null) frameRate = `${Math.round(data['frames/second'])} fps`;
   for (const key in data) {
@@ -32,17 +26,28 @@ function getGPGS5Data(data) {
               let time = '';
               let ele = '';
               let speed = '';
-              //Create comments for sample, in principle precision and fix
-              for (const key in sticky) partialSticky.push(`${translations[key] || key}: ${sticky[key]}`);
+              let fix = '';
+              let hdop = '';
+              //Use precision and fix tags
+              for (const key in sticky) {
+                if (key === 'fix')
+                  fix = `
+                <fix>${sticky[key]}</fix>`;
+                else if (key === 'precision')
+                  hdop = `
+                <hdop>${sticky[key]}</hdop>`;
+              }
+              //Could potentially add other values to cmt
               if (s.value.length > 3) partialSticky.push(`2dSpeed: ${s.value[3]}`);
               //Create comment string
               if (partialSticky.length)
                 cmt = `
                 <cmt>${partialSticky.join('; ')}</cmt>`;
               //Set elevation if present
+              const eleKey = ellipsoid ? 'geoidheight' : 'ele';
               if (s.value.length > 1)
                 ele = `
-                <ele>${s.value[2]}</ele>`;
+                <${eleKey}>${s.value[2]}</${eleKey}>`;
               //Set time if present
               if (s.date != null)
                 time = `
@@ -50,19 +55,19 @@ function getGPGS5Data(data) {
               //Set speed if present
               if (s.value.length > 4)
                 speed = `
-                <speed>${s.value[4]}</>`;
+                <speed>${s.value[4]}</speed>`;
               //Create sample string
               const partial = `
             <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
-                ${(ele + time + speed + cmt).trim()}
+                ${(ele + time + speed + fix + hdop + cmt).trim()}
             </trkpt>`;
               //Add it to samples
               inner += `${partial}`;
             }
           });
           //Create description of file/stream
-          const description = [device, frameRate, name, units].filter(e => e != null).join('. ');
-          return { inner, description };
+          const description = [frameRate, name, units].filter(e => e != null).join('. ');
+          return { inner, description, device };
         }
       }
     }
@@ -71,13 +76,14 @@ function getGPGS5Data(data) {
 }
 
 //Converts the processed data to GPX
-module.exports = function(data, { name }) {
-  const converted = getGPGS5Data(data);
+module.exports = function(data, { name, ellipsoid }) {
+  const converted = getGPGS5Data(data, ellipsoid);
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="https://github.com/juanirache/gopro-telemetry">
     <trk>
         <name>${name}</name>
+        <src>${converted.device}</src>
         <desc>${converted.description}</desc>
         <trkseg>
             ${converted.inner.trim()}
