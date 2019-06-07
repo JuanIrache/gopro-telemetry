@@ -28,7 +28,10 @@ function getGPGS5Data(data) {
               //Update and rememeber sticky data
               if (s.sticky) sticky = { ...sticky, ...s.sticky };
               let partialSticky = [];
-              let cmt = (time = ele = speed = '');
+              let cmt = '';
+              let time = '';
+              let ele = '';
+              let speed = '';
               //Create comments for sample, in principle precision and fix
               for (const key in sticky) partialSticky.push(`${translations[key] || key}: ${sticky[key]}`);
               if (s.value.length > 3) partialSticky.push(`2dSpeed: ${s.value[3]}`);
