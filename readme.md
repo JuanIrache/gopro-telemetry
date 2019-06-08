@@ -48,7 +48,7 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **geoidHeight** (boolean) Saves the altitude offset without applying it, for third party processing. Only relevant when _ellipsoid_ is enabled.
 - **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
 - **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
-- **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See below.
+- **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See details below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
@@ -149,8 +149,8 @@ This project is possible thanks to the [gpmf-parser documentation](https://githu
 
 These are the available preset formats:
 
-- **GPX** (.gpx) GPS Exchange format. Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_ and will use _ellipsoid_ altitude if not specified.
-- **KML** (.kml) Keyhole Markup Language. Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
+- **gpx** (.gpx) GPS Exchange format (returns as _string_). Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_ and will use _ellipsoid_ altitude if not specified.
+- **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
 
 ## More creative coding
 
@@ -158,7 +158,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Comment new preset modules ()
+- Comment new preset modules (geojson)
 - Presets to export to other formats (CSV, Virb, GEOJSON, AE)
 - Document presets
 - Unit tests for presets
