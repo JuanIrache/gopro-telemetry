@@ -14,7 +14,13 @@ const toKml = require('./code/toKml');
 
 function process(input, options) {
   //Prepare presets
-  if (presetsOptions[options.preset]) options = { ...options, ...presetsOptions.general, ...presetsOptions[options.preset] };
+  if (presetsOptions[options.preset]) {
+    options = { ...options, ...presetsOptions.general.mandatory, ...presetsOptions[options.preset].mandatory };
+    //Only pick the non mandatory options when the user did not specify them
+    for (const key in presetsOptions.general.preferred) if (options[key] == null) options.key = presetsOptions.general.preferred[key];
+    for (const key in presetsOptions[options.preset].preferred)
+      if (options[key] == null) options.key = presetsOptions[options.preset].preferred[key];
+  }
 
   //Create filter arrays if user didn't
   if (options.device && !Array.isArray(options.device)) options.device = [options.device];
