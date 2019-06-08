@@ -151,7 +151,7 @@ These are the available preset formats:
 
 - **gpx** (.gpx) GPS Exchange format (returns as _string_). Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_ and will use _ellipsoid_ altitude if not specified.
 - **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
-- **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (both) and will use _ellipsoid_ altitude if not specified.
+- **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 
 ## More creative coding
 
