@@ -17,8 +17,8 @@ function process(input, opts) {
   if (presetsOpts[opts.preset]) {
     opts = { ...opts, ...presetsOpts.general.mandatory, ...presetsOpts[opts.preset].mandatory };
     //Only pick the non mandatory options when the user did not specify them
-    for (const key in presetsOpts.general.preferred) if (opts[key] == null) opts.key = presetsOpts.general.preferred[key];
-    for (const key in presetsOpts[opts.preset].preferred) if (opts[key] == null) opts.key = presetsOpts[opts.preset].preferred[key];
+    for (const key in presetsOpts.general.preferred) if (opts[key] == null) opts[key] = presetsOpts.general.preferred[key];
+    for (const key in presetsOpts[opts.preset].preferred) if (opts[key] == null) opts[key] = presetsOpts[opts.preset].preferred[key];
   }
 
   //Create filter arrays if user didn't
