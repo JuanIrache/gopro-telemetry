@@ -45,8 +45,11 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size.
 - **smooth** (number) Uses the adjacent values of a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process.
 - **ellipsoid** (boolean) By default, the GPS5 altitude will be converted to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the default values, based on WGS84 (World Geodetic System) ellipsoid.
+- **geoidHeight** (boolean) Saves the altitude offset without applying it, for third party processing. Only relevant when _ellipsoid_ is enabled.
 - **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
 - **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
+- **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See below.
+- **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
 
@@ -142,20 +145,28 @@ Depending on the camera, model, settings and accessories, these are some of the 
 
 This project is possible thanks to the [gpmf-parser documentation](https://github.com/gopro/gpmf-parser), open sourced by GoPro.
 
+## Presets
+
+These are the available preset formats:
+
+- **GPX** (.gpx) GPS Exchange format. Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_ and will use _ellipsoid_ altitude if not specified.
+- **KML** (.kml) Keyhole Markup Language. Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
+
 ## More creative coding
 
 If you liked this you might like other [creative coding projects](https://tailorandwayne.com/coding-projects/).
 
 ## To-Do
 
-- Do something with TICK and TOCK?
-- Review console.log/error usage
-- Add try catches where / if necessary
-- Presets to export to other formats (CSV, GPS, KML, GEOJSON, AE)
+- Comment new preset modules ()
+- Presets to export to other formats (CSV, Virb, GEOJSON, AE)
+- Document presets
+- Unit tests for presets
 - Merge more than one video file
-- Compute properties? Distance, turns, vibration...?
 
 ## Maybe To-Do
 
+- Compute properties? Distance, turns, vibration, statistics...?
+- Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
