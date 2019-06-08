@@ -8,75 +8,74 @@ const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
 const processGPS5 = require('./code/processGPS5');
-const presetsOptions = require('./code/presetsOptions');
+const presetsOpts = require('./code/presetsOptions');
 const toGpx = require('./code/toGpx');
 const toKml = require('./code/toKml');
 
-function process(input, options) {
+function process(input, opts) {
   //Prepare presets
-  if (presetsOptions[options.preset]) {
-    options = { ...options, ...presetsOptions.general.mandatory, ...presetsOptions[options.preset].mandatory };
+  if (presetsOpts[opts.preset]) {
+    opts = { ...opts, ...presetsOpts.general.mandatory, ...presetsOpts[opts.preset].mandatory };
     //Only pick the non mandatory options when the user did not specify them
-    for (const key in presetsOptions.general.preferred) if (options[key] == null) options.key = presetsOptions.general.preferred[key];
-    for (const key in presetsOptions[options.preset].preferred)
-      if (options[key] == null) options.key = presetsOptions[options.preset].preferred[key];
+    for (const key in presetsOpts.general.preferred) if (opts[key] == null) opts.key = presetsOpts.general.preferred[key];
+    for (const key in presetsOpts[opts.preset].preferred) if (opts[key] == null) opts.key = presetsOpts[opts.preset].preferred[key];
   }
 
   //Create filter arrays if user didn't
-  if (options.device && !Array.isArray(options.device)) options.device = [options.device];
-  if (options.stream && !Array.isArray(options.stream)) options.stream = [options.stream];
+  if (opts.device && !Array.isArray(opts.device)) opts.device = [opts.device];
+  if (opts.stream && !Array.isArray(opts.stream)) opts.stream = [opts.stream];
 
   //Parse input
-  const parsed = parseKLV(input.rawData, options);
+  const parsed = parseKLV(input.rawData, opts);
   if (!parsed.DEVC) {
     const error = new Error('Invalid GPMF data. Root object must contain DEVC key');
-    if (options.tolerant) {
+    if (opts.tolerant) {
       setImmediate(() => console.error(error));
       return parsed;
     } else throw error;
   }
 
   //Return list of devices/streams only
-  if (options.deviceList) return deviceList(parsed);
+  if (opts.deviceList) return deviceList(parsed);
 
-  if (options.streamList) return streamList(parsed);
+  if (opts.streamList) return streamList(parsed);
 
   //Return now if raw wanted
-  if (options.raw) return parsed;
+  if (opts.raw) return parsed;
   //Group it by device
   const grouped = groupDevices(parsed);
 
   //Correct GPS height and filter out bad GPS data
-  if (!options.ellipsoid || options.preset === 'gpx' || options.GPS5Precision != null || options.GPS5Fix != null) {
-    for (const key in grouped) grouped[key] = processGPS5(grouped[key], options);
+  if (!opts.ellipsoid || opts.preset === 'gpx' || opts.GPS5Precision != null || opts.GPS5Fix != null) {
+    for (const key in grouped) grouped[key] = processGPS5(grouped[key], opts);
   }
 
   let interpreted = {};
   //Apply scale and matrix transformations
-  for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], options);
+  for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], opts);
 
   let timed = {};
   //Apply timing (gps and mp4) to every sample
-  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, options);
+  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, opts);
 
   //Merge samples in sensor entries
   let merged = {};
-  for (const key in timed) merged[key] = mergeStream(timed[key], options);
+  for (const key in timed) merged[key] = mergeStream(timed[key], opts);
 
   //Read framerate to convert groupTimes to number if needed
-  if (options.groupTimes === 'frames') options.groupTimes = input.timing.frameDuration;
+  if (opts.groupTimes === 'frames') opts.groupTimes = input.timing.frameDuration;
   //Group samples by time if necessary
-  if (options.groupTimes) merged = groupTimes(merged, options);
+  if (opts.groupTimes) merged = groupTimes(merged, opts);
 
   //Group samples by time if necessary
-  if (options.smooth) merged = smoothSamples(merged, options);
+  if (opts.smooth) merged = smoothSamples(merged, opts);
 
   //Add framerate to top level
   if (input.timing && input.timing.frameDuration != null) merged['frames/second'] = 1 / input.timing.frameDuration;
 
   //Process presets
-  if (options.preset === 'gpx') return toGpx(merged, options);
-  if (options.preset === 'kml') return toKml(merged, options);
+  if (opts.preset === 'gpx') return toGpx(merged, opts);
+  if (opts.preset === 'kml') return toKml(merged, opts);
 
   return merged;
 }
