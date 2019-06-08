@@ -1,4 +1,5 @@
 const { translations, ignore, stickyTranslations } = require('./keys');
+const deduceHeaders = require('./deduceHeaders');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
@@ -60,45 +61,14 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
 
           //Use name and units to describe every sample
           if (repeatHeaders) {
-            let head = [];
-            if (description.name) {
-              let name = description.name;
-              //Get values inside parenthesis, usually units or similar, ofter one per sample value
-              let parts = name.match(/.*\((.+?)\).*/);
-              if (parts && parts.length) {
-                //Remove parenthesis
-                name = name.replace(/\((.+?)\)/, '').trim();
-                //Take every value inside parenthesis
-                parts = parts[1].split(',').map(p => p.trim());
-                //Add every part to the name
-                head = parts.map(p => `${name} (${p})`);
-                //Or just use the name if no parenthesis
-              } else head.push(name);
-            }
-
-            let units = [];
-            if (description.units) {
-              if (Array.isArray(description.units)) {
-                //Save units as string array
-                description.units.forEach((u, i) => {
-                  units.push(` [${u}]`);
-                });
-                //Or single value string
-              } else units[0] = (units[0] || '') + ` [${description.units}]`;
-            }
-
-            //Loop through all the names and units
-            for (let i = 0; i < Math.max(head.length, units.length); i++) {
-              //Repeat elements if not enough iterations
-              head[i] = (head[i] || head[0] || '') + (units[i] || units[0] || '');
-            }
+            let headers = deduceHeaders(description);
             //Add the descriptions and values to samples
             samples = samples.map(s => {
               //If no available description, use numbers
-              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[head[i] || head[0] || i] = v));
-              else if (head[0]) s[head[0]] = s.value;
+              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[headers[i] || headers[0] || i] = v));
+              else if (headers[0]) s[headers[0]] = s.value;
               //Delete value key if we solved the situation
-              if (head.length) delete s.value;
+              if (headers.length) delete s.value;
               return s;
             });
             //Delete names and units, not needed any more
