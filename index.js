@@ -11,6 +11,7 @@ const processGPS5 = require('./code/processGPS5');
 const presetsOpts = require('./code/presetsOptions');
 const toGpx = require('./code/toGpx');
 const toKml = require('./code/toKml');
+const toGeojson = require('./code/toGeojson');
 
 function process(input, opts) {
   //Prepare presets
@@ -76,6 +77,7 @@ function process(input, opts) {
   //Process presets
   if (opts.preset === 'gpx') return toGpx(merged, opts);
   if (opts.preset === 'kml') return toKml(merged, opts);
+  if (opts.preset === 'geojson') return toGeojson(merged, opts);
 
   return merged;
 }
