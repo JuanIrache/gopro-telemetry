@@ -46,7 +46,7 @@ function process(input, opts) {
   const grouped = groupDevices(parsed);
 
   //Correct GPS height and filter out bad GPS data
-  if (!opts.ellipsoid || opts.preset === 'gpx' || opts.GPS5Precision != null || opts.GPS5Fix != null) {
+  if (!opts.ellipsoid || opts.geoidHeight || opts.GPS5Precision != null || opts.GPS5Fix != null) {
     for (const key in grouped) grouped[key] = processGPS5(grouped[key], opts);
   }
 
