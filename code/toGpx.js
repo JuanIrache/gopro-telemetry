@@ -75,8 +75,8 @@ function getGPGS5Data(data) {
         }
       }
     }
-    return '';
   }
+  return '';
 }
 
 //Converts the processed data to GPX

@@ -32,8 +32,8 @@ function getGPGS5Data(data) {
         }
       }
     }
-    return undefined;
   }
+  return undefined;
 }
 
 //Converts the processed data to geojson

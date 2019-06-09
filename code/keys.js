@@ -48,7 +48,7 @@ const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
 
 //Make some fourCC keys sticky and human readable
 const stickyTranslations = {
-  TMPC: 'temperature [Cº]',
+  TMPC: 'temperature [°C]',
   GPSF: 'fix',
   GPSP: 'precision',
   STMP: 'timestamps [µs]', //Maybe useful for accurate timing, but does not look consecutive or proportional

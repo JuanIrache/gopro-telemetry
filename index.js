@@ -12,6 +12,7 @@ const presetsOpts = require('./code/presetsOptions');
 const toGpx = require('./code/toGpx');
 const toKml = require('./code/toKml');
 const toGeojson = require('./code/toGeojson');
+const toCsv = require('./code/toCsv');
 
 function process(input, opts) {
   //Prepare presets
@@ -78,6 +79,7 @@ function process(input, opts) {
   if (opts.preset === 'gpx') return toGpx(merged, opts);
   if (opts.preset === 'kml') return toKml(merged, opts);
   if (opts.preset === 'geojson') return toGeojson(merged, opts);
+  if (opts.preset === 'csv') return toCsv(merged, opts);
 
   return merged;
 }
