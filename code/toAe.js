@@ -20,7 +20,7 @@ function getGPGS5Data(data) {
                 if (!Array.isArray(s.value)) s.value = [s.value];
                 let row = [];
                 //Add frame number
-                row.push(`,${i + 1},`);
+                row.push('', i + 1);
                 //Add all values
                 s.value.forEach((v, ii) => {
                   if (ii < 3) {
