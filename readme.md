@@ -160,6 +160,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Is smoothsamples broken like grouptimes?
 - Presets to export to other formats (AE)
 - Comment new preset modules ()
 - Document presets
