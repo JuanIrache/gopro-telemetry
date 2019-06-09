@@ -13,17 +13,17 @@ function getGPGS5Data(data) {
             let rows = [];
             //Get name and units to prepare headers
             //Loop all the samples
-            data[key].streams[stream].samples.forEach((s, i) => {
+            data[key].streams[stream].samples.forEach((s, i, { length }) => {
               //Check that at least we have the valid values
               if (s.value != null) {
                 //Force convert to array
                 if (!Array.isArray(s.value)) s.value = [s.value];
                 let row = [];
                 //Add frame number
-                if (s.cts != null) row.push(`,${i + 1},`);
+                row.push(`,${i + 1},`);
                 //Add all values
-                s.value.forEach((v, i) => {
-                  if (i < 3) {
+                s.value.forEach((v, ii) => {
+                  if (ii < 3) {
                     if (typeof v === 'number' || typeof v === 'string') row.push(v);
                     else row.push(JSON.stringify(v));
                   }
@@ -32,6 +32,7 @@ function getGPGS5Data(data) {
                 rows.push(row.map(e => `"${e.toString().replace(/"/g, '""')}"`).join(','));
               }
             });
+
             //Join all lines
             files[`${device}-${stream}`] = `Adobe After Effects 8.0 Keyframe Data,,,,
 ,,,,
