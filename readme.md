@@ -160,8 +160,8 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Presets to export to other formats (Virb, AE)
 - Comment new preset modules ()
-- Presets to export to other formats (CSV, Virb, AE)
 - Document presets
 - Unit tests for presets
 - Merge more than one video file
