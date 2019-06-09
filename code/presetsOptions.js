@@ -6,5 +6,5 @@ module.exports = {
   kml: { mandatory: { stream: 'GPS5', timeOut: 'date' }, preferred: {} },
   geojson: { mandatory: { stream: 'GPS5', timeOut: null, geoidHeight: true }, preferred: { ellipsoid: true } },
   csv: { mandatory: {}, preferred: {} },
-  ae: { mandatory: {}, preferred: { groupTimes: 'frame' } }
+  ae: { mandatory: {}, preferred: { groupTimes: 'frames' } }
 };
