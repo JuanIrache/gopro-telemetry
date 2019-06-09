@@ -160,7 +160,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Presets to export to other formats (Virb, AE)
+- Presets to export to other formats (AE)
 - Comment new preset modules ()
 - Document presets
 - Unit tests for presets
@@ -173,3 +173,4 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
 - Round values to fewer decimals optionally?
+- Implement other formats? Real garmin-virb specification?
