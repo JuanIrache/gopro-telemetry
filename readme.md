@@ -161,7 +161,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Comment tomgjson module
+- Unspaghettise some snippets
 - Split longer than 3 arrays in mgjson
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - Document mgjson module
@@ -170,6 +170,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 - grouptimes appears to do things wrong
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
+- Unit test padding, deduceHeaders
 - Unit tests for presets
 - Publish more mgjson samples
 - Merge more than one video file
