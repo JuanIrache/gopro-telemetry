@@ -1,5 +1,8 @@
 const deduceHeaders = require('./deduceHeaders');
 
+//After Effects can't read larger numbers
+const largestMGJSONNum = 2147483648;
+
 function createDataOutlineChildText(matchName, displayName, value) {
   //Build the style that After Effects needs
   if (typeof value != 'string') value = value.toString();
@@ -41,8 +44,8 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
         isSigned: true
       },
       range: {
-        occuring: { min: Number.MAX_SAFE_INTEGER, max: -Number.MAX_SAFE_INTEGER },
-        legal: { min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }
+        occuring: { min: largestMGJSONNum, max: -largestMGJSONNum },
+        legal: { min: -largestMGJSONNum, max: largestMGJSONNum }
       }
     };
   } else if (type === 'numberStringArray') {
@@ -58,8 +61,8 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
       arrayRanges: {
         ranges: sample
           .map(s => ({
-            occuring: { min: Number.MAX_SAFE_INTEGER, max: -Number.MAX_SAFE_INTEGER },
-            legal: { min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }
+            occuring: { min: largestMGJSONNum, max: -largestMGJSONNum },
+            legal: { min: -largestMGJSONNum, max: largestMGJSONNum }
           }))
           .slice(0, 3) //aqui fix when multiple sets
       }
