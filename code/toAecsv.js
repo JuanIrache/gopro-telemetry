@@ -11,7 +11,6 @@ function getGPGS5Data(data) {
           if (data[key].streams[stream].samples && data[key].streams[stream].samples.length) {
             //Prepare string
             let rows = [];
-            //Get name and units to prepare headers
             //Loop all the samples
             data[key].streams[stream].samples.forEach((s, i, { length }) => {
               //Check that at least we have the valid values
