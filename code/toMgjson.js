@@ -167,40 +167,33 @@ function getGPGS5Data(data) {
                 break;
               }
             }
+            if (typeof dateSample != 'object') dateSample = new Date(dateSample);
             forDateStream = {
               sampleSet: {
                 sampleSetID: 'streamXdate',
                 samples: []
               },
-              outline: createDynamicDataOutline(`streamXdate`, 'Date in UTC milliseconds', null, dateSample.getTime())
+              outline: createDynamicDataOutline(`streamXdate`, 'UTC date', null, dateSample.toISOString())
             };
-            //Hack minimum occuring date
-            forDateStream.outline.dataType.numberStringProperties.range.occuring.min = 0;
           }
           //Loop all the samples
           data[key].streams[stream].samples.forEach((s, i) => {
             //Save date samples if not done
             if (s.date && !dateStream) {
               if (typeof s.date != 'object') s.date = new Date(s.date);
-              let dateSample = { time: createTimecode(i, data['frames/second']), value: s.date.getTime().toString() };
-              forDateStream.outline.dataType.numberStringProperties.range.occuring.min = Math.min(
-                s.date.getTime(),
-                forDateStream.outline.dataType.numberStringProperties.range.occuring.min
+              s.date = s.date.toISOString();
+              let dateSample = {
+                time: createTimecode(i, data['frames/second']),
+                value: { length: s.date.length.toString(), str: s.date }
+              };
+
+              forDateStream.outline.dataType.paddedStringProperties.maxLen = Math.max(
+                s.date.toString().length,
+                forDateStream.outline.dataType.paddedStringProperties.maxLen
               );
-              forDateStream.outline.dataType.numberStringProperties.range.occuring.max = Math.max(
-                s.date.getTime(),
-                forDateStream.outline.dataType.numberStringProperties.range.occuring.max
-              );
-              forDateStream.outline.dataType.numberStringProperties.pattern.digitsInteger = Math.max(
-                Math.floor(s.date.getTime()).toString().length,
-                forDateStream.outline.dataType.numberStringProperties.pattern.digitsInteger
-              );
-              forDateStream.outline.dataType.numberStringProperties.pattern.digitsDecimal = Math.max(
-                s.date
-                  .getTime()
-                  .toString()
-                  .replace(/^\d*\.?/, '').length,
-                forDateStream.outline.dataType.numberStringProperties.pattern.digitsDecimal
+              forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
+                s.date.length.toString().length,
+                forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength
               );
               forDateStream.sampleSet.samples.push(dateSample);
             }
@@ -267,6 +260,18 @@ function getGPGS5Data(data) {
               sampleSet.samples.push(sample);
             }
           });
+          //Finish date stream
+          if (!dateStream) {
+            forDateStream.sampleSet.samples.forEach(s => {
+              s.value.str = s.value.str.padEnd(forDateStream.outline.dataType.paddedStringProperties.maxLen, ' ');
+              s.value.length = s.value.length.padStart(forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
+            });
+            forDateStream.outline.sampleCount = forDateStream.sampleSet.samples.length;
+            //Add to data
+            dataOutline.push(forDateStream.outline);
+            dataDynamicSamples.push(forDateStream.sampleSet);
+            dateStream = true;
+          }
           sampleSet.samples.forEach(s => {
             if (type === 'numberString') {
               s.value = padNumber(
@@ -290,25 +295,6 @@ function getGPGS5Data(data) {
           dataOutlineChild.sampleCount = sampleSet.samples.length;
           dataOutline.push(dataOutlineChild);
           dataDynamicSamples.push(sampleSet);
-          //Finish date stream
-          if (!dateStream) {
-            forDateStream.sampleSet.samples.forEach(s => {
-              s.value = padNumber(
-                s.value,
-                forDateStream.outline.dataType.numberStringProperties.pattern.digitsInteger,
-                forDateStream.outline.dataType.numberStringProperties.pattern.digitsDecimal
-              );
-            });
-            forDateStream.outline.sampleCount = forDateStream.sampleSet.samples.length;
-            //Hack minimum and maximum legal dates
-            forDateStream.outline.dataType.numberStringProperties.range.legal.min = 0;
-            forDateStream.outline.dataType.numberStringProperties.range.legal.max =
-              forDateStream.outline.dataType.numberStringProperties.range.occuring.max;
-            //Add to data
-            dataOutline.push(forDateStream.outline);
-            dataDynamicSamples.push(forDateStream.sampleSet);
-            dateStream = true;
-          }
         }
       }
     }
