@@ -14,6 +14,7 @@ const toKml = require('./code/toKml');
 const toGeojson = require('./code/toGeojson');
 const toCsv = require('./code/toCsv');
 const toAecsv = require('./code/toAecsv');
+const toMgjson = require('./code/toMgjson');
 
 function process(input, opts) {
   //Prepare presets
@@ -82,6 +83,7 @@ function process(input, opts) {
   if (opts.preset === 'geojson') return toGeojson(merged, opts);
   if (opts.preset === 'csv') return toCsv(merged);
   if (opts.preset === 'aecsv') return toAecsv(merged);
+  if (opts.preset === 'mgjson') return toMgjson(merged, opts);
 
   return merged;
 }
