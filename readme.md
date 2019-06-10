@@ -163,11 +163,14 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Presets to export to other formats (AE)
 - Add date stream to mgjson?
+- Split longer than 3 arrays in mgjson
 - Comment new preset modules ()
 - Document presets
 - TEst drop vs non drop in after effects
+- grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
 - Unit tests for presets
+- Publish more mgjson samples
 - Merge more than one video file
 
 ## Maybe To-Do
