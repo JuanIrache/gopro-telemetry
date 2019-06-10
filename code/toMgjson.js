@@ -85,21 +85,6 @@ function getDataOutlineType(value) {
   else return 'paddedString';
 }
 
-//Turn frame number into timecode
-//https://stackoverflow.com/a/31094859
-function createTimecode(currentFrame, fps) {
-  fps = Math.round(fps);
-  const h = Math.floor(currentFrame / (60 * 60 * fps));
-  const m = Math.floor(currentFrame / (60 * fps)) % 60;
-  const s = Math.floor(currentFrame / fps) % 60;
-  const f = currentFrame % fps;
-  return `${showTwoDigits(h)}:${showTwoDigits(m)}:${showTwoDigits(s)}:${showTwoDigits(f)}`;
-}
-
-function showTwoDigits(number) {
-  return ('00' + number).slice(-2);
-}
-
 function padNumber(val, int, dec) {
   let sign = '+';
   if (val[0] === '-') {
@@ -183,7 +168,7 @@ function getGPGS5Data(data) {
               if (typeof s.date != 'object') s.date = new Date(s.date);
               s.date = s.date.toISOString();
               let dateSample = {
-                time: createTimecode(i, data['frames/second']),
+                time: s.date,
                 value: { length: s.date.length.toString(), str: s.date }
               };
 
@@ -199,7 +184,7 @@ function getGPGS5Data(data) {
             }
             //Check that at least we have the valid values
             if (s.value != null) {
-              let sample = { time: createTimecode(i, data['frames/second']) };
+              let sample = { time: s.date };
               if (type === 'numberString') {
                 sample.value = s.value.toString();
                 dataOutlineChild.dataType.numberStringProperties.range.occuring.min = Math.min(
@@ -306,29 +291,16 @@ function getGPGS5Data(data) {
 module.exports = function(data, { name = '' }) {
   if (data['frames/second'] == null) throw new Error('After Effects needs frameRate');
   const converted = getGPGS5Data(data);
-  let timecodeInfo = {
-    dropFrame: false,
-    frameRate: { value: Math.round(data['frames/second']), scale: 1 }
-  };
-  //ToDo drop frame not working for some reason
-  // if (data['frames/second'] > 29.96 && data['frames/second'] < 29.98) {
-  //   timecodeInfo = {
-  //     dropFrame: true,
-  //     frameRate: { value: 29.97, scale: 1 }
-  //   };
-  // } else if (data['frames/second'] > 59.93 && data['frames/second'] < 59.95) {
-  //   timecodeInfo = {
-  //     dropFrame: true,
-  //     frameRate: { value: 59.94, scale: 1 }
-  //   };
-  // }
   let result = {
     version: 'MGJSON2.0.0',
     creator: 'https://github.com/JuanIrache/gopro-telemetry',
     dynamicSamplesPresentB: true,
     dynamicDataInfo: {
-      useTimecodeB: true,
-      timecodeInfo
+      useTimecodeB: false,
+      utcInfo: {
+        precisionLength: 3,
+        isGMT: true
+      }
     },
     dataOutline: [createDataOutlineChildText('filename', 'File name', name), ...converted.dataOutline],
     dataDynamicSamples: converted.dataDynamicSamples
