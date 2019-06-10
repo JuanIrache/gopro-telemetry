@@ -55,7 +55,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
         digitsInteger: 0,
         digitsDecimal: 0
       },
-      arraySize: sample.length,
+      arraySize: sample.slice(0, 3).length,
       //aqui dynamically pick slice when splitting samples
       arrayDisplayNames: deduceHeaders({ name: displayName, units }).slice(0, 3),
       arrayRanges: {
