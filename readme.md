@@ -163,6 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Presets to export to other formats (AE)
 - grouptimes appears to do things wrong
+- Starting time is different if filtering by stream? (GPS on hero7b sample)
 - Split longer than 3 arrays in mgjson
 - Comment new preset modules ()
 - Document presets
