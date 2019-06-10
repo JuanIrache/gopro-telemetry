@@ -36,21 +36,21 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
     if (units) result.displayName += `[${units}]`;
     result.dataType.numberStringProperties = {
       pattern: {
-        digitsInteger: null,
-        digitsDecimal: null,
-        isSigned: false
+        digitsInteger: 0,
+        digitsDecimal: 0,
+        isSigned: true
       },
       range: {
-        occuring: { min: null, max: null },
+        occuring: { min: Number.MAX_SAFE_INTEGER, max: -Number.MAX_SAFE_INTEGER },
         legal: { min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }
       }
     };
   } else if (type === 'numberStringArray') {
     result.dataType.numberArrayProperties = {
       pattern: {
-        isSigned: false,
-        digitsInteger: null,
-        digitsDecimal: null
+        isSigned: true,
+        digitsInteger: 0,
+        digitsDecimal: 0
       },
       arraySize: sample.length,
       //aqui dynamically pick slice when splitting samples
@@ -58,7 +58,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
       arrayRanges: {
         ranges: sample
           .map(s => ({
-            occuring: { min: null, max: null },
+            occuring: { min: Number.MAX_SAFE_INTEGER, max: -Number.MAX_SAFE_INTEGER },
             legal: { min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }
           }))
           .slice(0, 3) //aqui fix when multiple sets
@@ -94,6 +94,30 @@ function createTimecode(currentFrame, fps) {
 
 function showTwoDigits(number) {
   return ('00' + number).slice(-2);
+}
+
+function padNumber(val, int, dec) {
+  let sign = '+';
+  if (val[0] === '-') {
+    sign = '-';
+    val = val.slice(1);
+  }
+
+  let integer = val.match(/^(\d*)/);
+  if (int) {
+    if (!integer || !integer.length) integer = ['0', '0'];
+    let padded = integer[1].padStart(int, '0');
+    val = val.replace(/^(\d*)/, padded);
+  }
+  let decimal = val.match(/\.(\d*)$/);
+  if (dec) {
+    const missingDot = !decimal || !decimal.length;
+    if (missingDot) decimal = ['0', '0'];
+    let padded = decimal[1].padEnd(dec, '0');
+    if (missingDot) val = `${val}.${padded}`;
+    else val = val.replace(/(\d*)$/, padded);
+  }
+  return sign + val;
 }
 
 //Returns the GPS data as a mgjson partial object
@@ -191,12 +215,26 @@ function getGPGS5Data(data) {
               sampleSet.samples.push(sample);
             }
           });
-          if (type === 'paddedString') {
-            sampleSet.samples.forEach(s => {
+          sampleSet.samples.forEach(s => {
+            if (type === 'numberString') {
+              s.value = padNumber(
+                s.value,
+                dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger,
+                dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal
+              );
+            } else if (type === 'numberStringArray') {
+              s.value = s.value.map(v =>
+                padNumber(
+                  v,
+                  dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger,
+                  dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal
+                )
+              );
+            } else if (type === 'paddedString') {
               s.value.str = s.value.str.padEnd(dataOutlineChild.dataType.paddedStringProperties.maxLen, ' ');
               s.value.length = s.value.length.padStart(dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
-            });
-          }
+            }
+          });
           dataOutlineChild.sampleCount = sampleSet.samples.length;
           dataOutline.push(dataOutlineChild);
           dataDynamicSamples.push(sampleSet);
@@ -215,7 +253,7 @@ module.exports = function(data, { name = '' }) {
     dropFrame: false,
     frameRate: { value: Math.round(data['frames/second']), scale: 1 }
   };
-  //Not working for some reason
+  //ToDo drop frame not working for some reason
   // if (data['frames/second'] > 29.96 && data['frames/second'] < 29.98) {
   //   timecodeInfo = {
   //     dropFrame: true,
