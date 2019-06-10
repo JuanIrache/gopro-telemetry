@@ -162,6 +162,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Presets to export to other formats (AE)
+- Timecode does not match real time
 - Split longer than 3 arrays in mgjson
 - Comment new preset modules ()
 - Document presets
