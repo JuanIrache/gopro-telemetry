@@ -158,7 +158,7 @@ function getGPGS5Data(data) {
                 sampleSetID: 'streamXdate',
                 samples: []
               },
-              outline: createDynamicDataOutline(`streamXdate`, 'UTC date', null, dateSample.toISOString())
+              outline: createDynamicDataOutline(`streamXdate`, 'UTC date/time', null, dateSample.toISOString())
             };
           }
           //Loop all the samples
