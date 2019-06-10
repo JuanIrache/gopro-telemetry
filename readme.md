@@ -161,7 +161,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Move some tomgjson functions to standalone modules
 - Comment tomgjson module
 - Split longer than 3 arrays in mgjson
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)

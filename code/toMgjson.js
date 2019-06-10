@@ -1,4 +1,5 @@
 const deduceHeaders = require('./deduceHeaders');
+const padStringNumber = require('./padStringNumber');
 
 //After Effects can't read larger numbers
 const largestMGJSONNum = 2147483648;
@@ -83,30 +84,6 @@ function getDataOutlineType(value) {
   if (typeof value === 'number') return 'numberString';
   else if (Array.isArray(value) && value.length && typeof value[0] === 'number') return 'numberStringArray';
   else return 'paddedString';
-}
-
-function padNumber(val, int, dec) {
-  let sign = '+';
-  if (val[0] === '-') {
-    sign = '-';
-    val = val.slice(1);
-  }
-
-  let integer = val.match(/^(\d*)/);
-  if (int) {
-    if (!integer || !integer.length) integer = ['0', '0'];
-    let padded = integer[1].padStart(int, '0');
-    val = val.replace(/^(\d*)/, padded);
-  }
-  let decimal = val.match(/\.(\d*)$/);
-  if (dec) {
-    const missingDot = !decimal || !decimal.length;
-    if (missingDot) decimal = ['0', '0'];
-    let padded = decimal[1].padEnd(dec, '0');
-    if (missingDot) val = `${val}.${padded}`;
-    else val = val.replace(/(\d*)$/, padded);
-  }
-  return sign + val;
 }
 
 //Returns the GPS data as a mgjson partial object
@@ -259,14 +236,14 @@ function getGPGS5Data(data) {
           }
           sampleSet.samples.forEach(s => {
             if (type === 'numberString') {
-              s.value = padNumber(
+              s.value = padStringNumber(
                 s.value,
                 dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger,
                 dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal
               );
             } else if (type === 'numberStringArray') {
               s.value = s.value.map(v =>
-                padNumber(
+                padStringNumber(
                   v,
                   dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger,
                   dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal
