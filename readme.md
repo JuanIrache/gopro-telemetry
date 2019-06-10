@@ -162,10 +162,11 @@ If you liked this you might like other [creative coding projects](https://tailor
 ## To-Do
 
 - Presets to export to other formats (AE)
+- Add date stream to mgjson?
 - Comment new preset modules ()
 - Document presets
 - TEst drop vs non drop in after effects
-- Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType)
+- Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
 - Unit tests for presets
 - Merge more than one video file
 
