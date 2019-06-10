@@ -161,15 +161,15 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Presets to export to other formats (AE)
+- Move some tomgjson functions to standalone modules
+- Comment tomgjson module
+- Split longer than 3 arrays in mgjson
+- grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
+- Document mgjson module
+- Delete aecsv preset
+- Provide options for disabling interpolation (caregul with assuming then that grouptimes matches frames always!) and complexgrouping
 - grouptimes appears to do things wrong
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
-- Split longer than 3 arrays in mgjson
-- Comment new preset modules ()
-- Document presets
-- Move some tomgjson functions to standalone modules
-- grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
-- Provide options for disabling interpolation (caregul with assuming then that grouptimes matches frames always!) and complexgrouping
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
 - Unit tests for presets
 - Publish more mgjson samples
