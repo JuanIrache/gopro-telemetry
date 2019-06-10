@@ -68,6 +68,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
       }
     };
   } else if (type === 'paddedString') {
+    if (units) result.displayName += `[${units}]`;
     result.dataType.paddedStringProperties = {
       maxLen: null,
       maxDigitsInStrLength: null,
@@ -146,13 +147,15 @@ function getGPGS5Data(data) {
             sampleSetID: `stream${key + stream}`,
             samples: []
           };
-          let dataOutlineChild = createDynamicDataOutline(
-            `stream${key + stream}`,
-            streamName,
-            units,
-            data[key].streams[stream].samples[0].value
-          );
-          const type = getDataOutlineType(data[key].streams[stream].samples[0].value);
+          let validSample;
+          for (const s of data[key].streams[stream].samples) {
+            if (s.value != null) {
+              validSample = s.value;
+              break;
+            }
+          }
+          let dataOutlineChild = createDynamicDataOutline(`stream${key + stream}`, streamName, units, validSample);
+          const type = getDataOutlineType(validSample);
           //Loop all the samples
           data[key].streams[stream].samples.forEach((s, i) => {
             //Check that at least we have the valid values
