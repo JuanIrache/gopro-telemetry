@@ -42,7 +42,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
       },
       range: {
         occuring: { min: null, max: null },
-        legal: { min: '-Infinity', max: 'Infinity' }
+        legal: { min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }
       }
     };
   } else if (type === 'numberStringArray') {
@@ -55,10 +55,14 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
       arraySize: sample.length,
       //aqui dynamically pick slice when splitting samples
       arrayDisplayNames: deduceHeaders({ name: displayName, units }).slice(0, 3),
-      arrayRanges: sample.map(s => ({
-        occuring: { min: null, max: null },
-        legal: { min: '-Infinity', max: 'Infinity' }
-      }))
+      arrayRanges: {
+        ranges: sample
+          .map(s => ({
+            occuring: { min: null, max: null },
+            legal: { min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }
+          }))
+          .slice(0, 3) //aqui fix when multiple sets
+      }
     };
   } else if (type === 'paddedString') {
     result.dataType.paddedStringProperties = {
@@ -151,13 +155,13 @@ function getGPGS5Data(data) {
                   //fix when splitting to multiple sets
                   if (i < 3) {
                     sample.value[i] = v.toString();
-                    dataOutlineChild.dataType.numberArrayProperties.arrayRanges[i].occuring.min = Math.min(
+                    dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.min = Math.min(
                       v,
-                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges[i].occuring.min
+                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.min
                     );
-                    dataOutlineChild.dataType.numberArrayProperties.arrayRanges[i].occuring.max = Math.max(
+                    dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.max = Math.max(
                       v,
-                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges[i].occuring.max
+                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.max
                     );
 
                     dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger = Math.max(
