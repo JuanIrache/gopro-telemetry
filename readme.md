@@ -166,8 +166,10 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Split longer than 3 arrays in mgjson
 - Comment new preset modules ()
 - Document presets
-- TEst drop vs non drop in after effects
+- Move some tomgjson functions to standalone modules
+- TEst drop vs non drop in after effects (drop not working!)
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
+- Provide options for disabling interpolation (caregul with assuming then that grouptimes matches frames always!) and complexgrouping
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
 - Unit tests for presets
 - Publish more mgjson samples
