@@ -164,6 +164,8 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Presets to export to other formats (AE)
 - Comment new preset modules ()
 - Document presets
+- TEst drop vs non drop in after effects
+- Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType)
 - Unit tests for presets
 - Merge more than one video file
 
