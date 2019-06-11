@@ -233,6 +233,7 @@ function getGPGS5Data(data) {
               sampleSet.samples.push(sample);
             }
           });
+
           //Finish date stream
           if (!dateStream) {
             forDateStream.sampleSet.samples.forEach(s => {
