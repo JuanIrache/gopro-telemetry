@@ -43,7 +43,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
 
   if (type === 'numberString') {
     //Number saved as string (After Effects reasons)
-    if (units) result.displayName += `[${units}]`;
+    if (units) result.displayName += ` [${units}]`;
     result.dataType.numberStringProperties = {
       pattern: {
         //Will be calculated later
