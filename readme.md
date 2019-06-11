@@ -161,7 +161,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Publish more mgjson samples
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
