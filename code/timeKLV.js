@@ -169,9 +169,10 @@ function timeKLV(klv, timing, options) {
             //Try to compensate delayed samples proportionally
             let timoDur = 0;
             if (s.TIMO) {
-              //Substract time offset
+              //Substract time offset, but don't go under 0
+              if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
               currCts -= s.TIMO * 1000;
-              // delete s.TIMO;
+              if (currCts < 0) currCts = 0;
               if (d.STRM[i + 1] && d.STRM[i + 1].TIMO) {
                 //Find difference to next TIMO
                 const timoDiff = d.STRM[i + 1].TIMO - s.TIMO;
@@ -180,6 +181,7 @@ function timeKLV(klv, timing, options) {
               }
               //And compensate date
               currDate = new Date(currDate.getTime() - s.TIMO * 1000);
+              // delete s.TIMO;
             }
 
             //Loop samples and replace them with timed samples

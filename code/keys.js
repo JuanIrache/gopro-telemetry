@@ -44,8 +44,7 @@ const translations = {
 };
 
 //Ignore some, for now
-const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK', 'TIMO'];
-//TIMO Currently used to compensate sample time, often shows up in FACE stream
+const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
 
 //Make some fourCC keys sticky and human readable
 const stickyTranslations = {
