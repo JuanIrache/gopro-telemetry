@@ -161,6 +161,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Implement TIMO? (test with faces)
 - grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
   - Set starting time, at least for After Effects data (in the date stream) Add null samples at the beginning if no data?
@@ -169,7 +170,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Unit test padding, deduceHeaders
 - Unit tests for presets
 - Merge more than one video file
-- Implement TIMO? (test with faces)
 
 ## Maybe To-Do
 
@@ -178,5 +178,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
+- Implement highlight tags? https://github.com/gopro/gpmf-parser/issues/21
 - Round values to fewer decimals optionally?
 - Implement other formats? Real garmin-virb specification?
