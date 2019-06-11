@@ -161,7 +161,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Fix large or very small number notation for mgjson
 - Fix what happens when no face samples and selected stream face in mgjson
 - grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)

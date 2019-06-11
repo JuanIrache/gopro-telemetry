@@ -3,6 +3,30 @@
 const deduceHeaders = require('./deduceHeaders');
 const padStringNumber = require('./padStringNumber');
 
+//Avoid scientific notation
+//https://stackoverflow.com/a/46545519
+function bigStr(num) {
+  let numStr = String(num);
+  if (Math.abs(num) < 1.0) {
+    let e = parseInt(num.toString().split('e-')[1]);
+    if (e) {
+      let negative = num < 0;
+      if (negative) num *= -1;
+      num *= Math.pow(10, e - 1);
+      numStr = '0.' + new Array(e).join('0') + num.toString().substring(2);
+      if (negative) numStr = '-' + numStr;
+    }
+  } else {
+    let e = parseInt(num.toString().split('+')[1]);
+    if (e > 20) {
+      e -= 20;
+      num /= Math.pow(10, e);
+      numStr = num.toString() + new Array(e + 1).join('0');
+    }
+  }
+  return numStr;
+}
+
 //After Effects can't read larger numbers
 const largestMGJSONNum = 2147483648;
 
@@ -207,8 +231,8 @@ function getGPGS5Data(data) {
                 range.occuring.min = Math.min(val, range.occuring.min);
                 range.occuring.max = Math.max(val, range.occuring.max);
                 //And max left and right padding
-                pattern.digitsInteger = Math.max(Math.floor(val).toString().length, pattern.digitsInteger);
-                pattern.digitsDecimal = Math.max(val.toString().replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
+                pattern.digitsInteger = Math.max(bigStr(Math.floor(val)).length, pattern.digitsInteger);
+                pattern.digitsDecimal = Math.max(bigStr(val).replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
               };
 
               //Back to data samples. Check that at least we have the valid values
@@ -216,7 +240,7 @@ function getGPGS5Data(data) {
                 let sample = { time: s.date };
                 if (type === 'numberString') {
                   //Save numbers as strings
-                  sample.value = s.value.toString();
+                  sample.value = bigStr(s.value);
                   //Update mins, maxes and padding
                   setMaxMinPadNum(
                     s.value,
@@ -227,7 +251,7 @@ function getGPGS5Data(data) {
                   //Save arrays of numbers as arrays of strings
                   sample.value = [];
                   s.value.slice(inout.inn, inout.out).forEach((v, i) => {
-                    sample.value[i] = v.toString();
+                    sample.value[i] = bigStr(v);
                     //And update, mins, maxs and paddings
                     setMaxMinPadNum(
                       v,
