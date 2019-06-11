@@ -32,6 +32,11 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
         //Delete the samples from the original to avoid duplication
         delete s[fourCC];
         delete s.interpretSamples;
+
+        //Remember if will need to separate multiple samples
+        const multiple = s.multi;
+        delete s.multi;
+
         if (samples && samples.length) {
           let sticky = {};
           let description = {};
@@ -76,9 +81,41 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             delete description.name;
           }
 
-          //Add samples to stream entry
-          if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
-          else result.streams[fourCC] = { samples, ...description };
+          //Separate multiple samples if needed
+          if (multiple) {
+            //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
+            let newSamples = {};
+            samples.forEach((s, i) => {
+              let thisSample;
+              //Loop inner samples
+              s.value.forEach(v => {
+                if (v != null) {
+                  //Assign first value as ID if not done
+                  if (!newSamples[v[0]]) newSamples[v[0]] = [];
+                  //Create sample if not done
+                  if (!thisSample) {
+                    thisSample = {};
+                    //Copy all keys except the value
+                    Object.keys(s).forEach(k => {
+                      if (k !== 'value') thisSample[k] = s[k];
+                    });
+                  }
+                  //And copy the rest
+                  thisSample.value = v.slice(1);
+                  newSamples[v[0]][i] = thisSample;
+                }
+              });
+            });
+            for (const key in newSamples) {
+              //Add samples to stream entry
+              if (result.streams[fourCC + key]) result.streams[fourCC + key].samples.push(...newSamples[key]);
+              else result.streams[fourCC + key] = { samples: newSamples[key], ...description, name: `${description.name} ${key}` };
+            }
+          } else {
+            //Add samples to stream entry
+            if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
+            else result.streams[fourCC] = { samples, ...description };
+          }
         }
       }
     });

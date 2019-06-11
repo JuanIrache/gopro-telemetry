@@ -112,6 +112,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
 
+  //Remove multi if data is for direct delivery
+  if (options.raw) delete result.multi;
+
   return result;
 }
 
