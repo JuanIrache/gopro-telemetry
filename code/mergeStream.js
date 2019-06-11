@@ -65,12 +65,13 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           stickies[d['device name']][fourCC] = { ...stickies[d['device name']][fourCC], ...sticky };
 
           //Use name and units to describe every sample
-          if (repeatHeaders) {
+          const workOnHeaders = function(samples, desc) {
+            let description = JSON.parse(JSON.stringify(desc));
             let headers = deduceHeaders(description);
             //Add the descriptions and values to samples
             samples = samples.map(s => {
               //If no available description, use numbers
-              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[headers[i] || headers[0] || i] = v));
+              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[headers[i] || `${headers[0]} (${i})`] = v));
               else if (headers[0]) s[headers[0]] = s.value;
               //Delete value key if we solved the situation
               if (headers.length) delete s.value;
@@ -79,7 +80,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             //Delete names and units, not needed any more
             delete description.units;
             delete description.name;
-          }
+            return { samples, description };
+          };
 
           //Separate multiple samples if needed
           if (multiple) {
@@ -88,7 +90,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             samples.forEach((s, i) => {
               let thisSample;
               //Loop inner samples
-              s.value.forEach(v => {
+              (s.value || []).forEach(v => {
                 if (v != null) {
                   //Assign first value as ID if not done
                   if (!newSamples[v[0]]) newSamples[v[0]] = [];
@@ -106,12 +108,25 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 }
               });
             });
+            const preName = description.name;
             for (const key in newSamples) {
+              description.name = preName + ' ' + key;
+              let desc = description;
+              if (repeatHeaders) {
+                const newResults = workOnHeaders(newSamples[key], description);
+                newSamples[key] = newResults.samples;
+                desc = newResults.description;
+              }
               //Add samples to stream entry
               if (result.streams[fourCC + key]) result.streams[fourCC + key].samples.push(...newSamples[key]);
-              else result.streams[fourCC + key] = { samples: newSamples[key], ...description, name: `${description.name} ${key}` };
+              else result.streams[fourCC + key] = { samples: newSamples[key], ...desc };
             }
           } else {
+            if (repeatHeaders) {
+              const newResults = workOnHeaders(samples, description);
+              samples = newResults.samples;
+              description = newResults.description;
+            }
             //Add samples to stream entry
             if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
             else result.streams[fourCC] = { samples, ...description };
