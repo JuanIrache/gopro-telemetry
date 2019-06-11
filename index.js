@@ -52,7 +52,6 @@ function process(input, opts) {
   if (!opts.ellipsoid || opts.geoidHeight || opts.GPS5Precision != null || opts.GPS5Fix != null) {
     for (const key in grouped) grouped[key] = processGPS5(grouped[key], opts);
   }
-  console.log(grouped['1'].DEVC[1]);
 
   let interpreted = {};
   //Apply scale and matrix transformations

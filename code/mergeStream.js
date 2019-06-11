@@ -88,31 +88,26 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
             let newSamples = {};
             samples.forEach((s, i) => {
+              let thisSample;
               //Loop inner samples
-              (s.value || []).forEach((v, i) => {
-                if (v != null) {
-                  let thisSample = {};
-                  //Assign first value as ID if not done
-                  if (!newSamples[v[0]]) {
-                    //Create sample if not done
-                    newSamples[v[0]] = [];
-                    //Fill all skipped samples, even if are null
-                    for (let ii = 0; ii < i; ii++) {
-                      newSamples[v[0]][ii] = {};
-                      //Copy all keys except the value
-                      Object.keys(s).forEach(k => {
-                        if (k !== 'value') newSamples[v[0]][ii][k] = s[k];
-                      });
-                    }
-                  }
-                  //Copy all keys except the value to new sample
+              (s.value || []).forEach(v => {
+                //Use fake id 1 to make sure we have timing data form the get go
+                let id = 1;
+                if (v != null && Array.isArray(v)) id = v[0];
+                //Assign first value as ID if not done
+                if (!newSamples[id]) newSamples[id] = [];
+                //Create sample if not done
+                if (!thisSample) {
+                  thisSample = {};
+                  //Copy all keys except the value
                   Object.keys(s).forEach(k => {
                     if (k !== 'value') thisSample[k] = s[k];
                   });
-                  //And copy the rest
-                  thisSample.value = v.slice(1);
-                  newSamples[v[0]][i] = thisSample;
                 }
+                //And copy the rest
+                if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
+                else thisSample.value = null;
+                newSamples[id].push(thisSample);
               });
             });
             const preName = description.name;
