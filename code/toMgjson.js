@@ -131,14 +131,12 @@ function getGPGS5Data(data) {
             samples: []
           };
 
-          let validSample;
+          const getValidValue = function(arr, key) {
+            for (const s of arr) if (s[key] != null) return s[key];
+          };
+
           //Find a valid value to base the data structure on
-          for (const s of data[key].streams[stream].samples) {
-            if (s.value != null) {
-              validSample = s.value;
-              break;
-            }
-          }
+          let validSample = getValidValue(data[key].streams[stream].samples, 'value');
 
           //Create the stream structure
           let dataOutlineChild = createDynamicDataOutline(`stream${key + stream}`, streamName, units, validSample);
@@ -148,15 +146,11 @@ function getGPGS5Data(data) {
           //Prepare stream of dates, basically repeat the previous procedure
           let forDateStream;
           if (!dateStream) {
-            let dateSample;
-            for (const s of data[key].streams[stream].samples) {
-              if (s.date != null) {
-                dateSample = s.date;
-                break;
-              }
-            }
+            let dateSample = getValidValue(data[key].streams[stream].samples, 'date');
+
             //Make sure it is an object date and not a string. There must me some problem in another module changing this
             if (typeof dateSample != 'object') dateSample = new Date(dateSample);
+
             forDateStream = {
               sampleSet: {
                 sampleSetID: 'streamXdate',
@@ -166,30 +160,43 @@ function getGPGS5Data(data) {
             };
           }
 
+          const setMaxMinPadStr = function(time, val, outline) {
+            //Set found max lengths
+            outline.dataType.paddedStringProperties.maxLen = Math.max(
+              val.toString().length,
+              outline.dataType.paddedStringProperties.maxLen
+            );
+            outline.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
+              val.length.toString().length,
+              outline.dataType.paddedStringProperties.maxDigitsInStrLength
+            );
+            //And return sample
+            return {
+              time,
+              value: { length: val.length.toString(), str: val }
+            };
+          };
+
           //Loop all the samples
-          data[key].streams[stream].samples.forEach((s, i) => {
+          data[key].streams[stream].samples.forEach(s => {
             //Save date samples if not done
             if (s.date && !dateStream) {
               if (typeof s.date != 'object') s.date = new Date(s.date);
               //Save the dates as UTC string
               s.date = s.date.toISOString();
-              let dateSample = {
-                time: s.date,
-                value: { length: s.date.length.toString(), str: s.date }
-              };
-
-              //Set found max lengths
-              forDateStream.outline.dataType.paddedStringProperties.maxLen = Math.max(
-                s.date.toString().length,
-                forDateStream.outline.dataType.paddedStringProperties.maxLen
-              );
-              forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
-                s.date.length.toString().length,
-                forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength
-              );
+              let dateSample = setMaxMinPadStr(s.date, s.date, forDateStream.outline);
               //Save sample
               forDateStream.sampleSet.samples.push(dateSample);
             }
+
+            const setMaxMinPadNum = function(val, pattern, range) {
+              //Update mins and maxes
+              range.occuring.min = Math.min(val, range.occuring.min);
+              range.occuring.max = Math.max(val, range.occuring.max);
+              //And max left and right padding
+              pattern.digitsInteger = Math.max(Math.floor(val).toString().length, pattern.digitsInteger);
+              pattern.digitsDecimal = Math.max(val.toString().replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
+            };
 
             //Back to data samples. Check that at least we have the valid values
             if (s.value != null) {
@@ -197,23 +204,11 @@ function getGPGS5Data(data) {
               if (type === 'numberString') {
                 //Save numbers as strings
                 sample.value = s.value.toString();
-                //Update mins and maxes
-                dataOutlineChild.dataType.numberStringProperties.range.occuring.min = Math.min(
+                //Update mins, maxes and padding
+                setMaxMinPadNum(
                   s.value,
-                  dataOutlineChild.dataType.numberStringProperties.range.occuring.min
-                );
-                dataOutlineChild.dataType.numberStringProperties.range.occuring.max = Math.max(
-                  s.value,
-                  dataOutlineChild.dataType.numberStringProperties.range.occuring.max
-                );
-                //And max left and right padding
-                dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger = Math.max(
-                  Math.floor(s.value).toString().length,
-                  dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger
-                );
-                dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal = Math.max(
-                  s.value.toString().replace(/^\d*\.?/, '').length,
-                  dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal
+                  dataOutlineChild.dataType.numberStringProperties.pattern,
+                  dataOutlineChild.dataType.numberStringProperties.range
                 );
               } else if (type === 'numberStringArray') {
                 //Save arrays of numbers as arrays of strings
@@ -223,40 +218,16 @@ function getGPGS5Data(data) {
                   if (i < 3) {
                     sample.value[i] = v.toString();
                     //And update, mins, maxs and paddings
-                    dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.min = Math.min(
+                    setMaxMinPadNum(
                       v,
-                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.min
-                    );
-                    dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.max = Math.max(
-                      v,
-                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i].occuring.max
-                    );
-
-                    dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger = Math.max(
-                      Math.floor(v).toString().length,
-                      dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger
-                    );
-                    dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal = Math.max(
-                      v.toString().replace(/^\d*\.?/, '').length,
-                      dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal
+                      dataOutlineChild.dataType.numberArrayProperties.pattern,
+                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i]
                     );
                   }
                 });
               } else if (type === 'paddedString') {
                 //Save anything else as (padded)string
-                sample.value = {
-                  length: s.value.toString().length.toString(),
-                  str: s.value.toString()
-                };
-                //Update max length for padding
-                dataOutlineChild.dataType.paddedStringProperties.maxLen = Math.max(
-                  s.value.toString().length,
-                  dataOutlineChild.dataType.paddedStringProperties.maxLen
-                );
-                dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
-                  s.value.toString().length.toString().length,
-                  dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength
-                );
+                sample.value = setMaxMinPadStr(s.date, s.value, dataOutlineChild);
               }
               //Save sample
               sampleSet.samples.push(sample);
