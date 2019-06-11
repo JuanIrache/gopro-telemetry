@@ -52,7 +52,7 @@ const stickyTranslations = {
   GPSF: 'fix',
   GPSP: 'precision',
   STMP: 'timestamps [µs]', //Maybe useful for accurate timing, but does not look consecutive or proportional
-  TIMO: 'offset [s]'
+  TIMO: 'offset [s]' //Currently used to compensate sample time, often shows up in FACE stream
 };
 
 module.exports = { keyAndStructParser, types, mergeStrings, translations, ignore, stickyTranslations };

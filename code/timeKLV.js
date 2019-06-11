@@ -154,7 +154,7 @@ function timeKLV(klv, timing, options) {
         })();
 
         //Loop streams if present
-        (d.STRM || []).forEach(s => {
+        (d.STRM || []).forEach((s, i) => {
           //If group of samples found
           if (s.interpretSamples && s[s.interpretSamples].length) {
             const fourCC = s.interpretSamples;
@@ -166,6 +166,22 @@ function timeKLV(klv, timing, options) {
             let currCts = cts;
             let currDate = date;
 
+            //Try to compensate delayed samples proportionally
+            let timoDur = 0;
+            if (s.TIMO) {
+              //Substract time offset
+              currCts -= s.TIMO * 1000;
+              delete s.TIMO;
+              if (d.STRM[i + 1] && d.STRM[i + 1].TIMO) {
+                //Find difference to next TIMO
+                const timoDiff = d.STRM[i + 1].TIMO - s.TIMO;
+                //And calculate how much we must compensate each sample (interpolate)
+                timoDur = (100 * timoDiff) / s[fourCC].length;
+              }
+              //And compensate date
+              currDate = new Date(currDate.getTime() - s.TIMO * 1000);
+            }
+
             //Loop samples and replace them with timed samples
             s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
@@ -174,9 +190,9 @@ function timeKLV(klv, timing, options) {
                 //Filter out if timeOut option, but keep cts if needed for merging times
                 if (options.timeOut !== 'date' || options.groupTimes) timedSample.cts = currCts;
                 if (options.timeOut !== 'cts') timedSample.date = currDate;
-                //increment time adn date for the next sample
-                currCts += sDuration[fourCC];
-                currDate = new Date(currDate.getTime() + dateSDur[fourCC]);
+                //increment time and date for the next sample and compensate time offset
+                currCts += sDuration[fourCC] - timoDur;
+                currDate = new Date(currDate.getTime() + dateSDur[fourCC] - timoDur);
 
                 return timedSample;
                 //Otherwise return value without timing data
