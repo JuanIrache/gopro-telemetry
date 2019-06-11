@@ -153,7 +153,7 @@ These are the available preset formats:
 - **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
 - **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 - **csv** (.csv) Comma separated values, readable by Excel and other spreadsheet software. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present).
-- **aecsv** (.csv) CSV file the content of which can be pasted in Adobe After Effects layers. It will modify the _position_ property of the layer. Interpretation of these data will need to happen inside After Effcts. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present). Will probably be replaced with mgjson.
+- **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. **Experimental**. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
 
 ## More creative coding
 
@@ -161,13 +161,11 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Split longer than 3 arrays in mgjson
-- Document mgjson module
-- Delete aecsv preset
 - Publish more mgjson samples
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
+  - Set starting time, at least for After Effects data (in the date stream)
 - Provide options for disabling interpolation (careful with assuming then that grouptimes matches frames always!) and complexgrouping
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
 - Unit test padding, deduceHeaders
