@@ -161,23 +161,23 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Fix empty items (npm test)
-- Force interpret faces for after effects
-- grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
+- Fix large or very small number notation for mgjson
+- Fix what happens when no face samples and selected stream face in mgjson
 - grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
   - Set starting time, at least for After Effects data (in the date stream) Add null samples at the beginning if no data?
-- Implement TIMO? (test with faces)
 - Provide options for disabling interpolation (careful with assuming then that grouptimes matches frames always!) and complexgrouping?
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
 - Unit test padding, deduceHeaders
 - Unit tests for presets
 - Merge more than one video file
+- Implement TIMO? (test with faces)
 
 ## Maybe To-Do
 
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
+- grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV even more
 - Round values to fewer decimals optionally?
