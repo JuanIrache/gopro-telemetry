@@ -2,6 +2,7 @@
 
 const deduceHeaders = require('./deduceHeaders');
 const padStringNumber = require('./padStringNumber');
+const bigStr = require('./bigStr');
 
 //After Effects can't read larger numbers
 const largestMGJSONNum = 2147483648;
@@ -142,11 +143,14 @@ function getGPGS5Data(data) {
           let inout;
           if (Array.isArray(validSample)) inout = { inn: 0, out: 3, total: validSample.length };
 
+          //Force format in FACE keys
+          if (/^FACE\d*$/.test(stream)) inout = { inn: 0, out: 2, total: validSample.length };
+
           //Loop until all values are sorted. In most cases just once, decide break at the end
           for (;;) {
             //Prepare sample set
-            const part = inout ? inout.inn / 3 : 0;
-            const sampleSetID = `stream${key + stream + (part ? part + 1 : '')}`;
+            const part = inout ? inout.inn / (inout.out - inout.inn) : 0;
+            const sampleSetID = `stream${key + 'X' + stream + 'X' + (part ? part + 1 : '')}`;
             let sampleSet = {
               sampleSetID,
               samples: []
@@ -204,8 +208,8 @@ function getGPGS5Data(data) {
                 range.occuring.min = Math.min(val, range.occuring.min);
                 range.occuring.max = Math.max(val, range.occuring.max);
                 //And max left and right padding
-                pattern.digitsInteger = Math.max(Math.floor(val).toString().length, pattern.digitsInteger);
-                pattern.digitsDecimal = Math.max(val.toString().replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
+                pattern.digitsInteger = Math.max(bigStr(Math.floor(val)).length, pattern.digitsInteger);
+                pattern.digitsDecimal = Math.max(bigStr(val).replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
               };
 
               //Back to data samples. Check that at least we have the valid values
@@ -213,7 +217,7 @@ function getGPGS5Data(data) {
                 let sample = { time: s.date };
                 if (type === 'numberString') {
                   //Save numbers as strings
-                  sample.value = s.value.toString();
+                  sample.value = bigStr(s.value);
                   //Update mins, maxes and padding
                   setMaxMinPadNum(
                     s.value,
@@ -224,7 +228,7 @@ function getGPGS5Data(data) {
                   //Save arrays of numbers as arrays of strings
                   sample.value = [];
                   s.value.slice(inout.inn, inout.out).forEach((v, i) => {
-                    sample.value[i] = v.toString();
+                    sample.value[i] = bigStr(v);
                     //And update, mins, maxs and paddings
                     setMaxMinPadNum(
                       v,
@@ -290,8 +294,14 @@ function getGPGS5Data(data) {
             //Check if we reached the end or have to loop more fields in array value
             if (inout) {
               if (inout.out >= inout.total) break;
+              const diff = inout.out - inout.inn;
               inout.inn = inout.out;
-              inout.out += 3;
+              inout.out += diff;
+              //Force skip empty values in FACE keys and go to smile. VERY HACKY
+              if (inout.inn === 6 && /^FACE\d*$/.test(stream) && inout.total > 21) {
+                inout.inn = 21;
+                inout.out = 22;
+              }
             } else break;
           }
         }
@@ -322,6 +332,13 @@ module.exports = function(data, { name = '' }) {
     //And paste the converted data
     dataDynamicSamples: converted.dataDynamicSamples
   };
+
+  //Remove dynamic data if no samples
+  if (!result.dataDynamicSamples.length) {
+    delete result.dataDynamicSamples;
+    delete result.dynamicDataInfo;
+    result.dynamicSamplesPresentB = false;
+  }
 
   return result;
 };

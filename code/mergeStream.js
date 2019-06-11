@@ -32,6 +32,11 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
         //Delete the samples from the original to avoid duplication
         delete s[fourCC];
         delete s.interpretSamples;
+
+        //Remember if will need to separate multiple samples
+        const multiple = s.multi;
+        delete s.multi;
+
         if (samples && samples.length) {
           let sticky = {};
           let description = {};
@@ -60,12 +65,13 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           stickies[d['device name']][fourCC] = { ...stickies[d['device name']][fourCC], ...sticky };
 
           //Use name and units to describe every sample
-          if (repeatHeaders) {
+          const workOnHeaders = function(samples, desc) {
+            let description = JSON.parse(JSON.stringify(desc));
             let headers = deduceHeaders(description);
             //Add the descriptions and values to samples
             samples = samples.map(s => {
               //If no available description, use numbers
-              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[headers[i] || headers[0] || i] = v));
+              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[headers[i] || `${headers[0]} (${i})`] = v));
               else if (headers[0]) s[headers[0]] = s.value;
               //Delete value key if we solved the situation
               if (headers.length) delete s.value;
@@ -74,11 +80,59 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             //Delete names and units, not needed any more
             delete description.units;
             delete description.name;
-          }
+            return { samples, description };
+          };
 
-          //Add samples to stream entry
-          if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
-          else result.streams[fourCC] = { samples, ...description };
+          //Separate multiple samples if needed
+          if (multiple) {
+            //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
+            let newSamples = {};
+            samples.forEach((s, i) => {
+              let thisSample;
+              //Loop inner samples
+              (s.value || []).forEach(v => {
+                //Use fake id 1 to make sure we have timing data form the get go
+                let id = 1;
+                if (v != null && Array.isArray(v)) id = v[0];
+                //Assign first value as ID if not done
+                if (!newSamples[id]) newSamples[id] = [];
+                //Create sample if not done
+                if (!thisSample) {
+                  thisSample = {};
+                  //Copy all keys except the value
+                  Object.keys(s).forEach(k => {
+                    if (k !== 'value') thisSample[k] = s[k];
+                  });
+                }
+                //And copy the rest
+                if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
+                else thisSample.value = null;
+                newSamples[id].push(thisSample);
+              });
+            });
+            const preName = description.name;
+            for (const key in newSamples) {
+              description.name = preName + ' ' + key;
+              let desc = description;
+              if (repeatHeaders) {
+                const newResults = workOnHeaders(newSamples[key], description);
+                newSamples[key] = newResults.samples;
+                desc = newResults.description;
+              }
+              //Add samples to stream entry
+              if (result.streams[fourCC + key]) result.streams[fourCC + key].samples.push(...newSamples[key]);
+              else result.streams[fourCC + key] = { samples: newSamples[key], ...desc };
+            }
+          } else {
+            if (repeatHeaders) {
+              const newResults = workOnHeaders(samples, description);
+              samples = newResults.samples;
+              description = newResults.description;
+            }
+            //Add samples to stream entry
+            if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
+            else result.streams[fourCC] = { samples, ...description };
+          }
         }
       }
     });

@@ -1,6 +1,21 @@
 const { keyAndStructParser, types, mergeStrings } = require('./keys');
 const parseV = require('./parseV');
 
+//quick function to find the last, most relevant fourCC key
+function findLastCC(data, start, end) {
+  let ks;
+  while (start < end) {
+    //Retrieve structured data
+    ks = keyAndStructParser.parse(data.slice(start)).result;
+    //But don't process it, go to next
+    const length = ks.size * ks.repeat;
+    const reached = start + 8 + (length >= 0 ? length : 0);
+    //Align to 32 bits
+    while (start < reached) start += 4;
+  }
+  return ks.fourCC;
+}
+
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
 function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   let result = {};
@@ -8,41 +23,30 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   let unknown = new Set();
   //Will store complex type definitions
   let complexType = [];
-  //Track if we are repeating keys, to organise arrays correctly
-  let lastCC;
+  //Find the last, most relevant key
+  let lastCC = findLastCC(data, start, end);
+  //Remember last key for interpreting data later
+  result.interpretSamples = lastCC;
+
+  //Check if the lastCC is to be filtered out by options
+  if (parent === 'STRM' && options.stream && !options.stream.includes(lastCC)) return undefined;
+
   while (start < end) {
     let length;
-    let reached;
-    let tempStart;
     try {
       //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
       const ks = keyAndStructParser.parse(data.slice(start)).result;
 
       //Get the length of the value (or values, or nested values)
       length = ks.size * ks.repeat;
-      //Advance to the next KLV, at least 64 bits
-      reached = start + 8 + (length >= 0 ? length : 0);
-      tempStart = start;
-      //Align to 32 bits
-      while (tempStart < reached) tempStart += 4;
-      //Find if this is the last CC of the nest and emember it to keep it as array
-      if (tempStart >= end) lastCC = ks.fourCC;
 
-      //Abort if we are creating a device list. We have enough info
-      if ((options.deviceList && ks.fourCC === 'STRM') || (options.streamList && lastCC && parent === 'STRM')) {
-        //Force final data manipulation
-        lastCC = ks.fourCC;
-        result.interpretSamples = ks.fourCC;
-      } else {
+      //Abort if we are creating a device list. Or a streamList and We have enough info
+      const done = (options.deviceList && ks.fourCC === 'STRM') || (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
+      if (!done) {
         let partialResult = [];
-        //Check if the lastCC is to be filtered out by options
-        if (lastCC && parent === 'STRM' && options.stream && !options.stream.includes(ks.fourCC)) return null;
-        else if (length >= 0) {
-          //Remember last key for interpreting data later
-          if (lastCC) result.interpretSamples = ks.fourCC;
-
+        if (length >= 0) {
           //If empty, we still want to store the fourCC
-          if (length === 0) partialResult.push(null);
+          if (length === 0) partialResult.push(undefined);
           //Log unknown types for future implementation
           else if (!types[ks.type]) unknown.add(ks.type);
           //Recursive call to parse nested data
@@ -73,13 +77,19 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
             //If we just read a TYPE value, store it. Will be necessary in this nest
             if (ks.fourCC === 'TYPE') complexType = partialResult[0];
             //Abort if we are selecting devices and this one is not selected
-            else if (ks.fourCC === 'DVID' && parent === 'DEVC' && options.device && !options.device.includes(partialResult[0])) return null;
+            else if (ks.fourCC === 'DVID' && parent === 'DEVC' && options.device && !options.device.includes(partialResult[0]))
+              return undefined;
 
             //Something went wrong, store type for debugging
           } else unknown.add(ks.type);
 
+          //Handle data with multiple samples. Not easy
           if (result.hasOwnProperty(ks.fourCC)) {
-            result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
+            if (parent === 'STRM') {
+              if (!result.multi) result[ks.fourCC] = [result[ks.fourCC]];
+              result[ks.fourCC].push(partialResult);
+              result.multi = true;
+            } else result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
           } else result[ks.fourCC] = partialResult;
 
           //Parsing error
@@ -90,12 +100,10 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       else throw err;
     }
 
-    //If crashed reached is null, advance to the next KLV, at least 64 bits
-    if (reached == null) {
-      reached = start + 8 + (length >= 0 ? length : 0);
-      //Align to 32 bits
-      while (start < reached) start += 4;
-    } else start = tempStart;
+    //Advance to the next KLV, at least 64 bits
+    const reached = start + 8 + (length >= 0 ? length : 0);
+    //Align to 32 bits
+    while (start < reached) start += 4;
   }
 
   //Undo all arrays except the last key, which should be the array of samples
@@ -103,6 +111,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
+
+  //Remove multi if data is for direct delivery
+  if (options.raw) delete result.multi;
 
   return result;
 }

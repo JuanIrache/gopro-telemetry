@@ -1,6 +1,6 @@
 {
   "name": "gopro-telemetry",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later)",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,12 @@
   "keywords": [
     "GoPro",
     "GPS",
+    "GPMF",
+    "mgjson",
+    "GPX",
+    "CSV",
+    "KML",
+    "geojson",
     "accelerometer",
     "gyroscope",
     "telemetry",
