@@ -68,6 +68,4 @@ function getGPGS5Data(data) {
 }
 
 //Converts the processed data to csv
-module.exports = function(data) {
-  return getGPGS5Data(data);
-};
+module.exports = getGPGS5Data;
