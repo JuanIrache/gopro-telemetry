@@ -165,14 +165,14 @@ If you liked this you might like other [creative coding projects](https://tailor
 - grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
   - Set starting time, at least for After Effects data (in the date stream) Add null samples at the beginning if no data?
-- Provide options for disabling interpolation (careful with assuming then that grouptimes matches frames always!) and complexgrouping?
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
-- Unit test padding, deduceHeaders
+- Unit test padding, deduceHeaders, bigstr
 - Unit tests for presets
 - Merge more than one video file
 
 ## Maybe To-Do
 
+- Provide options for disabling interpolation (careful with assuming then that grouptimes matches frames always!) and complexgrouping?
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
