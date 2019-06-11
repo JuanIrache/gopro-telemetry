@@ -83,8 +83,13 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
             //Something went wrong, store type for debugging
           } else unknown.add(ks.type);
 
+          //Handle data with multiple samples. Not easy
           if (result.hasOwnProperty(ks.fourCC)) {
-            result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
+            if (parent === 'STRM') {
+              if (!result.multi) result[ks.fourCC] = [result[ks.fourCC]];
+              result[ks.fourCC].push(partialResult);
+              result.multi = true;
+            } else result[ks.fourCC] = result[ks.fourCC].concat(partialResult);
           } else result[ks.fourCC] = partialResult;
 
           //Parsing error
