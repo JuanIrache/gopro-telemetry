@@ -33,8 +33,6 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
   while (start < end) {
     let length;
-    let reached;
-    let tempStart;
     try {
       //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
       const ks = keyAndStructParser.parse(data.slice(start)).result;
@@ -42,10 +40,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       //Get the length of the value (or values, or nested values)
       length = ks.size * ks.repeat;
 
-      //Abort if we are creating a device list. We have enough info
-      if ((options.deviceList && ks.fourCC === 'STRM') || (options.streamList && lastCC === ks.fourCC && parent === 'STRM')) {
-        //aqui simplify
-      } else {
+      //Abort if we are creating a device list. Or a streamList and We have enough info
+      const done = (options.deviceList && ks.fourCC === 'STRM') || (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
+      if (!done) {
         let partialResult = [];
         if (length >= 0) {
           //If empty, we still want to store the fourCC
@@ -98,12 +95,10 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       else throw err;
     }
 
-    //If crashed reached is null, advance to the next KLV, at least 64 bits
-    if (reached == null) {
-      reached = start + 8 + (length >= 0 ? length : 0);
-      //Align to 32 bits
-      while (start < reached) start += 4;
-    } else start = tempStart;
+    //Advance to the next KLV, at least 64 bits
+    const reached = start + 8 + (length >= 0 ? length : 0);
+    //Align to 32 bits
+    while (start < reached) start += 4;
   }
 
   //Undo all arrays except the last key, which should be the array of samples
