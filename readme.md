@@ -161,6 +161,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Fix empty items (npm test)
 - Force interpret faces for after effects
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids)
 - grouptimes appears to do things wrong (fps not giving right samples per second)
