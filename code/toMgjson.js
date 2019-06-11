@@ -356,5 +356,12 @@ module.exports = function(data, { name = '' }) {
     dataDynamicSamples: converted.dataDynamicSamples
   };
 
+  //Remove dynamic data if no samples
+  if (!result.dataDynamicSamples.length) {
+    delete result.dataDynamicSamples;
+    delete result.dynamicDataInfo;
+    result.dynamicSamplesPresentB = false;
+  }
+
   return result;
 };
