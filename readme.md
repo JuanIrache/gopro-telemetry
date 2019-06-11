@@ -161,7 +161,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- grouptimes appears to do things wrong (fps not giving right samples per second)
 - Starting time is different if filtering by stream? (GPS on hero7b sample)
   - Set starting time, at least for After Effects data (in the date stream) Add null samples at the beginning if no data?
 - Report bugs in mgjson schema (hasExpectedFrequecyB, #/definitions/dyamicDataType, occuring)
