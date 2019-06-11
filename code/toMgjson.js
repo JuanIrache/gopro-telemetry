@@ -160,7 +160,7 @@ function getGPGS5Data(data) {
             };
           }
 
-          const setMaxMinPadStr = function(time, val, outline) {
+          const setMaxMinPadStr = function(val, outline) {
             //Set found max lengths
             outline.dataType.paddedStringProperties.maxLen = Math.max(
               val.toString().length,
@@ -170,11 +170,6 @@ function getGPGS5Data(data) {
               val.length.toString().length,
               outline.dataType.paddedStringProperties.maxDigitsInStrLength
             );
-            //And return sample
-            return {
-              time,
-              value: { length: val.length.toString(), str: val }
-            };
           };
 
           //Loop all the samples
@@ -184,7 +179,8 @@ function getGPGS5Data(data) {
               if (typeof s.date != 'object') s.date = new Date(s.date);
               //Save the dates as UTC string
               s.date = s.date.toISOString();
-              let dateSample = setMaxMinPadStr(s.date, s.date, forDateStream.outline);
+              let dateSample = { time: s.date, value: { length: s.date.length.toString(), str: s.date } };
+              setMaxMinPadStr(s.date, forDateStream.outline);
               //Save sample
               forDateStream.sampleSet.samples.push(dateSample);
             }
@@ -227,7 +223,8 @@ function getGPGS5Data(data) {
                 });
               } else if (type === 'paddedString') {
                 //Save anything else as (padded)string
-                sample.value = setMaxMinPadStr(s.date, s.value, dataOutlineChild);
+                sample.value = { time: s.date, value: { length: s.value.length.toString(), str: s.value } };
+                setMaxMinPadStr(s.value, dataOutlineChild);
               }
               //Save sample
               sampleSet.samples.push(sample);
