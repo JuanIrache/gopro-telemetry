@@ -13,6 +13,12 @@
   "keywords": [
     "GoPro",
     "GPS",
+    "GPMF",
+    "mgjson",
+    "GPX",
+    "CSV",
+    "KML",
+    "geojson",
     "accelerometer",
     "gyroscope",
     "telemetry",
