@@ -181,7 +181,7 @@ function timeKLV(klv, timing, options) {
               }
               //And compensate date
               currDate = new Date(currDate.getTime() - s.TIMO * 1000);
-              // delete s.TIMO;
+              delete s.TIMO;
             }
 
             //Loop samples and replace them with timed samples
