@@ -171,7 +171,7 @@ function timeKLV(klv, timing, options) {
             if (s.TIMO) {
               //Substract time offset
               currCts -= s.TIMO * 1000;
-              delete s.TIMO;
+              // delete s.TIMO;
               if (d.STRM[i + 1] && d.STRM[i + 1].TIMO) {
                 //Find difference to next TIMO
                 const timoDiff = d.STRM[i + 1].TIMO - s.TIMO;

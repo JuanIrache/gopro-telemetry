@@ -44,15 +44,15 @@ const translations = {
 };
 
 //Ignore some, for now
-const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK'];
+const ignore = ['EMPT', 'TSMP', 'TICK', 'TOCK', 'TIMO'];
+//TIMO Currently used to compensate sample time, often shows up in FACE stream
 
 //Make some fourCC keys sticky and human readable
 const stickyTranslations = {
   TMPC: 'temperature [°C]',
   GPSF: 'fix',
   GPSP: 'precision',
-  STMP: 'timestamps [µs]', //Maybe useful for accurate timing, but does not look consecutive or proportional
-  TIMO: 'offset [s]' //Currently used to compensate sample time, often shows up in FACE stream
+  STMP: 'timestamps [µs]' //Maybe useful for accurate timing, but does not look consecutive or proportional
 };
 
 module.exports = { keyAndStructParser, types, mergeStrings, translations, ignore, stickyTranslations };
