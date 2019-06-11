@@ -65,6 +65,9 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
     if (partialName != result.displayName) result.displayName = partialName;
     else if (part) result.displayName += ` part ${part + 1}`;
     //Array of numbers, for example axes of a sensor
+    let deducedHeaders = deduceHeaders({ name: displayName, units });
+    let selectedHeaders = deducedHeaders.slice(inn, out);
+    if (selectedHeaders.length != sample.length) selectedHeaders = sample.map(s => deducedHeaders[0]);
     result.dataType.numberArrayProperties = {
       pattern: {
         isSigned: true,
@@ -74,7 +77,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
       //Limited to 3 axes, we split the rest to additional streams
       arraySize: sample.slice(inn, out).length,
       //Set tentative headers for each array. much like the repeatHeaders option
-      arrayDisplayNames: deduceHeaders({ name: displayName, units }).slice(inn, out),
+      arrayDisplayNames: deducedHeaders,
       arrayRanges: {
         ranges: sample
           .map(s => ({

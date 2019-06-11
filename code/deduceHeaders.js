@@ -1,6 +1,6 @@
 //Creates as many headers as possible form the available name and units, inn and out create combinations
 module.exports = function({ units, name }, { inn, out } = {}) {
-  let parts = [];
+  let parts;
   if (name) {
     //Get values inside parenthesis, usually units or similar, ofter one per sample value
     parts = name.match(/.*\((.+?)\).*/);
@@ -9,7 +9,7 @@ module.exports = function({ units, name }, { inn, out } = {}) {
       name = name.replace(/\((.+?)\)/, '').trim();
       //Take every value inside parenthesis
       parts = parts[1].split(',').map(p => p.trim());
-    }
+    } else parts = [];
   }
 
   let unitsHeaders = [];
@@ -20,7 +20,8 @@ module.exports = function({ units, name }, { inn, out } = {}) {
     else unitsHeaders[0] = units;
   }
 
-  let headers = [];
+  //Put name here in case we don't loop
+  let headers = [name];
 
   if (inn == null || out == null) {
     //Loop through all the names and units
