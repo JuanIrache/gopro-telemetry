@@ -142,11 +142,14 @@ function getGPGS5Data(data) {
           let inout;
           if (Array.isArray(validSample)) inout = { inn: 0, out: 3, total: validSample.length };
 
+          //Force format in FACE keys
+          if (/^FACE\d*$/.test(stream)) inout = { inn: 0, out: 2, total: validSample.length };
+
           //Loop until all values are sorted. In most cases just once, decide break at the end
           for (;;) {
             //Prepare sample set
-            const part = inout ? inout.inn / 3 : 0;
-            const sampleSetID = `stream${key + stream + (part ? part + 1 : '')}`;
+            const part = inout ? inout.inn / (inout.out - inout.inn) : 0;
+            const sampleSetID = `stream${key + 'X' + stream + 'X' + (part ? part + 1 : '')}`;
             let sampleSet = {
               sampleSetID,
               samples: []
@@ -290,8 +293,14 @@ function getGPGS5Data(data) {
             //Check if we reached the end or have to loop more fields in array value
             if (inout) {
               if (inout.out >= inout.total) break;
+              const diff = inout.out - inout.inn;
               inout.inn = inout.out;
-              inout.out += 3;
+              inout.out += diff;
+              //Force skip empty values in FACE keys and go to smile. VERY HACKY
+              if (inout.inn === 6 && /^FACE\d*$/.test(stream) && inout.total > 21) {
+                inout.inn = 21;
+                inout.out = 22;
+              }
             } else break;
           }
         }
