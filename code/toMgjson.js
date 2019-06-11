@@ -26,7 +26,7 @@ function createDataOutlineChildText(matchName, displayName, value) {
 }
 
 //Build the style that After Effects needs for dynamic values: numbers, arrays of numbers (axes) or strings (date)
-function createDynamicDataOutline(matchName, displayName, units, sample) {
+function createDynamicDataOutline(matchName, displayName, units, sample, { inn, out } = {}, part) {
   const type = getDataOutlineType(sample);
   let result = {
     objectType: 'dataDynamic',
@@ -60,6 +60,10 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
       }
     };
   } else if (type === 'numberStringArray') {
+    //Try to create a different display name, either by using the repeatheaders technique or specifying the part
+    const partialName = deduceHeaders({ name: displayName, units }, { inn, out });
+    if (partialName != result.displayName) result.displayName = partialName;
+    else if (part) result.displayName += ` part ${part + 1}`;
     //Array of numbers, for example axes of a sensor
     result.dataType.numberArrayProperties = {
       pattern: {
@@ -68,17 +72,16 @@ function createDynamicDataOutline(matchName, displayName, units, sample) {
         digitsDecimal: 0
       },
       //Limited to 3 axes, we split the rest to additional streams
-      arraySize: sample.slice(0, 3).length,
-      //aqui dynamically pick slice when splitting samples
+      arraySize: sample.slice(inn, out).length,
       //Set tentative headers for each array. much like the repeatHeaders option
-      arrayDisplayNames: deduceHeaders({ name: displayName, units }).slice(0, 3),
+      arrayDisplayNames: deduceHeaders({ name: displayName, units }).slice(inn, out),
       arrayRanges: {
         ranges: sample
           .map(s => ({
             occuring: { min: largestMGJSONNum, max: -largestMGJSONNum },
             legal: { min: -largestMGJSONNum, max: largestMGJSONNum }
           }))
-          .slice(0, 3) //aqui fix when multiple sets
+          .slice(inn, out)
       }
     };
   } else if (type === 'paddedString') {
@@ -125,12 +128,6 @@ function getGPGS5Data(data) {
           let units;
           if (data[key].streams[stream].units != null) units = data[key].streams[stream].units;
 
-          //Prepare sample set
-          let sampleSet = {
-            sampleSetID: `stream${key + stream}`,
-            samples: []
-          };
-
           const getValidValue = function(arr, key) {
             for (const s of arr) if (s[key] != null) return s[key];
           };
@@ -138,80 +135,92 @@ function getGPGS5Data(data) {
           //Find a valid value to base the data structure on
           let validSample = getValidValue(data[key].streams[stream].samples, 'value');
 
-          //Create the stream structure
-          let dataOutlineChild = createDynamicDataOutline(`stream${key + stream}`, streamName, units, validSample);
-          //And find the type
-          const type = getDataOutlineType(validSample);
+          //Prepare iteration in case we need to loop over samples more than 3 items long
+          let inout;
+          if (Array.isArray(validSample)) inout = { inn: 0, out: 3, total: validSample.length };
 
-          //Prepare stream of dates, basically repeat the previous procedure
-          let forDateStream;
-          if (!dateStream) {
-            let dateSample = getValidValue(data[key].streams[stream].samples, 'date');
-
-            //Make sure it is an object date and not a string. There must me some problem in another module changing this
-            if (typeof dateSample != 'object') dateSample = new Date(dateSample);
-
-            forDateStream = {
-              sampleSet: {
-                sampleSetID: 'streamXdate',
-                samples: []
-              },
-              outline: createDynamicDataOutline(`streamXdate`, 'UTC date/time', null, dateSample.toISOString())
+          //Loop until all values are sorted. In most cases just once, decide break at the end
+          for (;;) {
+            //Prepare sample set
+            const part = inout ? inout.inn / 3 : 0;
+            const sampleSetID = `stream${key + stream + (part ? part + 1 : '')}`;
+            let sampleSet = {
+              sampleSetID,
+              samples: []
             };
-          }
 
-          const setMaxMinPadStr = function(val, outline) {
-            //Set found max lengths
-            outline.dataType.paddedStringProperties.maxLen = Math.max(
-              val.toString().length,
-              outline.dataType.paddedStringProperties.maxLen
-            );
-            outline.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
-              val.length.toString().length,
-              outline.dataType.paddedStringProperties.maxDigitsInStrLength
-            );
-          };
+            //Create the stream structure
+            let dataOutlineChild = createDynamicDataOutline(sampleSetID, streamName, units, validSample, inout, part);
+            //And find the type
+            const type = getDataOutlineType(validSample);
 
-          //Loop all the samples
-          data[key].streams[stream].samples.forEach(s => {
-            //Save date samples if not done
-            if (s.date && !dateStream) {
-              if (typeof s.date != 'object') s.date = new Date(s.date);
-              //Save the dates as UTC string
-              s.date = s.date.toISOString();
-              let dateSample = { time: s.date, value: { length: s.date.length.toString(), str: s.date } };
-              setMaxMinPadStr(s.date, forDateStream.outline);
-              //Save sample
-              forDateStream.sampleSet.samples.push(dateSample);
+            //Prepare stream of dates, basically repeat the previous procedure
+            let forDateStream;
+            if (!dateStream) {
+              let dateSample = getValidValue(data[key].streams[stream].samples, 'date');
+
+              //Make sure it is an object date and not a string. There must me some problem in another module changing this
+              if (typeof dateSample != 'object') dateSample = new Date(dateSample);
+
+              forDateStream = {
+                sampleSet: {
+                  sampleSetID: 'streamXdate',
+                  samples: []
+                },
+                outline: createDynamicDataOutline(`streamXdate`, 'UTC date/time', null, dateSample.toISOString())
+              };
             }
 
-            const setMaxMinPadNum = function(val, pattern, range) {
-              //Update mins and maxes
-              range.occuring.min = Math.min(val, range.occuring.min);
-              range.occuring.max = Math.max(val, range.occuring.max);
-              //And max left and right padding
-              pattern.digitsInteger = Math.max(Math.floor(val).toString().length, pattern.digitsInteger);
-              pattern.digitsDecimal = Math.max(val.toString().replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
+            const setMaxMinPadStr = function(val, outline) {
+              //Set found max lengths
+              outline.dataType.paddedStringProperties.maxLen = Math.max(
+                val.toString().length,
+                outline.dataType.paddedStringProperties.maxLen
+              );
+              outline.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
+                val.length.toString().length,
+                outline.dataType.paddedStringProperties.maxDigitsInStrLength
+              );
             };
 
-            //Back to data samples. Check that at least we have the valid values
-            if (s.value != null) {
-              let sample = { time: s.date };
-              if (type === 'numberString') {
-                //Save numbers as strings
-                sample.value = s.value.toString();
-                //Update mins, maxes and padding
-                setMaxMinPadNum(
-                  s.value,
-                  dataOutlineChild.dataType.numberStringProperties.pattern,
-                  dataOutlineChild.dataType.numberStringProperties.range
-                );
-              } else if (type === 'numberStringArray') {
-                //Save arrays of numbers as arrays of strings
-                sample.value = [];
-                s.value.forEach((v, i) => {
-                  //fix when splitting to multiple sets
-                  if (i < 3) {
+            //Loop all the samples
+            data[key].streams[stream].samples.forEach(s => {
+              //Save date samples if not done
+              if (s.date && !dateStream) {
+                if (typeof s.date != 'object') s.date = new Date(s.date);
+                //Save the dates as UTC string
+                s.date = s.date.toISOString();
+                let dateSample = { time: s.date, value: { length: s.date.length.toString(), str: s.date } };
+                setMaxMinPadStr(s.date, forDateStream.outline);
+                //Save sample
+                forDateStream.sampleSet.samples.push(dateSample);
+              }
+
+              const setMaxMinPadNum = function(val, pattern, range) {
+                //Update mins and maxes
+                range.occuring.min = Math.min(val, range.occuring.min);
+                range.occuring.max = Math.max(val, range.occuring.max);
+                //And max left and right padding
+                pattern.digitsInteger = Math.max(Math.floor(val).toString().length, pattern.digitsInteger);
+                pattern.digitsDecimal = Math.max(val.toString().replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
+              };
+
+              //Back to data samples. Check that at least we have the valid values
+              if (s.value != null) {
+                let sample = { time: s.date };
+                if (type === 'numberString') {
+                  //Save numbers as strings
+                  sample.value = s.value.toString();
+                  //Update mins, maxes and padding
+                  setMaxMinPadNum(
+                    s.value,
+                    dataOutlineChild.dataType.numberStringProperties.pattern,
+                    dataOutlineChild.dataType.numberStringProperties.range
+                  );
+                } else if (type === 'numberStringArray') {
+                  //Save arrays of numbers as arrays of strings
+                  sample.value = [];
+                  s.value.slice(inout.inn, inout.out).forEach((v, i) => {
                     sample.value[i] = v.toString();
                     //And update, mins, maxs and paddings
                     setMaxMinPadNum(
@@ -219,62 +228,69 @@ function getGPGS5Data(data) {
                       dataOutlineChild.dataType.numberArrayProperties.pattern,
                       dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i]
                     );
-                  }
-                });
-              } else if (type === 'paddedString') {
-                //Save anything else as (padded)string
-                sample.value = { time: s.date, value: { length: s.value.length.toString(), str: s.value } };
-                setMaxMinPadStr(s.value, dataOutlineChild);
+                  });
+                } else if (type === 'paddedString') {
+                  //Save anything else as (padded)string
+                  sample.value = { time: s.date, value: { length: s.value.length.toString(), str: s.value } };
+                  setMaxMinPadStr(s.value, dataOutlineChild);
+                }
+                //Save sample
+                sampleSet.samples.push(sample);
               }
-              //Save sample
-              sampleSet.samples.push(sample);
-            }
-          });
-
-          //Finish date stream
-          if (!dateStream) {
-            forDateStream.sampleSet.samples.forEach(s => {
-              //Apply maximum padding
-              s.value.str = s.value.str.padEnd(forDateStream.outline.dataType.paddedStringProperties.maxLen, ' ');
-              s.value.length = s.value.length.padStart(forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
             });
-            //Record total length of samples
-            forDateStream.outline.sampleCount = forDateStream.sampleSet.samples.length;
-            //Add to data
-            dataOutline.push(forDateStream.outline);
-            dataDynamicSamples.push(forDateStream.sampleSet);
-            //Done with date
-            dateStream = true;
-          }
 
-          sampleSet.samples.forEach(s => {
-            if (type === 'numberString') {
-              //Apply max padding to every sample
-              s.value = padStringNumber(
-                s.value,
-                dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger,
-                dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal
-              );
-            } else if (type === 'numberStringArray') {
-              //Apply max padding to every sample
-              s.value = s.value.map(v =>
-                padStringNumber(
-                  v,
-                  dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger,
-                  dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal
-                )
-              );
-            } else if (type === 'paddedString') {
-              //Apply max padding to every sample
-              s.value.str = s.value.str.padEnd(dataOutlineChild.dataType.paddedStringProperties.maxLen, ' ');
-              s.value.length = s.value.length.padStart(dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
+            //Finish date stream
+            if (!dateStream) {
+              forDateStream.sampleSet.samples.forEach(s => {
+                //Apply maximum padding
+                s.value.str = s.value.str.padEnd(forDateStream.outline.dataType.paddedStringProperties.maxLen, ' ');
+                s.value.length = s.value.length.padStart(forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
+              });
+              //Record total length of samples
+              forDateStream.outline.sampleCount = forDateStream.sampleSet.samples.length;
+              //Add to data
+              dataOutline.push(forDateStream.outline);
+              dataDynamicSamples.push(forDateStream.sampleSet);
+              //Done with date
+              dateStream = true;
             }
-          });
-          //Save total samples count
-          dataOutlineChild.sampleCount = sampleSet.samples.length;
-          //Save stream
-          dataOutline.push(dataOutlineChild);
-          dataDynamicSamples.push(sampleSet);
+
+            sampleSet.samples.forEach(s => {
+              if (type === 'numberString') {
+                //Apply max padding to every sample
+                s.value = padStringNumber(
+                  s.value,
+                  dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger,
+                  dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal
+                );
+              } else if (type === 'numberStringArray') {
+                //Apply max padding to every sample
+                s.value = s.value.map(v =>
+                  padStringNumber(
+                    v,
+                    dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger,
+                    dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal
+                  )
+                );
+              } else if (type === 'paddedString') {
+                //Apply max padding to every sample
+                s.value.str = s.value.str.padEnd(dataOutlineChild.dataType.paddedStringProperties.maxLen, ' ');
+                s.value.length = s.value.length.padStart(dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
+              }
+            });
+            //Save total samples count
+            dataOutlineChild.sampleCount = sampleSet.samples.length;
+            //Save stream
+            dataOutline.push(dataOutlineChild);
+            dataDynamicSamples.push(sampleSet);
+
+            //Check if we reached the end or have to loop more fields in array value
+            if (inout) {
+              if (inout.out >= inout.total) break;
+              inout.inn = inout.out;
+              inout.out += 3;
+            } else break;
+          }
         }
       }
     }
