@@ -159,6 +159,10 @@ function timeKLV(klv, timing, options) {
           return { date: null, duration: null };
         })();
 
+        //Create empty stream if needed for timing purposes
+        const dummyStream = { STNM: 'UTC date/time', interpretSamples: 'dateStream', dateStream: ['0'] };
+        if (options.dateStream) d.STRM.push(dummyStream);
+
         //Loop streams if present
         (d.STRM || []).forEach((s, i) => {
           //If group of samples found

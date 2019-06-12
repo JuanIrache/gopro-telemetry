@@ -114,8 +114,7 @@ function getGPGS5Data(data) {
   let dataOutline = [];
   //Holds the streams
   let dataDynamicSamples = [];
-  //Have we created the date stream?
-  let dateStream = false;
+
   for (const key in data) {
     if (data[key].streams) {
       //Save a static entry with the device name
@@ -161,23 +160,6 @@ function getGPGS5Data(data) {
             //And find the type
             const type = getDataOutlineType(validSample);
 
-            //Prepare stream of dates, basically repeat the previous procedure
-            let forDateStream;
-            if (!dateStream) {
-              let dateSample = getValidValue(data[key].streams[stream].samples, 'date');
-
-              //Make sure it is an object date and not a string. There must me some problem in another module changing this
-              if (typeof dateSample != 'object') dateSample = new Date(dateSample);
-
-              forDateStream = {
-                sampleSet: {
-                  sampleSetID: 'streamXdate',
-                  samples: []
-                },
-                outline: createDynamicDataOutline(`streamXdate`, 'UTC date/time', null, dateSample.toISOString())
-              };
-            }
-
             const setMaxMinPadStr = function(val, outline) {
               //Set found max lengths
               outline.dataType.paddedStringProperties.maxLen = Math.max(
@@ -192,17 +174,6 @@ function getGPGS5Data(data) {
 
             //Loop all the samples
             data[key].streams[stream].samples.forEach(s => {
-              //Save date samples if not done
-              if (s.date && !dateStream) {
-                if (typeof s.date != 'object') s.date = new Date(s.date);
-                //Save the dates as UTC string
-                s.date = s.date.toISOString();
-                let dateSample = { time: s.date, value: { length: s.date.length.toString(), str: s.date } };
-                setMaxMinPadStr(s.date, forDateStream.outline);
-                //Save sample
-                forDateStream.sampleSet.samples.push(dateSample);
-              }
-
               const setMaxMinPadNum = function(val, pattern, range) {
                 //Update mins and maxes
                 range.occuring.min = Math.min(val, range.occuring.min);
@@ -238,6 +209,11 @@ function getGPGS5Data(data) {
                   });
                 } else if (type === 'paddedString') {
                   //Save anything else as (padded)string
+                  //If dateStream, save date as string instead of dummy value
+                  if (stream === 'dateStream') {
+                    if (typeof s.date != 'object') s.date = new Date(s.date);
+                    s.value = s.date.toISOString();
+                  }
                   sample.value = { length: s.value.length.toString(), str: s.value };
                   setMaxMinPadStr(s.value, dataOutlineChild);
                 }
@@ -245,22 +221,6 @@ function getGPGS5Data(data) {
                 sampleSet.samples.push(sample);
               }
             });
-
-            //Finish date stream
-            if (!dateStream) {
-              forDateStream.sampleSet.samples.forEach(s => {
-                //Apply maximum padding
-                s.value.str = s.value.str.padEnd(forDateStream.outline.dataType.paddedStringProperties.maxLen, ' ');
-                s.value.length = s.value.length.padStart(forDateStream.outline.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
-              });
-              //Record total length of samples
-              forDateStream.outline.sampleCount = forDateStream.sampleSet.samples.length;
-              //Add to data
-              dataOutline.push(forDateStream.outline);
-              dataDynamicSamples.push(forDateStream.sampleSet);
-              //Done with date
-              dateStream = true;
-            }
 
             sampleSet.samples.forEach(s => {
               if (type === 'numberString') {
@@ -280,7 +240,7 @@ function getGPGS5Data(data) {
                   )
                 );
               } else if (type === 'paddedString') {
-                //Apply max padding to every sample           
+                //Apply max padding to every sample
                 s.value.str = s.value.str.padEnd(dataOutlineChild.dataType.paddedStringProperties.maxLen, ' ');
                 s.value.length = s.value.length.padStart(dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
               }
