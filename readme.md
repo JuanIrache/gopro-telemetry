@@ -162,7 +162,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- don't force timeout date on presets, set to null
 - problem when using grouptimes and timeout date (don't delete date until later)
 - Add option to not merge, separate from not interpolate
 - Beta test
