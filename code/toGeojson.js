@@ -24,7 +24,10 @@ function getGPGS5Data(data) {
               //Set elevation if present
               if (s.value.length > 1) coordinates[i].push(s.value[2]);
               //Set time if present
-              if (s.date != null) properties.AbsoluteUtcMicroSec[i] = s.date.getTime();
+              if (s.date != null) {
+                if (typeof s.date != 'object') s.date = new Date(s.date);
+                properties.AbsoluteUtcMicroSec[i] = s.date.getTime();
+              }
               if (s.cts != null) properties.RelativeMicroSec[i] = s.cts;
             }
           });
