@@ -83,8 +83,6 @@ describe('Testing GPSFix with hero6 file', () => {
   });
 
   test(`timeOut:"cts" option should export cts time values`, () => {
-    console.log(result['1'].streams.FACE1.samples);
-
     expect(result['1'].streams.FACE1.samples[1].cts).toBeDefined();
   });
 
