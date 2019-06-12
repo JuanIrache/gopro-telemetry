@@ -25,12 +25,18 @@ function fillGPSTime(klv, options) {
     let partialRes;
     let date;
     //Loop strams if present
-    (d.STRM || []).forEach(s => {
-      //Find the GPSU date in the GPS5 stream
-      if (s.GPSU != null) date = toDate(s.GPSU);
-      //Done with GPSU
-      delete s.GPSU;
-    });
+    if (d.STRM && d.STRM.length) {
+      for (const key in d.STRM) {
+        //Find the GPSU date in the GPS5 stream
+        if (d.STRM[key].GPSU != null) {
+          date = toDate(d.STRM[key].GPSU);
+          //Done with GPSU
+          if (options.stream && !options.stream.includes('GPS5')) delete d.STRM[key];
+          else delete d.STRM[key].GPSU;
+          break;
+        }
+      }
+    }
 
     if (date) {
       //Set date for first packet
@@ -153,6 +159,10 @@ function timeKLV(klv, timing, options) {
           return { date: null, duration: null };
         })();
 
+        //Create empty stream if needed for timing purposes
+        const dummyStream = { STNM: 'UTC date/time', interpretSamples: 'dateStream', dateStream: ['0'] };
+        if (options.dateStream) d.STRM.push(dummyStream);
+
         //Loop streams if present
         (d.STRM || []).forEach((s, i) => {
           //If group of samples found
@@ -169,9 +179,10 @@ function timeKLV(klv, timing, options) {
             //Try to compensate delayed samples proportionally
             let timoDur = 0;
             if (s.TIMO) {
-              //Substract time offset
+              //Substract time offset, but don't go under 0
+              if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
               currCts -= s.TIMO * 1000;
-              // delete s.TIMO;
+              if (currCts < 0) currCts = 0;
               if (d.STRM[i + 1] && d.STRM[i + 1].TIMO) {
                 //Find difference to next TIMO
                 const timoDiff = d.STRM[i + 1].TIMO - s.TIMO;
@@ -180,6 +191,7 @@ function timeKLV(klv, timing, options) {
               }
               //And compensate date
               currDate = new Date(currDate.getTime() - s.TIMO * 1000);
+              delete s.TIMO;
             }
 
             //Loop samples and replace them with timed samples
