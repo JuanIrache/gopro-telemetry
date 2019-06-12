@@ -162,7 +162,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- problem when using grouptimes and timeout date (don't delete date until later)
 - Add option to not merge, separate from not interpolate
 - Beta test
 - Merge more than one video file

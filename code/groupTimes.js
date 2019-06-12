@@ -72,7 +72,7 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation }) {
             else if (group.length === 1) newSamples.push(group[0]);
             else if (i > 0 && i < samples.length && !disableInterpolation) newSamples.push(interpolateSample(samples, i - 1, currentTime));
             //If cts was temporary, remove it
-            if (timeOut === 'date') delete newSamples[newSamples.length - 1].cts;
+            if (timeOut === 'date' && newSamples.length) delete newSamples[newSamples.length - 1].cts;
             //Add time to analyse next chunk
             currentTime += groupTimes;
           }
