@@ -8,7 +8,7 @@ test(`toCsv should label results by device-stream`, () => {
   expect(result['Hero6 Black-ACCL']).toBeDefined();
 });
 
-test(`toCsv return key-string pairs`, () => {
+test(`toCsv should return key-string pairs`, () => {
   expect(result['Hero6 Black-ACCL'].length).toBeGreaterThan(20000);
 });
 
