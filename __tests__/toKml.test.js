@@ -14,8 +14,6 @@ test(`toKml should start with xml-kml format`, () => {
 <kml xmlns="http://earth.google.com/kml/2.0">
     <Document>
         <name>undefined</name>
-        <description>Camera. GPS (Lat., Long., Alt., 2D speed, 3D`
+        <description>Camera. 30 fps. GPS (Lat., Long., Alt., 2D s`
   );
 });
-
-console.log(result.slice(0, 197));
