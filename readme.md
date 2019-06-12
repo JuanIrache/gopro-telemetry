@@ -163,7 +163,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Test disableMerging
 - Beta test
 - Merge more than one video file
 
