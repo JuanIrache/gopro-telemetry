@@ -163,7 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Unit test padding, deduceHeaders, bigstr, disableInterpolation?
+- Unit test disableInterpolation?
 - Unit tests for presets
 - Beta test
 - Merge more than one video file
@@ -172,9 +172,9 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
-- grouptimes and smooth can produce bad results when interpolating/smoothing integers (for example, face ids until I took care of them)
+- grouptimes and smooth can produce bad results when interpolating/smoothing integers (like it happened before with face ids)
 - Take potential nested arrays into account f[8]? Never found one to test
-- Optimise parseKLV even more
+- Optimise parseKLV performance even more
 - Implement highlight tags? https://github.com/gopro/gpmf-parser/issues/21
 - Round values to fewer decimals optionally?
 - Implement other formats? Real garmin-virb specification?
