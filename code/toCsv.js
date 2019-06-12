@@ -46,6 +46,7 @@ function getGPGS5Data(data) {
               let row = [];
               //Add time
               if (s.cts != null) row.push(s.cts);
+              if (typeof s.date != 'object') s.date = new Date(s.date);
               if (s.date != null) row.push(s.date.toISOString());
               //Add all values
               s.value.forEach(v => {

@@ -40,11 +40,13 @@ function getGPGS5Data(data) {
                 cmt = `
             <description>${partialSticky.join('; ')}</description>`;
               //Set time if present
-              if (s.date != null)
+              if (s.date != null) {
+                if (typeof s.date != 'object') s.date = new Date(s.date);
                 time = `
             <TimeStamp>
                 <when>${s.date.toISOString()}</when>
             </TimeStamp>`;
+              }
               //Prepare coordinates
               let coords = [s.value[1], s.value[0]];
               //Set elevation if present
