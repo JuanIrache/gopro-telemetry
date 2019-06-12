@@ -163,7 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Unit test bigstr, disableInterpolation?
+- Unit test disableInterpolation?
 - Unit tests for presets
 - Beta test
 - Merge more than one video file
