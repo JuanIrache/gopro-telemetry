@@ -238,7 +238,7 @@ function getGPGS5Data(data) {
                   });
                 } else if (type === 'paddedString') {
                   //Save anything else as (padded)string
-                  sample.value = { time: s.date, value: { length: s.value.length.toString(), str: s.value } };
+                  sample.value = { length: s.value.length.toString(), str: s.value };
                   setMaxMinPadStr(s.value, dataOutlineChild);
                 }
                 //Save sample
@@ -280,7 +280,7 @@ function getGPGS5Data(data) {
                   )
                 );
               } else if (type === 'paddedString') {
-                //Apply max padding to every sample
+                //Apply max padding to every sample           
                 s.value.str = s.value.str.padEnd(dataOutlineChild.dataType.paddedStringProperties.maxLen, ' ');
                 s.value.length = s.value.length.padStart(dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
               }
