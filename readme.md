@@ -167,6 +167,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## Maybe To-Do
 
+- Keep klv types and scaling to identify what are integers and what are floats and avoid smoothing/interpolation when int?
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (like it happened before with face ids)
