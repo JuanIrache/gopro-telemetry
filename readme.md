@@ -163,7 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Unit test padding, deduceHeaders, bigstr, disableInterpolation?
+- Unit test deduceHeaders, bigstr, disableInterpolation?
 - Unit tests for presets
 - Beta test
 - Merge more than one video file
