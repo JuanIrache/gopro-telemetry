@@ -138,7 +138,6 @@ Depending on the camera, model, settings and accessories, these are some of the 
 - Timestamps (µs)
 - Magnetometer (µT)
 - Face detection
-- Highlights (manual and computed)
 - White balance (ºK or RGB)
 - Luma
 - Hue
