@@ -35,7 +35,7 @@ function interpolateSample(samples, i, currentTime) {
 }
 
 //Makes sure there is one sample per each specified time chunk
-module.exports = function(klv, { groupTimes, timeOut, disableInterpolation }) {
+module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disableMerging }) {
   //Copy timeout value for other functions
   timeOut = timeOut;
   //Copy input
@@ -65,7 +65,7 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation }) {
                 //Check the next sample
               } else i++;
               //One sample is just fine if disableInterpolation
-              if (disableInterpolation) break;
+              if (disableMerging) break;
             }
             //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
             if (group.length > 1) newSamples.push(reduceSamples(group));
