@@ -12,7 +12,7 @@ function getGPGS5Data(data) {
           let name;
           if (data[key].streams.GPS5.name != null) name = data[key].streams.GPS5.name;
           let units;
-          if (data[key].streams.GPS5.units != null) units = data[key].streams.GPS5.units.toString();
+          if (data[key].streams.GPS5.units != null) units = `[${data[key].streams.GPS5.units.toString()}]`;
           let inner = '';
           let sticky = {};
           //Loop all the samples
@@ -72,7 +72,7 @@ function getGPGS5Data(data) {
             }
           });
           //Create description of file/stream
-          const description = [frameRate, name, units].filter(e => e != null).join('. ');
+          const description = [frameRate, name, units].filter(e => e != null).join(' - ');
           return { inner, description, device };
         }
       }
