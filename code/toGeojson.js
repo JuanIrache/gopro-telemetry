@@ -1,6 +1,7 @@
 //Returns the GPS data as an object for geojson
 function getGPGS5Data(data) {
   let properties = {};
+  let coordinates = [];
   for (const key in data) {
     //Save device name
     if (data[key]['device name'] != null) properties.device = data[key]['device name'];
@@ -12,7 +13,6 @@ function getGPGS5Data(data) {
           if (data[key].streams.GPS5.samples[0].sticky && data[key].streams.GPS5.samples[0].sticky.geoidHeight) {
             properties.geoidHeight = data[key].streams.GPS5.samples[0].sticky.geoidHeight;
           }
-          let coordinates = [];
           //Will save utc and cts
           properties.AbsoluteUtcMicroSec = [];
           properties.RelativeMicroSec = [];
@@ -36,7 +36,7 @@ function getGPGS5Data(data) {
       }
     }
   }
-  return undefined;
+  return { coordinates, properties };
 }
 
 //Converts the processed data to geojson

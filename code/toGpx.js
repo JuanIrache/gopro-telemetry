@@ -1,9 +1,10 @@
 //Returns the GPS data as a string
 function getGPGS5Data(data) {
   let frameRate;
+  let inner = '';
+  let device = '';
   if (data['frames/second'] != null) frameRate = `${Math.round(data['frames/second'])} fps`;
   for (const key in data) {
-    let device;
     if (data[key]['device name'] != null) device = data[key]['device name'];
     if (data[key].streams) {
       for (const stream in data[key].streams) {
@@ -13,7 +14,6 @@ function getGPGS5Data(data) {
           if (data[key].streams.GPS5.name != null) name = data[key].streams.GPS5.name;
           let units;
           if (data[key].streams.GPS5.units != null) units = `[${data[key].streams.GPS5.units.toString()}]`;
-          let inner = '';
           let sticky = {};
           //Loop all the samples
           data[key].streams.GPS5.samples.forEach(s => {
@@ -78,12 +78,13 @@ function getGPGS5Data(data) {
       }
     }
   }
-  return '';
+  return { inner, description: frameRate || '', device };
 }
 
 //Converts the processed data to GPX
 module.exports = function(data, { name }) {
   const converted = getGPGS5Data(data);
+  if (!converted) return undefined;
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="https://github.com/juanirache/gopro-telemetry">
