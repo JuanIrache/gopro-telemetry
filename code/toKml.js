@@ -7,9 +7,10 @@ const translations = {
 //Returns the GPS data as a string
 function getGPGS5Data(data) {
   let frameRate;
+  let device;
+  let inner = '';
   if (data['frames/second'] != null) frameRate = `${Math.round(data['frames/second'])} fps`;
   for (const key in data) {
-    let device;
     if (data[key]['device name'] != null) device = data[key]['device name'];
     if (data[key].streams) {
       for (const stream in data[key].streams) {
@@ -19,7 +20,6 @@ function getGPGS5Data(data) {
           if (data[key].streams.GPS5.name != null) name = data[key].streams.GPS5.name;
           let units;
           if (data[key].streams.GPS5.units != null) units = data[key].streams.GPS5.units.toString();
-          let inner = '';
           let sticky = {};
           //Loop all the samples
           data[key].streams.GPS5.samples.forEach(s => {
@@ -76,7 +76,7 @@ function getGPGS5Data(data) {
       }
     }
   }
-  return '';
+  return { inner, description: [device, frameRate].filter(e => e != null).join('. ') };
 }
 
 //Converts the processed data to KML

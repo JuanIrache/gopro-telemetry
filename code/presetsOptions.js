@@ -6,5 +6,5 @@ module.exports = {
   kml: { mandatory: { dateStream: false, stream: 'GPS5', timeOut: null }, preferred: {} },
   geojson: { mandatory: { dateStream: false, stream: 'GPS5', timeOut: null, geoidHeight: true }, preferred: { ellipsoid: true } },
   csv: { mandatory: { dateStream: false }, preferred: {} },
-  mgjson: { mandatory: { dateStream: true }, preferred: { groupTimes: 'frames' } }
+  mgjson: { mandatory: { dateStream: true }, preferred: { groupTimes: 'frames', disableInterpolation: true, disableMerging: false } }
 };
