@@ -163,7 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Beta test
+- Interpret FACE by default
 - Merge more than one video file
 
 ## Maybe To-Do
