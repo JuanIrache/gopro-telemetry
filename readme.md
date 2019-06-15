@@ -163,6 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Is device array of numbers or array of strings?
 - Merge more than one video file
 
 ## Maybe To-Do
