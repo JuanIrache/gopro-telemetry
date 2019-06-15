@@ -28,7 +28,7 @@ function getGPGS5Data(data) {
               //Update and remember sticky data
               if (s.sticky) sticky = { ...sticky, ...s.sticky };
               //If first row
-              if (i === 0) {
+              if (!rows.length) {
                 let firstRow = [];
                 //Add time
                 if (s.cts != null) firstRow.push('cts');
