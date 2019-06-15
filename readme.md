@@ -163,6 +163,8 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Interpret FACE by default
+- Update description on github and package
 - Is device array of numbers or array of strings?
 - Merge more than one video file
 
