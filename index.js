@@ -66,7 +66,10 @@ function process(input, opts) {
   for (const key in timed) merged[key] = mergeStream(timed[key], opts);
 
   //Read framerate to convert groupTimes to number if needed
-  if (opts.groupTimes === 'frames') opts.groupTimes = input.timing.frameDuration * 1000;
+  if (opts.groupTimes === 'frames') {
+    if (input.timing && input.timing.frameDuration) opts.groupTimes = input.timing.frameDuration * 1000;
+    else throw new Error('Frame rate is needed for your current options');
+  }
 
   //Group samples by time if necessary
   if (opts.groupTimes) merged = groupTimes(merged, opts);
