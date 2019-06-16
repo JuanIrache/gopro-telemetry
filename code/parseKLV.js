@@ -1,5 +1,6 @@
 const { keyAndStructParser, types, mergeStrings } = require('./keys');
 const parseV = require('./parseV');
+const unArrayTypes = require('./unArrayTypes');
 const { generateStructArr } = require('./keys');
 
 //quick function to find the last, most relevant fourCC key
@@ -82,7 +83,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
               for (let i = 0; i < ks.repeat; i++) partialResult.push(parseV(environment, start + 8 + i * ks.size, ks.size, specifics));
             } else partialResult.push(parseV(environment, start + 8, length, specifics));
             //If we just read a TYPE value, store it. Will be necessary in this nest
-            if (ks.fourCC === 'TYPE') complexType = partialResult[0];
+            if (ks.fourCC === 'TYPE') complexType = unArrayTypes(partialResult[0]);
             //Abort if we are selecting devices and this one is not selected
             else if (ks.fourCC === 'DVID' && parent === 'DEVC' && options.device && !options.device.includes(partialResult[0]))
               return undefined;
