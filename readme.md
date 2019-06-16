@@ -163,7 +163,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Only force interpret FACEs if not raw!
 - Fix HUES stream (keep in nested array? Force calculation?) https://github.com/gopro/gpmf-parser#hero7-black-adds-removes-changes-otherwise-supports-all-hero6-metadata
 - improve SCEN labelling: Move value outside of array?
 - SCEN1 why?

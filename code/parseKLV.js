@@ -91,7 +91,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
           } else unknown.add(ks.type);
 
           //Try to define unknown data based on documentation
-          if (ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
+          if (!options.raw && ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
             //Create the string for inside the parenthesis, and remove nulls
             let extraDescription = generateStructArr(ks.fourCC).filter(v => v != null);
             let newValueArr = [];
