@@ -54,4 +54,39 @@ const stickyTranslations = {
   STMP: 'timestamps [µs]' //Maybe useful for accurate timing, but does not look consecutive or proportional
 };
 
-module.exports = { keyAndStructParser, types, mergeStrings, translations, ignore, stickyTranslations };
+//Some metadata is not described internally, but the format can be deduced from documentation:
+//https://github.com/gopro/gpmf-parser#hero7-black-adds-removes-changes-otherwise-supports-all-hero6-metadata
+const forcedStruct = {
+  FACE: 'ID,x,y,w,h,unused[17],smile'
+};
+
+//mgjson output splits arrays in groups of 3 values, we can change that here,
+//for example to express coordinates of FACE bounding boxes by pairs
+const mgjsonMaxArrs = {
+  FACE: 2
+};
+
+//Interpret the previous string as an array
+function generateStructArr(key) {
+  const str = forcedStruct[key];
+  if (!str) return null;
+  let resultingArr = [];
+  str.split(',').forEach(w => {
+    if (/.+\[\d+\]$/.test(w)) {
+      for (let i = 0; i < w.match(/(.+)\[(\d+)\]$/)[2]; i++) resultingArr.push(w.match(/(.+)\[(\d+)\]$/)[1]);
+    } else resultingArr.push(w);
+  });
+  resultingArr = resultingArr.map(v => (v === 'unused' ? null : v));
+  return resultingArr;
+}
+
+module.exports = {
+  keyAndStructParser,
+  types,
+  mergeStrings,
+  translations,
+  ignore,
+  stickyTranslations,
+  generateStructArr,
+  mgjsonMaxArrs
+};

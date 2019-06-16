@@ -50,7 +50,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           //Remember previous sticky values, that's why they're sticky
           sticky = { ...stickies[d['device name']][fourCC], ...sticky };
           //If repeatSticky, add the sticky values to every sample
-          if (repeatSticky) samples = samples.map(s => ({ ...s, ...sticky }));
+          if (repeatSticky) samples = samples.map(ss => ({ ...ss, ...sticky }));
           //If have both samples and stickies
           else if (Object.keys(sticky).length && samples.length) {
             for (let key in sticky) {
@@ -69,13 +69,13 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             let description = JSON.parse(JSON.stringify(desc));
             let headers = deduceHeaders(description);
             //Add the descriptions and values to samples
-            samples = samples.map(s => {
+            samples = samples.map(ss => {
               //If no available description, use numbers
-              if (Array.isArray(s.value)) s.value.forEach((v, i) => (s[headers[i] || `${headers[0]} (${i})`] = v));
-              else if (headers[0]) s[headers[0]] = s.value;
+              if (Array.isArray(ss.value)) ss.value.forEach((v, i) => (ss[headers[i] || `${headers[0]} (${i})`] = v));
+              else if (headers[0]) ss[headers[0]] = ss.value;
               //Delete value key if we solved the situation
-              if (headers.length) delete s.value;
-              return s;
+              if (headers.length) delete ss.value;
+              return ss;
             });
             //Delete names and units, not needed any more
             delete description.units;
@@ -87,10 +87,13 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           if (multiple) {
             //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
             let newSamples = {};
-            samples.forEach((s, i) => {
+            samples.forEach(ss => {
+              //Remove ID from description if present
+              if (description.name) description.name = description.name.replace(/\(ID,?(.*)\)$/i, '($1)');
+
               let thisSample;
               //Loop inner samples
-              (s.value || []).forEach(v => {
+              (ss.value || []).forEach(v => {
                 //Use fake id 1 to make sure we have timing data form the get go
                 let id = 1;
                 if (v != null && Array.isArray(v)) id = v[0];
@@ -100,8 +103,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 if (!thisSample) {
                   thisSample = {};
                   //Copy all keys except the value
-                  Object.keys(s).forEach(k => {
-                    if (k !== 'value') thisSample[k] = s[k];
+                  Object.keys(ss).forEach(k => {
+                    if (k !== 'value') thisSample[k] = ss[k];
                   });
                 }
                 //And copy the rest
