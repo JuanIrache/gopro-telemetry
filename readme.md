@@ -171,7 +171,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (like it happened before with face ids)
-- Take potential nested arrays into account f[8]? Never found one to test
 - Optimise parseKLV performance even more
 - Implement highlight tags? https://github.com/gopro/gpmf-parser/issues/21
 - Round values to fewer decimals optionally?

@@ -1,4 +1,4 @@
-const { translations, ignore, stickyTranslations } = require('./keys');
+const { translations, ignore, stickyTranslations, idKeysTranslation, idValuesTranslation } = require('./keys');
 const deduceHeaders = require('./deduceHeaders');
 
 //Compare equality of values, including objects
@@ -86,17 +86,30 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           //Simplify Hero7 Labelling style
           const newStyle = /\[\[([\w,\s]+)\][,\s\.]*\]/;
           if (description.name && newStyle.test(description.name)) {
-            const inner = description.name.match(newStyle)[1].split(',').map(s => s.trim()).join(',');
+            const inner = description.name
+              .match(newStyle)[1]
+              .split(',')
+              .map(s => s.trim())
+              .join(',');
             description.name = description.name.replace(newStyle, `(${inner})`);
-          } 
+          }
 
           //Separate multiple samples if needed
           if (multiple) {
             //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
             let newSamples = {};
+            //Dummy id key if none is found
+            let idKey = 'id';
             samples.forEach(ss => {
-              //Remove ID from description if present
-              if (description.name) description.name = description.name.replace(/\((\w+),?(.*)\)$/i, '($2) $1:');
+              if (description.name) {
+                //Remove ID from description if present
+                const parts = description.name.match(/\((\w+),?(.*)\)$/i);
+                if (parts) {
+                  //Save id key for later
+                  idKey = idKeysTranslation(parts[1]);
+                  description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]}) ${idKey}:`);
+                }
+              }
 
               let thisSample;
               //Loop inner samples
@@ -113,6 +126,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                       if (k !== 'value') thisSample[k] = ss[k];
                     });
                   }
+                  //Add id
+                  thisSample[idKey] = idValuesTranslation(id, idKey);
                   //And copy the rest
                   if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
                   else thisSample.value = v;
