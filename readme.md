@@ -163,9 +163,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Fix HUES stream (keep in nested array? Force calculation?) https://github.com/gopro/gpmf-parser#hero7-black-adds-removes-changes-otherwise-supports-all-hero6-metadata
-- improve SCEN labelling: Move value outside of array?
-- SCEN1 why?
 - Merge more than one video file
 
 ## Maybe To-Do
