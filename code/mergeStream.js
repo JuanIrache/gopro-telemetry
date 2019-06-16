@@ -116,6 +116,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 }
                 //And copy the rest
                 if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
+                //And simplify single values
+                if (thisSample.value.length === 1) thisSample.value = thisSample.value[0];
                 else thisSample.value = null;
                 newSamples[id].push(thisSample);
               });
