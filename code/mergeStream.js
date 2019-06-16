@@ -101,25 +101,26 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
               let thisSample;
               //Loop inner samples
               (ss.value || []).forEach(v => {
-                //Use fake id 1 to make sure we have timing data form the get go
-                let id = 1;
-                if (v != null && Array.isArray(v)) id = v[0];
-                //Assign first value as ID if not done
-                if (!newSamples[id]) newSamples[id] = [];
-                //Create sample if not done
-                if (!thisSample) {
-                  thisSample = {};
-                  //Copy all keys except the value
-                  Object.keys(ss).forEach(k => {
-                    if (k !== 'value') thisSample[k] = ss[k];
-                  });
+                if (v != null && Array.isArray(v)) {
+                  let id = v[0];
+                  //Assign first value as ID if not done
+                  if (!newSamples[id]) newSamples[id] = [];
+                  //Create sample if not done
+                  if (!thisSample) {
+                    thisSample = {};
+                    //Copy all keys except the value
+                    Object.keys(ss).forEach(k => {
+                      if (k !== 'value') thisSample[k] = ss[k];
+                    });
+                  }
+                  //And copy the rest
+                  if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
+                  else thisSample.value = v;
+                  //And simplify single values
+                  if (Array.isArray(thisSample.value) && thisSample.value.length === 1) thisSample.value = thisSample.value[0];
+                  //Save
+                  newSamples[id].push(thisSample);
                 }
-                //And copy the rest
-                if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
-                //And simplify single values
-                if (Array.isArray(thisSample.value) && thisSample.value.length === 1) thisSample.value = thisSample.value[0];
-                else thisSample.value = null;
-                newSamples[id].push(thisSample);
               });
             });
             const preName = description.name;
