@@ -83,34 +83,44 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             return { samples, description };
           };
 
+          //Simplify Hero7 Labelling style
+          const newStyle = /\[\[([\w,\s]+)\][,\s\.]*\]/;
+          if (description.name && newStyle.test(description.name)) {
+            const inner = description.name.match(newStyle)[1].split(',').map(s => s.trim()).join(',');
+            description.name = description.name.replace(newStyle, `(${inner})`);
+          } 
+
           //Separate multiple samples if needed
           if (multiple) {
             //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
             let newSamples = {};
             samples.forEach(ss => {
               //Remove ID from description if present
-              if (description.name) description.name = description.name.replace(/\(ID,?(.*)\)$/i, '($1)');
+              if (description.name) description.name = description.name.replace(/\((\w+),?(.*)\)$/i, '($2) $1:');
 
               let thisSample;
               //Loop inner samples
               (ss.value || []).forEach(v => {
-                //Use fake id 1 to make sure we have timing data form the get go
-                let id = 1;
-                if (v != null && Array.isArray(v)) id = v[0];
-                //Assign first value as ID if not done
-                if (!newSamples[id]) newSamples[id] = [];
-                //Create sample if not done
-                if (!thisSample) {
-                  thisSample = {};
-                  //Copy all keys except the value
-                  Object.keys(ss).forEach(k => {
-                    if (k !== 'value') thisSample[k] = ss[k];
-                  });
+                if (v != null && Array.isArray(v)) {
+                  let id = v[0];
+                  //Assign first value as ID if not done
+                  if (!newSamples[id]) newSamples[id] = [];
+                  //Create sample if not done
+                  if (!thisSample) {
+                    thisSample = {};
+                    //Copy all keys except the value
+                    Object.keys(ss).forEach(k => {
+                      if (k !== 'value') thisSample[k] = ss[k];
+                    });
+                  }
+                  //And copy the rest
+                  if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
+                  else thisSample.value = v;
+                  //And simplify single values
+                  if (Array.isArray(thisSample.value) && thisSample.value.length === 1) thisSample.value = thisSample.value[0];
+                  //Save
+                  newSamples[id].push(thisSample);
                 }
-                //And copy the rest
-                if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
-                else thisSample.value = null;
-                newSamples[id].push(thisSample);
               });
             });
             const preName = description.name;
