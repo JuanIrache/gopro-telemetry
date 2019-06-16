@@ -80,6 +80,26 @@ function generateStructArr(key) {
   return resultingArr;
 }
 
+//Convert some keys and values to human readable, based on documentation, no internal data
+function idKeysTranslation(key) {
+  return key.replace(/_?FOUR_?CC/i, '');
+}
+
+function idValuesTranslation(val, key) {
+  const pairs = {
+    CLASSIFIER: {
+      SNOW: 'snow',
+      URBA: 'urban',
+      INDO: 'indoor',
+      WATR: 'water',
+      VEGE: 'vegetation',
+      BEAC: 'beach'
+    }
+  };
+  if (pairs[key]) return pairs[key][val] || val;
+  return val;
+}
+
 module.exports = {
   keyAndStructParser,
   types,
@@ -88,5 +108,7 @@ module.exports = {
   ignore,
   stickyTranslations,
   generateStructArr,
-  mgjsonMaxArrs
+  mgjsonMaxArrs,
+  idKeysTranslation,
+  idValuesTranslation
 };
