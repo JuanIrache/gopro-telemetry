@@ -3,6 +3,7 @@
 const deduceHeaders = require('./deduceHeaders');
 const padStringNumber = require('./padStringNumber');
 const bigStr = require('./bigStr');
+const { mgjsonMaxArrs } = require('./keys');
 
 //After Effects can't read larger numbers
 const largestMGJSONNum = 2147483648;
@@ -138,12 +139,9 @@ function getGPGS5Data(data) {
           //Find a valid value to base the data structure on
           let validSample = getValidValue(data[key].streams[stream].samples, 'value');
 
-          //Prepare iteration in case we need to loop over samples more than 3 items long
+          //Prepare iteration in case we need to loop over samples more than 3 items long, can be overriden from keys
           let inout;
-          if (Array.isArray(validSample)) inout = { inn: 0, out: 3, total: validSample.length };
-
-          //Force format in FACE keys
-          if (/^FACE\d*$/.test(stream)) inout = { inn: 0, out: 2, total: validSample.length };
+          if (Array.isArray(validSample)) inout = { inn: 0, out: mgjsonMaxArrs[stream.slice(0, 4)] || 3, total: validSample.length };
 
           //Loop until all values are sorted. In most cases just once, decide break at the end
           for (;;) {
@@ -257,11 +255,6 @@ function getGPGS5Data(data) {
               const diff = inout.out - inout.inn;
               inout.inn = inout.out;
               inout.out += diff;
-              //Force skip empty values in FACE keys and go to smile. VERY HACKY
-              if (inout.inn === 6 && /^FACE\d*$/.test(stream) && inout.total > 21) {
-                inout.inn = 21;
-                inout.out = 22;
-              }
             } else break;
           }
         }

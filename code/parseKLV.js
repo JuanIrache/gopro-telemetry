@@ -1,5 +1,6 @@
 const { keyAndStructParser, types, mergeStrings } = require('./keys');
 const parseV = require('./parseV');
+const { generateStructArr } = require('./keys');
 
 //quick function to find the last, most relevant fourCC key
 function findLastCC(data, start, end) {
@@ -88,6 +89,42 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
             //Something went wrong, store type for debugging
           } else unknown.add(ks.type);
+
+          //Try to define unknown data based on documentation
+          if (ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
+            //Create the string for inside the parenthesis, and remove nulls
+            let extraDescription = generateStructArr(ks.fourCC).filter(v => v != null);
+            let newValueArr = [];
+            //Loop partial results
+            partialResult.forEach((p, i) => {
+              //Will become the description if it's the most comprehensive one
+              let descCandidate = [];
+              let newP = [];
+              //Loop the keys in the description
+              generateStructArr(ks.fourCC).forEach((e, ii) => {
+                //For nested arrays
+                if (Array.isArray(p) && e != null) {
+                  //Push label and value if not null (in order to get rid of unused data)
+                  descCandidate.push(e);
+                  newP.push(p[ii]);
+                  //And for values, push first label
+                } else if (ii === 0 && e != null) descCandidate.push(e);
+              });
+              //Save new values if worth it
+              if (newP.length) partialResult[i] = newP;
+              if (descCandidate.length > extraDescription.length) extraDescription = descCandidate;
+            });
+
+            if (newValueArr.length) partialResult[0] = newValueArr;
+            if (extraDescription.length) {
+              const extraDescString = extraDescription.join(',');
+              if (!/\(.+\)$/.test(result.STNM)) {
+                result.STNM = `${result.STNM || ''} (${extraDescString})`;
+              } else if (result.STNM.match(/\((.+)\)$/)[1].length < extraDescString.length) {
+                result.STNM.replace(/\(.+\)$/, `(${extraDescString})`);
+              }
+            }
+          }
 
           //Handle data with multiple samples. Not easy
           if (result.hasOwnProperty(ks.fourCC)) {
