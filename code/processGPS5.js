@@ -24,7 +24,7 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix, geoidHeight 
   if (!ellipsoid || geoidHeight || GPS5Fix != null || GPS5Precision != null) {
     (result.DEVC || []).forEach((d, i, { length }) => {
       //First loop to find a suitable value
-      for (let i = d.STRM.length - 1; i >= 0; i--) {
+      for (let i = (d.STRM || []).length - 1; i >= 0; i--) {
         //Delete streams that do not pass the test
         if (d.STRM[i].GPS5 && !approveStream(d.STRM[i])) d.STRM.splice(i, 1);
         else if (
