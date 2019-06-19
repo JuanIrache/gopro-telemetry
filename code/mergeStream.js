@@ -119,8 +119,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                       if (k !== 'value') thisSample[k] = ss[k];
                     });
                   }
-                  //Add id
-                  thisSample[idKey] = idValuesTranslation(id, idKey);
+
                   //And copy the rest
                   if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
                   else thisSample.value = v;
@@ -134,6 +133,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             const preName = description.name;
             for (const key in newSamples) {
               description.name = preName + ' ' + key;
+              //Add id
+              description[idKey] = idValuesTranslation(key, idKey);
               let desc = description;
               if (repeatHeaders) {
                 const newResults = workOnHeaders(newSamples[key], description);
