@@ -1,5 +1,5 @@
 const { translations, names, knownMulti } = require('./keys');
-const hero7labelling = require('./hero7Labelling');
+const hero7Labelling = require('./hero7Labelling');
 
 function deviceList(klv) {
   result = {};
@@ -13,7 +13,7 @@ function deviceList(klv) {
       if (s.interpretSamples && s.interpretSamples !== 'STNM') {
         result[d.DVID].streams[s.interpretSamples] = s.STNM || s.RMRK || names[s.interpretSamples] || s.interpretSamples;
         //Simplify Hero7 Labelling style //And translate ID in cases where multiple values are known(since we haven not looked inside)
-        result[d.DVID].streams[s.interpretSamples] = hero7labelling(
+        result[d.DVID].streams[s.interpretSamples] = hero7Labelling(
           result[d.DVID].streams[s.interpretSamples],
           knownMulti[s.interpretSamples]
         );

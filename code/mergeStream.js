@@ -1,6 +1,6 @@
 const { translations, ignore, stickyTranslations, idKeysTranslation, idValuesTranslation } = require('./keys');
 const deduceHeaders = require('./deduceHeaders');
-const hero7labelling = require('./hero7labelling');
+const hero7Labelling = require('./hero7Labelling');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
@@ -85,7 +85,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           };
 
           //Simplify Hero7 Labelling style
-          description.name = hero7labelling(description.name);
+          description.name = hero7Labelling(description.name);
 
           //Separate multiple samples if needed
           if (multiple) {
