@@ -1,5 +1,6 @@
 const { translations, ignore, stickyTranslations, idKeysTranslation, idValuesTranslation } = require('./keys');
 const deduceHeaders = require('./deduceHeaders');
+const hero7Labelling = require('./hero7Labelling');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
@@ -84,15 +85,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           };
 
           //Simplify Hero7 Labelling style
-          const newStyle = /\[\[([\w,\s]+)\][,\s\.]*\]/;
-          if (description.name && newStyle.test(description.name)) {
-            const inner = description.name
-              .match(newStyle)[1]
-              .split(',')
-              .map(s => s.trim())
-              .join(',');
-            description.name = description.name.replace(newStyle, `(${inner})`);
-          }
+          description.name = hero7Labelling(description.name);
 
           //Separate multiple samples if needed
           if (multiple) {
@@ -126,8 +119,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                       if (k !== 'value') thisSample[k] = ss[k];
                     });
                   }
-                  //Add id
-                  thisSample[idKey] = idValuesTranslation(id, idKey);
+
                   //And copy the rest
                   if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
                   else thisSample.value = v;
@@ -141,6 +133,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             const preName = description.name;
             for (const key in newSamples) {
               description.name = preName + ' ' + key;
+              //Add id
+              description[idKey] = idValuesTranslation(key, idKey);
               let desc = description;
               if (repeatHeaders) {
                 const newResults = workOnHeaders(newSamples[key], description);

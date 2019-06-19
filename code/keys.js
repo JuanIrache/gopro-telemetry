@@ -100,6 +100,37 @@ function idValuesTranslation(val, key) {
   return val;
 }
 
+//Names in case stream is not defined with name
+const names = {
+  ACCL: '3-axis accelerometer',
+  GYRO: '3-axis gyroscope',
+  ISOG: 'Image sensor gain',
+  SHUT: 'Exposure time',
+  GPS5: 'Latitude, longitude, altitude (WGS 84), 2D ground speed, and 3D speed',
+  GPSU: 'UTC time and data from GPS',
+  GPSF: 'GPS Fix',
+  GPSP: 'GPS Precision - Dilution of Precision (DOP x100)',
+  STMP: 'Microsecond timestampes',
+  MAGN: 'Magnetometer',
+  FACE: 'Face detection boundaring boxes',
+  FCNM: 'Faces counted per frame',
+  ISOE: 'Sensor ISO',
+  ALLD: 'Auto Low Light frame Duration',
+  WBAL: 'White Balance in Kelvin',
+  WRGB: 'White Balance RGB gains',
+  YAVG: 'Luma (Y) Average over the frame',
+  HUES: 'Predominant hues over the frame',
+  UNIF: 'Image uniformity',
+  SCEN: 'Scene classifier in probabilities'
+};
+
+//Keys that are known to hold multiple samples per sample
+const knownMulti = {
+  FACE: true,
+  HUES: true,
+  SCEN: true
+};
+
 module.exports = {
   keyAndStructParser,
   types,
@@ -110,5 +141,7 @@ module.exports = {
   generateStructArr,
   mgjsonMaxArrs,
   idKeysTranslation,
-  idValuesTranslation
+  idValuesTranslation,
+  names,
+  knownMulti
 };
