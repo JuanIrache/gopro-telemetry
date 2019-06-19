@@ -1,4 +1,4 @@
-const { translations } = require('./keys');
+const { translations, titles } = require('./keys');
 
 function deviceList(klv) {
   result = {};
@@ -10,8 +10,7 @@ function deviceList(klv) {
     //Add all streams to each device, except for STNM error
     (d.STRM || []).forEach(s => {
       if (s.interpretSamples && s.interpretSamples !== 'STNM')
-        result[d.DVID].streams[s.interpretSamples] =
-          s.STNM || s.RMRK || s.UNIT || s.SIUN || result[d.DVID].streams[s.interpretSamples] || '';
+        result[d.DVID].streams[s.interpretSamples] = s.STNM || s.RMRK || titles[s.interpretSamples] || s.interpretSamples;
     });
   });
   return result;

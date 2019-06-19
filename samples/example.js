@@ -7,7 +7,7 @@ const writeFileAsync = promisify(fs.writeFile);
 async function toJSON(filename) {
   try {
     const file = await readFileAsync(__dirname + filename);
-    const result = goproTelemetry({ rawData: file }, { stream: 'SCEN' });
+    const result = goproTelemetry({ rawData: file }, {});
     await writeFileAsync('./out.json', JSON.stringify(result));
     console.log('File saved');
   } catch (error) {
@@ -17,5 +17,5 @@ async function toJSON(filename) {
 
 //Available files
 //Fusion.raw, hero5.raw, hero6.raw, hero6+ble.raw, karma.raw, hero7.raw
-const filename = '/ignore/difficult.raw';
+const filename = '/Fusion.raw';
 toJSON(filename);

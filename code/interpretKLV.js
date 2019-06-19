@@ -1,3 +1,5 @@
+const { titles } = require('./keys');
+
 //Apply scale and matrix transformations to data
 function interpretKLV(klv, options) {
   let result = JSON.parse(JSON.stringify(klv));
@@ -59,6 +61,12 @@ function interpretKLV(klv, options) {
           }
           s = newS;
         }
+
+        //Add name if missing and possible
+        if (!result.hasOwnProperty('NAME') && titles[result.interpretSamples]) {
+          result.name = titles[result.interpretSamples];
+        }
+
         return s;
       });
       //If we did not interpret, look deeper
