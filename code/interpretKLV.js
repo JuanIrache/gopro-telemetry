@@ -64,8 +64,6 @@ function interpretKLV(klv, options) {
 
         //Add name if missing and possible
         if (!result.hasOwnProperty('STNM') && names[result.interpretSamples]) {
-          console.log(result.interpretSamples);
-
           result.STNM = names[result.interpretSamples];
         }
 
