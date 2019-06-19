@@ -163,6 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Re-merge streams that have been separated by ID? as values of the same stream? SCEN, HUES... maybe even FACE... after timing.
 - Merge more than one video file
 
 ## Maybe To-Do
