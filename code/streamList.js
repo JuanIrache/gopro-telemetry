@@ -1,5 +1,5 @@
 const { translations, names, knownMulti } = require('./keys');
-const hero7labelling = require('./hero7labelling');
+const hero7labelling = require('./hero7Labelling');
 
 function deviceList(klv) {
   result = {};
