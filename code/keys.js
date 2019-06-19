@@ -124,6 +124,13 @@ const titles = {
   SCEN: 'Scene classifier in probabilities'
 };
 
+//Keys that are known to hold multiple samples per sample
+const knownMulti = {
+  FACE: true,
+  HUES: true,
+  SCEN: true
+};
+
 module.exports = {
   keyAndStructParser,
   types,
@@ -135,5 +142,6 @@ module.exports = {
   mgjsonMaxArrs,
   idKeysTranslation,
   idValuesTranslation,
-  titles
+  titles,
+  knownMulti
 };
