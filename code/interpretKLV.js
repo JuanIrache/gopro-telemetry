@@ -1,4 +1,4 @@
-const { titles } = require('./keys');
+const { names } = require('./keys');
 
 //Apply scale and matrix transformations to data
 function interpretKLV(klv, options) {
@@ -63,8 +63,10 @@ function interpretKLV(klv, options) {
         }
 
         //Add name if missing and possible
-        if (!result.hasOwnProperty('NAME') && titles[result.interpretSamples]) {
-          result.name = titles[result.interpretSamples];
+        if (!result.hasOwnProperty('STNM') && names[result.interpretSamples]) {
+          console.log(result.interpretSamples);
+
+          result.STNM = names[result.interpretSamples];
         }
 
         return s;

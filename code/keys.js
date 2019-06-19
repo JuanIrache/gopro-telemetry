@@ -101,7 +101,7 @@ function idValuesTranslation(val, key) {
 }
 
 //Names in case stream is not defined with name
-const titles = {
+const names = {
   ACCL: '3-axis accelerometer',
   GYRO: '3-axis gyroscope',
   ISOG: 'Image sensor gain',
@@ -142,6 +142,6 @@ module.exports = {
   mgjsonMaxArrs,
   idKeysTranslation,
   idValuesTranslation,
-  titles,
+  names,
   knownMulti
 };
