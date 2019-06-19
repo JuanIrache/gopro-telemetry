@@ -163,6 +163,7 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
+- Stream title when no name?
 - Merge more than one video file
 
 ## Maybe To-Do
