@@ -210,7 +210,12 @@ function getGPGS5Data(data) {
                   //If dateStream, save date as string instead of dummy value
                   if (stream === 'dateStream') {
                     if (typeof s.date != 'object') s.date = new Date(s.date);
-                    s.value = s.date.toISOString();
+                    try {
+                      s.value = s.date.toISOString();
+                    } catch (error) {
+                      s.value = s.date;
+                      setImmediate(() => console.error(error.message || error), s.date);
+                    }
                   }
                   sample.value = { length: s.value.length.toString(), str: s.value };
                   setMaxMinPadStr(s.value, dataOutlineChild);
