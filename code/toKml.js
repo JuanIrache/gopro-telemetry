@@ -42,10 +42,18 @@ function getGPGS5Data(data) {
               //Set time if present
               if (s.date != null) {
                 if (typeof s.date != 'object') s.date = new Date(s.date);
-                time = `
+                try {
+                  time = `
             <TimeStamp>
                 <when>${s.date.toISOString()}</when>
             </TimeStamp>`;
+                } catch (error) {
+                  time = `
+            <TimeStamp>
+                <when>${s.date}</when>
+            </TimeStamp>`;
+                  setImmediate(() => console.error(error.message || error), s.date);
+                }
               }
               //Prepare coordinates
               let coords = [s.value[1], s.value[0]];

@@ -55,8 +55,14 @@ function getGPGS5Data(data) {
               //Set time if present
               if (s.date != null) {
                 if (typeof s.date != 'object') s.date = new Date(s.date);
-                time = `
+                try {
+                  time = `
                 <time>${s.date.toISOString()}</time>`;
+                } catch (error) {
+                  time = `
+                <time>${s.date}</time>`;
+                  setImmediate(() => console.error(error.message || error), s.date);
+                }
               }
               //Set speed if present
               if (s.value.length > 4)

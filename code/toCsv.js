@@ -47,7 +47,14 @@ function getGPGS5Data(data) {
               //Add time
               if (s.cts != null) row.push(s.cts);
               if (typeof s.date != 'object') s.date = new Date(s.date);
-              if (s.date != null) row.push(s.date.toISOString());
+              if (s.date != null) {
+                try {
+                  row.push(s.date.toISOString());
+                } catch (error) {
+                  row.push(s.date);
+                  setImmediate(() => console.error(error.message || error), s.date);
+                }
+              }
               //Add all values
               s.value.forEach(v => {
                 if (typeof v === 'number' || typeof v === 'string') row.push(v);
