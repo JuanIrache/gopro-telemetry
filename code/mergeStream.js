@@ -102,7 +102,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]})`);
               }
             }
-            console.log(idKey);
+
             samples.forEach(ss => {
               let thisSample;
               //Loop inner samples
