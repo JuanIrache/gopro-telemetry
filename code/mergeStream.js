@@ -93,17 +93,17 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             let newSamples = {};
             //Dummy id key if none is found
             let idKey = 'id';
-            samples.forEach(ss => {
-              if (description.name) {
-                //Remove ID from description if present
-                const parts = description.name.match(/\((\w+),?(.*)\)$/i);
-                if (parts) {
-                  //Save id key for later
-                  idKey = idKeysTranslation(parts[1]);
-                  description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]}) ${idKey}:`);
-                }
+            if (description.name) {
+              //Remove ID from description if present
+              const parts = description.name.match(/\((\w+),?(.*)\)$/i);
+              if (parts) {
+                //Save id key for later
+                idKey = idKeysTranslation(parts[1]);
+                description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]})`);
               }
+            }
 
+            samples.forEach(ss => {
               let thisSample;
               //Loop inner samples
               (ss.value || []).forEach(v => {
@@ -130,11 +130,9 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 }
               });
             });
-            const preName = description.name;
             for (const key in newSamples) {
-              description.name = preName + ' ' + key;
               //Add id
-              description[idKey] = idValuesTranslation(key, idKey);
+              description.subStreamName = `${idKey}:${idValuesTranslation(key, idKey)}`;
               let desc = description;
               if (repeatHeaders) {
                 const newResults = workOnHeaders(newSamples[key], description);

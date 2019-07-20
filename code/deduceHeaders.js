@@ -6,7 +6,10 @@ module.exports = function({ units, name }, { inn, out } = {}) {
     parts = name.match(/.*\((.+?)\).*/);
     if (parts && parts.length) {
       //Remove parenthesis
-      name = name.replace(/\((.+?)\)/, '').trim();
+      name = name
+        .replace(/\((.+?)\)/, '')
+        .trim()
+        .replace('  ', ' ');
       //Take every value inside parenthesis
       parts = parts[1].split(',').map(p => p.trim());
     } else parts = [];
