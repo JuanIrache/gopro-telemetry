@@ -96,8 +96,8 @@ module.exports = function(data, { name }) {
 <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="https://github.com/juanirache/gopro-telemetry">
     <trk>
         <name>${name}</name>
-        <src>${converted.device}</src>
         <desc>${converted.description}</desc>
+        <src>${converted.device}</src>
         <trkseg>
             ${converted.inner.trim()}
         </trkseg>
