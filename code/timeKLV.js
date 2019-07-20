@@ -9,7 +9,8 @@ function toDate(d) {
     SEC = 6,
     MIL = 7;
   let parts = d.match(regex);
-  if (parts) return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL]));
+  if (parts)
+    return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL])).getTime();
   return null;
 }
 
@@ -38,9 +39,9 @@ function fillGPSTime(klv, options) {
       }
     }
 
-    if (date) {
+    if (date != null) {
       //Set date for first packet
-      if (!initialDate) initialDate = date.getTime();
+      if (initialDate == null) initialDate = date;
       partialRes = { date };
       // Assign duration for previous pack. The last one will lack it
       if (res.length && res[res.length - 1] && res[res.length - 1].date)
@@ -48,7 +49,7 @@ function fillGPSTime(klv, options) {
     }
     if (partialRes) {
       //Deduce starting time from date and push result
-      partialRes.cts = partialRes.date.getTime() - initialDate;
+      partialRes.cts = partialRes.date - initialDate;
       res.push(partialRes);
     } else {
       res.push(null);
@@ -67,7 +68,7 @@ function fillGPSTime(klv, options) {
         // Look for the next valild date
         if (res[i + x] && res[i + x].date) {
           //And interpolate to find the previous one
-          res[i - 1].duration = (res[i + x].date.getTime() - res[i - 1].date.getTime()) / x;
+          res[i - 1].duration = (res[i + x].date - res[i - 1].date) / x;
           //Duration set, remove from missingDurations
           const index = missingDurations.indexOf(i - 1);
           if (index !== -1) missingDurations.splice(index, 1);
@@ -82,8 +83,8 @@ function fillGPSTime(klv, options) {
       }
       if (res[i - 1].duration != null) {
         // Deduce date and starting time form previous date and duration
-        res[i] = { date: new Date(res[i - 1].date.getTime() + res[i - 1].duration) };
-        res[i].cts = res[i].date.getTime() - initialDate;
+        res[i] = { date: res[i - 1].date + res[i - 1].duration };
+        res[i].cts = res[i].date - initialDate;
         missingDurations.push(i);
       }
     }
@@ -91,7 +92,7 @@ function fillGPSTime(klv, options) {
 
   //Fill missing durations
   missingDurations.forEach(i => {
-    if (res[i + 1] && res[i + 1].date) res[i].duration = res[i + 1].date.getTime() - res[i].date.getTime();
+    if (res[i + 1] && res[i + 1].date) res[i].duration = res[i + 1].date - res[i].date;
   });
 
   //If only one group of samples, invent duration to get at least some useful results
@@ -125,7 +126,7 @@ function fillMP4Time(klv, timing, options) {
       if (i + 1 < klv.DEVC.length) partialRes.duration = res[i - 1].duration;
     }
     //Deduce the date by adding the starting time to the initial date, and push
-    partialRes.date = new Date(initialDate + partialRes.cts);
+    partialRes.date = initialDate + partialRes.cts;
     res.push(partialRes);
   });
 
@@ -171,6 +172,7 @@ function timeKLV(klv, timing, options) {
             const fourCC = s.interpretSamples;
             //Divide duration of packet by samples in packet to get sample duration per fourCC type
             if (duration != null) sDuration[fourCC] = duration / s[fourCC].length;
+
             //The same for duration of dates
             if (dateDur != null) dateSDur[fourCC] = dateDur / s[fourCC].length;
             //We know the time and date of the first sample
@@ -202,10 +204,10 @@ function timeKLV(klv, timing, options) {
                 let timedSample = { value };
                 //Filter out if timeOut option, but keep cts if needed for merging times
                 if (options.timeOut !== 'date' || options.groupTimes) timedSample.cts = currCts;
-                if (options.timeOut !== 'cts') timedSample.date = currDate;
+                if (options.timeOut !== 'cts') timedSample.date = new Date(currDate);
                 //increment time and date for the next sample and compensate time offset
                 currCts += sDuration[fourCC] - timoDur;
-                currDate = new Date(currDate.getTime() + dateSDur[fourCC] - timoDur);
+                currDate += dateSDur[fourCC] - timoDur;
 
                 return timedSample;
                 //Otherwise return value without timing data
