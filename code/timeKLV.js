@@ -193,7 +193,7 @@ function timeKLV(klv, timing, options) {
                 timoDur = (100 * timoDiff) / s[fourCC].length;
               }
               //And compensate date
-              currDate = new Date(currDate - s.TIMO * 1000);
+              currDate = currDate - s.TIMO * 1000;
               delete s.TIMO;
             }
 
