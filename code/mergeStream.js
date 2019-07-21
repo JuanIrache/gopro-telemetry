@@ -125,7 +125,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 const newSample = { ...ss, value: [] };
                 (ss.value || []).forEach((v, x) => {
                   if (v != null && Array.isArray(v)) {
-                    headers[x] = v[0];
+                    headers[x] = idValuesTranslation(v[0], idKey);
                     newSample.value.push(v[1]);
                   }
                 });
