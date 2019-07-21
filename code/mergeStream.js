@@ -89,7 +89,11 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
 
           //This bit saved as function for more than one condition to use it
           const completeSample = ({ samples, description }) => {
-            //aqui check what happens with repeatheaders here
+            if (repeatHeaders) {
+              const newResults = workOnHeaders(samples, description);
+              samples = newResults.samples;
+              description = newResults.description;
+            }
             //Add samples to stream entry
             if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
             else result.streams[fourCC] = { samples, ...description };
@@ -179,7 +183,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                 else result.streams[fourCC + key] = { samples: newSamples[key], ...desc };
               }
             }
-          } else completeSample(newResults);
+          } else completeSample({ samples, description });
         }
       }
     });
