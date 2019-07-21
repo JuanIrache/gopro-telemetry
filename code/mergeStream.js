@@ -87,63 +87,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           //Simplify Hero7 Labelling style
           description.name = hero7Labelling(description.name);
 
-          //Separate multiple samples if needed
-          if (multiple) {
-            //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
-            let newSamples = {};
-            //Dummy id key if none is found
-            let idKey = 'id';
-            if (description.name) {
-              //Remove ID from description if present
-              const parts = description.name.match(/\((\w+),?(.*)\)$/i);
-              if (parts) {
-                //Save id key for later
-                idKey = idKeysTranslation(parts[1]);
-                description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]})`);
-              }
-            }
-
-            samples.forEach(ss => {
-              let thisSample;
-              //Loop inner samples
-              (ss.value || []).forEach(v => {
-                if (v != null && Array.isArray(v)) {
-                  let id = v[0];
-                  //Assign first value as ID if not done
-                  if (!newSamples[id]) newSamples[id] = [];
-                  //Create sample if not done
-                  if (!thisSample) {
-                    thisSample = {};
-                    //Copy all keys except the value
-                    Object.keys(ss).forEach(k => {
-                      if (k !== 'value') thisSample[k] = ss[k];
-                    });
-                  }
-
-                  //And copy the rest
-                  if (v != null && Array.isArray(v)) thisSample.value = v.slice(1);
-                  else thisSample.value = v;
-                  //And simplify single values
-                  if (Array.isArray(thisSample.value) && thisSample.value.length === 1) thisSample.value = thisSample.value[0];
-                  //Save
-                  newSamples[id].push(thisSample);
-                }
-              });
-            });
-            for (const key in newSamples) {
-              //Add id
-              description.subStreamName = `${idKey}:${idValuesTranslation(key, idKey)}`;
-              let desc = description;
-              if (repeatHeaders) {
-                const newResults = workOnHeaders(newSamples[key], description);
-                newSamples[key] = newResults.samples;
-                desc = newResults.description;
-              }
-              //Add samples to stream entry
-              if (result.streams[fourCC + key]) result.streams[fourCC + key].samples.push(...newSamples[key]);
-              else result.streams[fourCC + key] = { samples: newSamples[key], ...desc };
-            }
-          } else {
+          //This bit saved as function for more than one condition to use it
+          const completeSample = ({ samples, description }) => {
             if (repeatHeaders) {
               const newResults = workOnHeaders(samples, description);
               samples = newResults.samples;
@@ -152,7 +97,93 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             //Add samples to stream entry
             if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
             else result.streams[fourCC] = { samples, ...description };
-          }
+          };
+
+          //Separate multiple samples if needed
+          if (multiple) {
+            //We are assuming the first value is the ID, as it happens with FACES, this might be completely wrong
+            let newSamples = {};
+            //Dummy id key if none is found
+            let idKey = 'id';
+            let parts;
+            if (description.name) {
+              //Remove ID from description if present
+              parts = description.name.match(/\((\w+),?(.*)\)$/i);
+              if (parts) {
+                //Save id key for later
+                idKey = idKeysTranslation(parts[1]);
+              }
+            }
+
+            if (samples[0].value[0] && samples[0].value[0].length === 2) {
+              //keep everything in 1 stream, just label it
+              const headers = [];
+              const newSamples = [];
+              //Grab the id of each substream, save it for the description, and save the second value as the only value
+              samples.forEach((ss, i) => {
+                //Loop inner samples
+                const newSample = { ...ss, value: [] };
+                (ss.value || []).forEach((v, x) => {
+                  if (v != null && Array.isArray(v)) {
+                    headers[x] = v[0];
+                    newSample.value.push(v[1]);
+                  }
+                });
+
+                newSamples.push(newSample);
+              });
+
+              if (parts) {
+                //Add previously known units to description
+                description.name = description.name.replace(/\((\w+),?(.*)\)$/i, ` | ${idKey}`);
+                description.units = parts[2].split(',').map(p => p.trim());
+              }
+              //Add new keys
+              description.name += ` (${headers.join(',')})`;
+
+              completeSample({ samples: newSamples, description });
+            } else {
+              //Split stream in substreams
+              if (parts) description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]})`);
+
+              samples.forEach(ss => {
+                //Loop inner samples
+                (ss.value || []).forEach(v => {
+                  if (v != null && Array.isArray(v)) {
+                    let id = v[0];
+                    //Assign first value as ID if not done
+                    if (!newSamples[id]) newSamples[id] = [];
+
+                    let thisSample = {};
+                    //Copy all keys except the value
+                    Object.keys(ss).forEach(k => {
+                      if (k !== 'value') thisSample[k] = ss[k];
+                    });
+
+                    //And copy the rest
+                    thisSample.value = v.slice(1);
+                    //And simplify single values
+                    if (Array.isArray(thisSample.value) && thisSample.value.length === 1) thisSample.value = thisSample.value[0];
+                    //Save
+                    newSamples[id].push(thisSample);
+                  }
+                });
+              });
+              for (const key in newSamples) {
+                //Add id
+                description.subStreamName = `${idKey}:${idValuesTranslation(key, idKey)}`;
+                let desc = description;
+                if (repeatHeaders) {
+                  const newResults = workOnHeaders(newSamples[key], description);
+                  newSamples[key] = newResults.samples;
+                  desc = newResults.description;
+                }
+                //Add samples to stream entry
+                if (result.streams[fourCC + key]) result.streams[fourCC + key].samples.push(...newSamples[key]);
+                else result.streams[fourCC + key] = { samples: newSamples[key], ...desc };
+              }
+            }
+          } else completeSample({ samples, description });
         }
       }
     });
