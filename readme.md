@@ -163,7 +163,6 @@ If you liked this you might like other [creative coding projects](https://tailor
 
 ## To-Do
 
-- Consider using camera time instead of gps time for mgjson and other presets. It appears to be more reliable
 - Merge more than one video file
 - Hardcode (r,g,b) in rgb gains output?
 - Accept rawdata as input
