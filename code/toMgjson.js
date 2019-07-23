@@ -37,7 +37,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
     dataType: { type },
     //We apply (linear) interpolation to numeric values only
     interpolation: type === 'paddedString' ? 'hold' : 'linear',
-    hasExpectedFrequencyB: false,
+    hasExpectedFrequecyB: false,
     //Some values will be set afterwards
     sampleCount: null,
     matchName
