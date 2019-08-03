@@ -163,11 +163,13 @@ If you liked this you might like some of our [app prototyping](https://prototypi
 
 ## To-Do
 
-- Re-merge streams that have been separated by ID? as values of the same stream? SCEN, HUES... maybe even FACE... after timing.
 - Merge more than one video file
+- Hardcode (r,g,b) in rgb gains output?
+- Accept rawdata as input
 
 ## Maybe To-Do
 
+- Modify binary data: https://www.npmjs.com/package/binary-parser-encoder
 - Keep klv types and scaling to identify what are integers and what are floats and avoid smoothing/interpolation when int?
 - Compute properties? Distance, turns, vibration, statistics...?
 - Improve accuracy like GetGPMFSampleRate in https://github.com/gopro/gpmf-parser/blob/master/demo/GPMF_mp4reader.c

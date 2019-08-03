@@ -37,7 +37,7 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
     dataType: { type },
     //We apply (linear) interpolation to numeric values only
     interpolation: type === 'paddedString' ? 'hold' : 'linear',
-    hasExpectedFrequencyB: false,
+    hasExpectedFrequecyB: false,
     //Some values will be set afterwards
     sampleCount: null,
     matchName
@@ -128,7 +128,12 @@ function getGPGS5Data(data) {
         if (data[key].streams[stream].samples && data[key].streams[stream].samples.length) {
           //Save the stream name for display
           let streamName = stream;
-          if (data[key].streams[stream].name != null) streamName = data[key].streams[stream].name;
+          if (data[key].streams[stream].name != null) {
+            streamName = data[key].streams[stream].name;
+            if (data[key].streams[stream].subStreamName != null) {
+              streamName += ' ' + data[key].streams[stream].subStreamName;
+            }
+          }
           let units;
           if (data[key].streams[stream].units != null) units = data[key].streams[stream].units;
 

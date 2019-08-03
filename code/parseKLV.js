@@ -30,12 +30,12 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   //Remember last key for interpreting data later
   result.interpretSamples = lastCC;
 
-  //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if not raw or lists
+  //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if not raw or lists or timein is MP4
   if (
     parent === 'STRM' &&
     options.stream &&
     !options.stream.includes(lastCC) &&
-    (lastCC != 'GPS5' || options.raw || options.streamList || options.deviceList)
+    (lastCC !== 'GPS5' || options.timeIn === 'MP4' || options.raw || options.streamList || options.deviceList)
   )
     return undefined;
 
