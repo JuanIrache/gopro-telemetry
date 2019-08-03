@@ -159,7 +159,7 @@ These are the available preset formats:
 
 ## More creative coding
 
-If you liked this you might like other [creative coding projects](https://tailorandwayne.com/coding-projects/).
+If you liked this you might like some of our [app prototyping](https://prototyping.barcelona).
 
 ## To-Do
 
