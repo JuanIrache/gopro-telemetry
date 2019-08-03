@@ -159,7 +159,7 @@ These are the available preset formats:
 
 ## More creative coding
 
-If you liked this you might like some of our [app prototyping](https://prototyping.barcelona).
+If you liked this you might like some of my [app prototyping](https://prototyping.barcelona).
 
 ## To-Do
 
