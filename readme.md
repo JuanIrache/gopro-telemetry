@@ -1,6 +1,6 @@
 # GoPro Telemetry
 
-Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later).
+Parses telemetry from the GPMF track in GoPro cameras (Hero5 and later).
 
 Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-telemetry-extractor/).
 
