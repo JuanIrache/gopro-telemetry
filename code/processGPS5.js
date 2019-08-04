@@ -31,7 +31,7 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix, geoidHeight 
           (!ellipsoid || geoidHeight) &&
           d.STRM[i].GPSF != null &&
           d.STRM[i].GPSP != null &&
-          d.STRM[i].GPS5[0] &&
+          d.STRM[i].GPS5 &&
           d.STRM[i].GPS5[0] != null
         ) {
           // Analyse quality of GPS data, and how centered in the dataset time it is
