@@ -44,6 +44,8 @@ function getGPGS5Data(data) {
               }
               //Could potentially add other values to cmt
               if (s.value.length > 3) partialSticky.push(`2dSpeed: ${s.value[3]}`);
+              //Speeds as comment
+              if (s.value.length > 4) partialSticky.push(`3dSpeed: ${s.value[4]}`);
               //Create comment string
               if (partialSticky.length)
                 cmt = `
@@ -64,14 +66,18 @@ function getGPGS5Data(data) {
                   setImmediate(() => console.error(error.message || error), s.date);
                 }
               }
-              //Set speed if present
+              //Set speed if present, in Garmin format: https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd
               if (s.value.length > 4)
                 speed = `
-                <speed>${s.value[4]}</speed>`;
+                <extensions>
+                  <gpxtpx:TrackPointExtension>
+                    <gpxtpx:speed>${s.value[4]}</gpxtpx:speed>
+                  </gpxtpx:TrackPointExtension>
+                </extensions>`;
               //Create sample string
               const partial = `
             <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
-                ${(ele + time + speed + fix + hdop + geoidHeight + cmt).trim()}
+                ${(ele + time + fix + hdop + geoidHeight + speed + cmt).trim()}
             </trkpt>`;
               //Add it to samples
               inner += `${partial}`;
@@ -93,7 +99,7 @@ module.exports = function(data, { name }) {
   if (!converted) return undefined;
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
-<gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="https://github.com/juanirache/gopro-telemetry">
+<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v2" version="1.1" creator="https://github.com/juanirache/gopro-telemetry">
     <trk>
         <name>${name}</name>
         <desc>${converted.description}</desc>
