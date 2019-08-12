@@ -17,9 +17,9 @@ const toMgjson = require('./code/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const setSourceOffset = require('./code/setSourceOffset');
 
-function parseOne(input, opts) {
+function parseOne({ rawData }, opts) {
   //Parse input
-  const parsed = parseKLV(input.rawData, opts);
+  const parsed = parseKLV(rawData, opts);
   if (!parsed.DEVC) {
     const error = new Error('Invalid GPMF data. Root object must contain DEVC key');
     if (opts.tolerant) {
@@ -31,7 +31,7 @@ function parseOne(input, opts) {
   return parsed;
 }
 
-function interpretOne(input, parsed, opts) {
+function interpretOne(timing, parsed, opts) {
   //Group it by device
   const grouped = groupDevices(parsed);
 
@@ -46,7 +46,7 @@ function interpretOne(input, parsed, opts) {
 
   let timed = {};
   //Apply timing (gps and mp4) to every sample
-  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, opts);
+  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], timing, opts);
 
   //Merge samples in sensor entries
   let merged = {};
@@ -71,10 +71,13 @@ function process(input, opts) {
   if (opts.stream && !Array.isArray(opts.stream)) opts.stream = [opts.stream];
 
   let interpreted;
+  let timing;
 
   //Check if input is array of sources
   if (Array.isArray(input) && input.length === 1) input = input[0];
   if (!Array.isArray(input)) {
+    timing = JSON.parse(JSON.stringify(input.timing));
+    timing.start = new Date(timing.start);
     const parsed = parseOne(input, opts);
 
     //Return list of devices/streams only
@@ -84,16 +87,20 @@ function process(input, opts) {
     //Return now if raw wanted
     if (opts.raw) return parsed;
 
-    interpreted = interpretOne(input, parsed, opts);
+    interpreted = interpretOne(timing, parsed, opts);
   } else {
+    let timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
+    timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
     //Sort by in time
-    input = input.sort((a, b) => a.timing.start.getTime() - b.timing.start.getTime());
+    const sortedInput = input
+      .concat()
+      .sort((a, b) => a.timing.start.getTime() - b.timing.start.getTime());
 
     //Loop parse all files, with offsets
     const parsed = [];
-    for (let i = 0; i < input.length; i++) {
-      if (i > 0) setSourceOffset(input[i - 1], input[i]);
-      parsed.push(parseOne(input[i], opts));
+    for (let i = 0; i < sortedInput.length; i++) {
+      if (i > 0) setSourceOffset(timing[i - 1], timing[i]);
+      parsed.push(parseOne(sortedInput[i], opts));
     }
 
     //Return list of devices/streams only
@@ -104,16 +111,18 @@ function process(input, opts) {
     if (opts.raw) return parsed;
 
     //Interpret all
-    const interpretedArr = parsed.map((p, i) => interpretOne(input[i], p, opts));
+    const interpretedArr = parsed.map((p, i) => interpretOne(timing[i], p, opts));
 
     //Merge samples in interpreted obj
     interpreted = mergeInterpretedSources(interpretedArr);
+
+    //Set single timing for rest of outer function
+    timing = timing[0];
   }
 
   //Read framerate to convert groupTimes to number if needed
   if (opts.groupTimes === 'frames') {
-    if (input.timing && input.timing.frameDuration)
-      opts.groupTimes = input.timing.frameDuration * 1000;
+    if (timing && timing.frameDuration) opts.groupTimes = timing.frameDuration * 1000;
     else throw new Error('Frame rate is needed for your current options');
   }
 
@@ -124,8 +133,8 @@ function process(input, opts) {
   if (opts.smooth) interpreted = smoothSamples(interpreted, opts);
 
   //Add framerate to top level
-  if (input.timing && input.timing.frameDuration != null)
-    interpreted['frames/second'] = 1 / input.timing.frameDuration;
+  if (timing && timing.frameDuration != null)
+    interpreted['frames/second'] = 1 / timing.frameDuration;
 
   //Process presets
   if (opts.preset === 'gpx') return toGpx(interpreted, opts);
