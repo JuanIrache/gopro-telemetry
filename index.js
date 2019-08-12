@@ -14,6 +14,8 @@ const toKml = require('./code/toKml');
 const toGeojson = require('./code/toGeojson');
 const toCsv = require('./code/toCsv');
 const toMgjson = require('./code/toMgjson');
+const mergeInterpretedSources = require('./code/mergeInterpretedSources');
+const setSourceOffset = require('./code/setSourceOffset');
 
 function parseOne(input, opts) {
   //Parse input
@@ -84,6 +86,28 @@ function process(input, opts) {
 
     interpreted = interpretOne(input, parsed, opts);
   } else {
+    //Sort by in time
+    input = input.sort((a, b) => a.timing.start.getTime() - b.timing.start.getTime());
+
+    //Loop parse all files, with offsets
+    const parsed = [];
+    for (let i = 0; i < input.length; i++) {
+      if (i > 0) setSourceOffset(input[i - 1], input[i]);
+      parsed.push(parseOne(input[i], opts));
+    }
+
+    //Return list of devices/streams only
+    if (opts.deviceList) return parsed.map(p => deviceList(p));
+    if (opts.streamList) return parsed.map(p => streamList(p));
+
+    //Return now if raw wanted
+    if (opts.raw) return parsed;
+
+    //Interpret all
+    const interpretedArr = parsed.map((p, i) => interpretOne(input[i], p, opts));
+
+    //Merge samples in interpreted obj
+    interpreted = mergeInterpretedSources(interpretedArr);
   }
 
   //Read framerate to convert groupTimes to number if needed
