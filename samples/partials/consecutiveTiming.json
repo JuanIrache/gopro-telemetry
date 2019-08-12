@@ -1,0 +1,16 @@
+[
+  {
+    "samples": [{ "cts": 0, "duration": 1040 }, { "cts": 1040, "duration": 1440 }],
+    "start": "2019-08-12T17:40:37.000Z",
+    "frameDuration": 0.04
+  },
+  {
+    "samples": [
+      { "cts": 0, "duration": 1040 },
+      { "cts": 1040, "duration": 1040 },
+      { "cts": 2080, "duration": 1680 }
+    ],
+    "start": "2019-08-12T17:40:44.000Z",
+    "frameDuration": 0.04
+  }
+]

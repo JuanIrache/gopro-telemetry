@@ -14,22 +14,12 @@ const toKml = require('./code/toKml');
 const toGeojson = require('./code/toGeojson');
 const toCsv = require('./code/toCsv');
 const toMgjson = require('./code/toMgjson');
+const mergeInterpretedSources = require('./code/mergeInterpretedSources');
+const setSourceOffset = require('./code/setSourceOffset');
 
-function process(input, opts) {
-  //Prepare presets
-  if (presetsOpts[opts.preset]) {
-    opts = { ...opts, ...presetsOpts.general.mandatory, ...presetsOpts[opts.preset].mandatory };
-    //Only pick the non mandatory options when the user did not specify them
-    for (const key in presetsOpts.general.preferred) if (opts[key] == null) opts[key] = presetsOpts.general.preferred[key];
-    for (const key in presetsOpts[opts.preset].preferred) if (opts[key] == null) opts[key] = presetsOpts[opts.preset].preferred[key];
-  }
-
-  //Create filter arrays if user didn't
-  if (opts.device && !Array.isArray(opts.device)) opts.device = [opts.device];
-  if (opts.stream && !Array.isArray(opts.stream)) opts.stream = [opts.stream];
-
+function parseOne({ rawData }, opts) {
   //Parse input
-  const parsed = parseKLV(input.rawData, opts);
+  const parsed = parseKLV(rawData, opts);
   if (!parsed.DEVC) {
     const error = new Error('Invalid GPMF data. Root object must contain DEVC key');
     if (opts.tolerant) {
@@ -38,13 +28,10 @@ function process(input, opts) {
     } else throw error;
   }
 
-  //Return list of devices/streams only
-  if (opts.deviceList) return deviceList(parsed);
+  return parsed;
+}
 
-  if (opts.streamList) return streamList(parsed);
-
-  //Return now if raw wanted
-  if (opts.raw) return parsed;
+function interpretOne(timing, parsed, opts) {
   //Group it by device
   const grouped = groupDevices(parsed);
 
@@ -59,35 +46,108 @@ function process(input, opts) {
 
   let timed = {};
   //Apply timing (gps and mp4) to every sample
-  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], input.timing, opts);
+  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], timing, opts);
 
   //Merge samples in sensor entries
   let merged = {};
   for (const key in timed) merged[key] = mergeStream(timed[key], opts);
 
+  return merged;
+}
+
+function process(input, opts) {
+  //Prepare presets
+  if (presetsOpts[opts.preset]) {
+    opts = { ...opts, ...presetsOpts.general.mandatory, ...presetsOpts[opts.preset].mandatory };
+    //Only pick the non mandatory options when the user did not specify them
+    for (const key in presetsOpts.general.preferred)
+      if (opts[key] == null) opts[key] = presetsOpts.general.preferred[key];
+    for (const key in presetsOpts[opts.preset].preferred)
+      if (opts[key] == null) opts[key] = presetsOpts[opts.preset].preferred[key];
+  }
+
+  //Create filter arrays if user didn't
+  if (opts.device && !Array.isArray(opts.device)) opts.device = [opts.device];
+  if (opts.stream && !Array.isArray(opts.stream)) opts.stream = [opts.stream];
+
+  let interpreted;
+  let timing;
+
+  //Check if input is array of sources
+  if (Array.isArray(input) && input.length === 1) input = input[0];
+  if (!Array.isArray(input)) {
+    if (input.timing) {
+      timing = JSON.parse(JSON.stringify(input.timing));
+      timing.start = new Date(timing.start);
+    }
+    const parsed = parseOne(input, opts);
+
+    //Return list of devices/streams only
+    if (opts.deviceList) return deviceList(parsed);
+    if (opts.streamList) return streamList(parsed);
+
+    //Return now if raw wanted
+    if (opts.raw) return parsed;
+
+    interpreted = interpretOne(timing, parsed, opts);
+  } else {
+    if (input.some(i => !i.timing))
+      throw new Error('per-source timing is necessary in order to merge sources');
+    let timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
+    timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
+    //Sort by in time
+    const sortedInput = input
+      .concat()
+      .sort((a, b) => a.timing.start.getTime() - b.timing.start.getTime());
+
+    //Loop parse all files, with offsets
+    const parsed = [];
+    for (let i = 0; i < sortedInput.length; i++) {
+      if (i > 0) setSourceOffset(timing[i - 1], timing[i]);
+      parsed.push(parseOne(sortedInput[i], opts));
+    }
+
+    //Return list of devices/streams only
+    if (opts.deviceList) return parsed.map(p => deviceList(p));
+    if (opts.streamList) return parsed.map(p => streamList(p));
+
+    //Return now if raw wanted
+    if (opts.raw) return parsed;
+
+    //Interpret all
+    const interpretedArr = parsed.map((p, i) => interpretOne(timing[i], p, opts));
+
+    //Merge samples in interpreted obj
+    interpreted = mergeInterpretedSources(interpretedArr);
+
+    //Set single timing for rest of outer function
+    timing = timing[0];
+  }
+
   //Read framerate to convert groupTimes to number if needed
   if (opts.groupTimes === 'frames') {
-    if (input.timing && input.timing.frameDuration) opts.groupTimes = input.timing.frameDuration * 1000;
+    if (timing && timing.frameDuration) opts.groupTimes = timing.frameDuration * 1000;
     else throw new Error('Frame rate is needed for your current options');
   }
 
   //Group samples by time if necessary
-  if (opts.groupTimes) merged = groupTimes(merged, opts);
+  if (opts.groupTimes) interpreted = groupTimes(interpreted, opts);
 
   //Group samples by time if necessary
-  if (opts.smooth) merged = smoothSamples(merged, opts);
+  if (opts.smooth) interpreted = smoothSamples(interpreted, opts);
 
   //Add framerate to top level
-  if (input.timing && input.timing.frameDuration != null) merged['frames/second'] = 1 / input.timing.frameDuration;
+  if (timing && timing.frameDuration != null)
+    interpreted['frames/second'] = 1 / timing.frameDuration;
 
   //Process presets
-  if (opts.preset === 'gpx') return toGpx(merged, opts);
-  if (opts.preset === 'kml') return toKml(merged, opts);
-  if (opts.preset === 'geojson') return toGeojson(merged, opts);
-  if (opts.preset === 'csv') return toCsv(merged);
-  if (opts.preset === 'mgjson') return toMgjson(merged, opts);
+  if (opts.preset === 'gpx') return toGpx(interpreted, opts);
+  if (opts.preset === 'kml') return toKml(interpreted, opts);
+  if (opts.preset === 'geojson') return toGeojson(interpreted, opts);
+  if (opts.preset === 'csv') return toCsv(interpreted);
+  if (opts.preset === 'mgjson') return toMgjson(interpreted, opts);
 
-  return merged;
+  return interpreted;
 }
 
 module.exports = function(input, options = {}) {

@@ -59,7 +59,7 @@ All options default to _null/false_. Using filters to retrieve the desired resul
 Example:
 
 ```js
-const telemetry = goproTelemetry(rawData, { stream: ['ACCL'], repeatSticky: true });
+const telemetry = goproTelemetry({ rawData, timing }, { stream: ['ACCL'], repeatSticky: true });
 ```
 
 This slightly more comprehensive example includes the data extraction step with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
@@ -91,6 +91,17 @@ gpmfExtract(file)
      { cts: 2002, duration: 1001 },
      { cts: 3003, duration: 1001 },
      { cts: 4004, duration: 1001 } ] }
+```
+
+## Merging consecutive files
+
+GoPros split very long videos in multiple files. In order to generate a single metadata output you can provide the data as an array of objects with data and timing information. Note that usually the last 1-2 seconds of a video file do not include metadata. In some cases this might create a noticeable gap.
+
+```js
+const telemetry = goproTelemetry([
+  { rawData: file1Data, timing: file1Timing },
+  { rawData: file2Data, timing: file2Timing }
+]);
 ```
 
 ## Output
@@ -163,9 +174,9 @@ If you liked this you might like some of my [app prototyping](https://prototypin
 
 ## To-Do
 
-- Merge more than one video file
-- Hardcode (r,g,b) in rgb gains output?
+- Provide progress
 - Accept rawdata as input
+- Hardcode (r,g,b) in rgb gains output?
 
 ## Maybe To-Do
 
