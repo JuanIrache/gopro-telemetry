@@ -163,9 +163,10 @@ If you liked this you might like some of my [app prototyping](https://prototypin
 
 ## To-Do
 
-- Merge more than one video file
-- Hardcode (r,g,b) in rgb gains output?
+- Document merging files
+- Test merging files
 - Accept rawdata as input
+- Hardcode (r,g,b) in rgb gains output?
 
 ## Maybe To-Do
 
