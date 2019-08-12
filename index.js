@@ -76,8 +76,10 @@ function process(input, opts) {
   //Check if input is array of sources
   if (Array.isArray(input) && input.length === 1) input = input[0];
   if (!Array.isArray(input)) {
-    timing = JSON.parse(JSON.stringify(input.timing));
-    timing.start = new Date(timing.start);
+    if (input.timing) {
+      timing = JSON.parse(JSON.stringify(input.timing));
+      timing.start = new Date(timing.start);
+    }
     const parsed = parseOne(input, opts);
 
     //Return list of devices/streams only
@@ -89,6 +91,8 @@ function process(input, opts) {
 
     interpreted = interpretOne(timing, parsed, opts);
   } else {
+    if (input.some(i => !i.timing))
+      throw new Error('per-source timing is necessary in order to merge sources');
     let timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
     //Sort by in time
