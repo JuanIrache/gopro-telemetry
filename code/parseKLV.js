@@ -52,7 +52,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       length = ks.size * ks.repeat;
 
       //Abort if we are creating a device list. Or a streamList and We have enough info
-      const done = (options.deviceList && ks.fourCC === 'STRM') || (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
+      const done =
+        (options.deviceList && ks.fourCC === 'STRM') ||
+        (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
       if (!done) {
         let partialResult = [];
         if (length >= 0) {
