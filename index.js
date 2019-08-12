@@ -18,6 +18,8 @@ const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const setSourceOffset = require('./code/setSourceOffset');
 
 function parseOne({ rawData }, opts) {
+  if (opts.provideParsed) return rawData;
+
   //Parse input
   const parsed = parseKLV(rawData, opts);
   if (!parsed.DEVC) {
