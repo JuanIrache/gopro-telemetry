@@ -23,7 +23,17 @@ describe('Testing with hero6+ble.raw file', () => {
   });
 
   test(`hero6+ble.raw should have specific keys`, () => {
-    expect(Object.keys(result['1'].streams)).toEqual(['ACCL', 'GYRO', 'GPS5', 'FACE', 'FCNM', 'ISOE', 'SHUT', 'WBAL', 'WRGB']);
+    expect(Object.keys(result['1'].streams)).toEqual([
+      'ACCL',
+      'GYRO',
+      'GPS5',
+      'FACE',
+      'FCNM',
+      'ISOE',
+      'SHUT',
+      'WBAL',
+      'WRGB'
+    ]);
   });
 });
 
@@ -31,7 +41,10 @@ describe('Testing deeper with hero6+ble file', () => {
   beforeAll(() => {
     filename = 'hero6+ble';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file }, { device: 16778241, stream: 'acc1', repeatSticky: true });
+    result = goproTelemetry(
+      { rawData: file },
+      { device: 16778241, stream: 'acc1', repeatSticky: true }
+    );
   });
 
   test(`repeatSticky should be working for all samples`, () => {
@@ -43,7 +56,10 @@ describe('Testing with hero7 file', () => {
   beforeAll(() => {
     filename = 'hero7';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file }, { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000 });
+    result = goproTelemetry(
+      { rawData: file },
+      { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000 }
+    );
   });
 
   test(`groupTimes should simplify data samples`, () => {
@@ -111,5 +127,32 @@ describe('Testing with Fusion file', () => {
 
   test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
     expect(result['1'].streams.GYRO.samples[0].date).toEqual(new Date('2017-12-31T12:15:25.000Z'));
+  });
+});
+
+describe('Testing joining consecutive files', () => {
+  beforeAll(() => {
+    filename = 'consecutive1';
+    const filename2 = 'consecutive2';
+
+    let timing = JSON.parse(
+      fs.readFileSync(`${__dirname}/../samples/partials/consecutiveTiming.json`)
+    );
+    timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
+
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    const file2 = fs.readFileSync(`${__dirname}/../samples/${filename2}.raw`);
+    result = goproTelemetry([
+      { rawData: file, timing: timing[0] },
+      { rawData: file2, timing: timing[1] }
+    ]);
+  });
+
+  test(`Consecutive files should add samples from two files`, () => {
+    expect(result['1'].streams.ACCL.samples.length).toBe(1092);
+  });
+
+  test(`Consecutive files should keep consecutive cts times`, () => {
+    expect(result['1'].streams.ACCL.samples[1091].cts).toBe(10751.884057971107);
   });
 });

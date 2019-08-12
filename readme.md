@@ -165,6 +165,7 @@ If you liked this you might like some of my [app prototyping](https://prototypin
 
 - Document merging files
 - Test merging files
+- Provide progress
 - Accept rawdata as input
 - Hardcode (r,g,b) in rgb gains output?
 

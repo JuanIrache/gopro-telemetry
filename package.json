@@ -4,7 +4,7 @@
   "description": "Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later) and converts it to multiple formats",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --runInBand -t"
   },
   "repository": {
     "type": "git",
