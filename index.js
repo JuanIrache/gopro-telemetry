@@ -17,8 +17,8 @@ const toMgjson = require('./code/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const setSourceOffset = require('./code/setSourceOffset');
 
-function parseOne({ rawData }, opts) {
-  if (opts.provideParsed) return rawData;
+function parseOne({ rawData, parsedData }, opts) {
+  if (parsedData) return parsedData;
 
   //Parse input
   const parsed = parseKLV(rawData, opts);

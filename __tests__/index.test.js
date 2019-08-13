@@ -156,3 +156,42 @@ describe('Testing joining consecutive files', () => {
     expect(result['1'].streams.ACCL.samples[1091].cts).toBe(10751.884057971107);
   });
 });
+
+describe('Testing reusing parsed data', () => {
+  beforeAll(() => {
+    filename = 'hero6';
+
+    const timing = {
+      frameDuration: 0.03336666666666666,
+      start: new Date('2017-12-31T12:15:25.000Z'),
+      samples: [{ cts: 0, duration: 1001 }]
+    };
+
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    result = [goproTelemetry({ rawData: file, timing })];
+    //Retrieve parsed data with a bunch of options to make sure that does not change the output
+    const parsedData = goproTelemetry(
+      { rawData: file, timing },
+      {
+        raw: true,
+        repeatSticky: true,
+        repeatHeaders: true,
+        timeOut: 'date',
+        timeIn: 'GPS',
+        groupTimes: 1000,
+        disableInterpolation: true,
+        disableMerging: true,
+        smooth: 5,
+        ellipsoid: true,
+        geoidHeight: true,
+        GPS5Precision: 200,
+        GPS5Fix: 3
+      }
+    );
+    result.push(goproTelemetry({ parsedData, timing }));
+  });
+
+  test(`Reused parsed data should output the same as binary data`, () => {
+    expect(JSON.stringify(result[0])).toBe(JSON.stringify(result[1]));
+  });
+});
