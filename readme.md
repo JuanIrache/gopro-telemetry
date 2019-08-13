@@ -93,17 +93,6 @@ gpmfExtract(file)
      { cts: 4004, duration: 1001 } ] }
 ```
 
-## Merging consecutive files
-
-GoPros split very long videos in multiple files. In order to generate a single metadata output you can provide the data as an array of objects with data and timing information. Note that usually the last 1-2 seconds of a video file do not include metadata. In some cases this might create a noticeable gap.
-
-```js
-const telemetry = goproTelemetry([
-  { rawData: file1Data, timing: file1Timing },
-  { rawData: file2Data, timing: file2Timing }
-]);
-```
-
 ## Output
 
 The output with the default options looks like this:
@@ -166,7 +155,29 @@ These are the available preset formats:
 - **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
 - **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 - **csv** (.csv) Comma separated values, readable by Excel and other spreadsheet software. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present).
-- **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. **Experimental**. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
+- **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
+
+## Merging consecutive files
+
+GoPros split very long videos in multiple files. In order to generate a single metadata output you can provide the data as an array of objects with data and timing information. Note that usually the last 1-2 seconds of a video file do not include metadata. In some cases this might create a noticeable gap.
+
+```js
+const telemetry = goproTelemetry([
+  { rawData: file1Data, timing: file1Timing },
+  { rawData: file2Data, timing: file2Timing }
+]);
+```
+
+## Reusing parsed data
+
+The first step in the parsing process is usually the most resource-intensive. To avoid repeating it if you want to apply different options to the same input, you can retrieve the parsed data by using the **raw** option and pass it to in the successive calls as **parsedData** instead of **rawData**.
+
+```js
+const parsedData = goproTelemetry({ rawData, timing }, { raw: true });
+const telemetry = goproTelemetry({ parsedData, timing });
+```
+
+The 'raw' data option is sensitive to the options: **device**, **stream**, **deviceList**, **streamList**, **tolerant**, **debug** and indirectly to some **presets**. Meaning this approach should not be used if any of these options is going to change between calls.
 
 ## More creative coding
 
@@ -175,11 +186,10 @@ If you liked this you might like some of my [app prototyping](https://prototypin
 ## To-Do
 
 - Provide progress
-- Accept rawdata as input
-- Hardcode (r,g,b) in rgb gains output?
 
 ## Maybe To-Do
 
+- Hardcode (r,g,b) in rgb gains output?
 - Modify binary data: https://www.npmjs.com/package/binary-parser-encoder
 - Keep klv types and scaling to identify what are integers and what are floats and avoid smoothing/interpolation when int?
 - Compute properties? Distance, turns, vibration, statistics...?
@@ -188,4 +198,3 @@ If you liked this you might like some of my [app prototyping](https://prototypin
 - Optimise parseKLV performance even more
 - Implement highlight tags? https://github.com/gopro/gpmf-parser/issues/21
 - Round values to fewer decimals optionally?
-- Implement other formats? Real garmin-virb specification?

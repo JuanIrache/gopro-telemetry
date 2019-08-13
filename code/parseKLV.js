@@ -30,12 +30,15 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   //Remember last key for interpreting data later
   result.interpretSamples = lastCC;
 
-  //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if not raw or lists or timein is MP4
+  //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if lists or timein is MP4
   if (
     parent === 'STRM' &&
     options.stream &&
     !options.stream.includes(lastCC) &&
-    (lastCC !== 'GPS5' || options.timeIn === 'MP4' || options.raw || options.streamList || options.deviceList)
+    (lastCC !== 'GPS5' ||
+      (options.timeIn === 'MP4' && !options.raw) ||
+      options.streamList ||
+      options.deviceList)
   )
     return undefined;
 
@@ -49,7 +52,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
       length = ks.size * ks.repeat;
 
       //Abort if we are creating a device list. Or a streamList and We have enough info
-      const done = (options.deviceList && ks.fourCC === 'STRM') || (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
+      const done =
+        (options.deviceList && ks.fourCC === 'STRM') ||
+        (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
       if (!done) {
         let partialResult = [];
         if (length >= 0) {
@@ -80,19 +85,27 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
             //Access the values or single value
             if (ks.repeat > 1) {
-              for (let i = 0; i < ks.repeat; i++) partialResult.push(parseV(environment, start + 8 + i * ks.size, ks.size, specifics));
+              for (let i = 0; i < ks.repeat; i++)
+                partialResult.push(
+                  parseV(environment, start + 8 + i * ks.size, ks.size, specifics)
+                );
             } else partialResult.push(parseV(environment, start + 8, length, specifics));
             //If we just read a TYPE value, store it. Will be necessary in this nest
             if (ks.fourCC === 'TYPE') complexType = unArrayTypes(partialResult[0]);
             //Abort if we are selecting devices and this one is not selected
-            else if (ks.fourCC === 'DVID' && parent === 'DEVC' && options.device && !options.device.includes(partialResult[0]))
+            else if (
+              ks.fourCC === 'DVID' &&
+              parent === 'DEVC' &&
+              options.device &&
+              !options.device.includes(partialResult[0])
+            )
               return undefined;
 
             //Something went wrong, store type for debugging
           } else unknown.add(ks.type);
 
           //Try to define unknown data based on documentation
-          if (!options.raw && ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
+          if (ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
             //Create the string for inside the parenthesis, and remove nulls
             let extraDescription = generateStructArr(ks.fourCC).filter(v => v != null);
             let newValueArr = [];
@@ -151,13 +164,12 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   }
 
   //Undo all arrays except the last key, which should be the array of samples
-  for (const key in result) if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
+  for (const key in result)
+    if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
 
   //If debugging, print unexpected types
-  if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
-
-  //Remove multi if data is for direct delivery
-  if (options.raw) delete result.multi;
+  if (options.debug && unknown.size)
+    setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
 
   return result;
 }
