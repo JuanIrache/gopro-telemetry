@@ -131,6 +131,9 @@ const knownMulti = {
   SCEN: true
 };
 
+//Streams that we can add programmatically based on other data
+const computedStreams = ['dateStream'];
+
 module.exports = {
   keyAndStructParser,
   types,
@@ -143,5 +146,6 @@ module.exports = {
   idKeysTranslation,
   idValuesTranslation,
   names,
-  knownMulti
+  knownMulti,
+  computedStreams
 };

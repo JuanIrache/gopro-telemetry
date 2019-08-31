@@ -2,6 +2,7 @@ const parseKLV = require('./code/parseKLV');
 const groupDevices = require('./code/groupDevices');
 const deviceList = require('./code/deviceList');
 const streamList = require('./code/streamList');
+const keys = require('./code/keys');
 const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
@@ -124,6 +125,15 @@ function process(input, opts) {
 
     //Set single timing for rest of outer function
     timing = timing[0];
+  }
+
+  //Clean unused streams (namely GPS5 used for timing if cached raw data)
+  for (const dev in interpreted) {
+    for (const stream in interpreted[dev].streams) {
+      if (!opts.stream.includes(stream) && !keys.computedStreams.includes(stream)) {
+        delete interpreted[dev].streams[stream];
+      }
+    }
   }
 
   //Read framerate to convert groupTimes to number if needed
