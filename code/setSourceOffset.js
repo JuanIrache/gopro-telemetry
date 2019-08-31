@@ -6,6 +6,6 @@ module.exports = (a, b) => {
   if (nextStart - lastTime < 0) throw new Error('Sources overlap in time. Cannot merge');
   const firstCts = a.samples[0].cts;
   const firstStart = a.start.getTime();
-  const offset = firstCts + nextStart - firstStart;
-  b.samples = b.samples.map(s => ({ ...s, cts: s.cts + offset }));
+  b.offset = firstCts + nextStart - firstStart;
+  b.samples = b.samples.map(s => ({ ...s, cts: s.cts + b.offset }));
 };

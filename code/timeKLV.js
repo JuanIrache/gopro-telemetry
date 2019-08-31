@@ -140,7 +140,7 @@ function fillMP4Time(klv, timing, options) {
       if (i + 1 < klv.DEVC.length) partialRes.duration = res[i - 1].duration;
     }
     //Deduce the date by adding the starting time to the initial date, and push
-    partialRes.date = initialDate + partialRes.cts;
+    partialRes.date = initialDate + partialRes.cts - (timing.offset || 0);
     res.push(partialRes);
   });
 
