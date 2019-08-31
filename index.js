@@ -95,7 +95,7 @@ function process(input, opts) {
   } else {
     if (input.some(i => !i.timing))
       throw new Error('per-source timing is necessary in order to merge sources');
-    let timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
+    timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
     //Sort by in time
     const sortedInput = input
