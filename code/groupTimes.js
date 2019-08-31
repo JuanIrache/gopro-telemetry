@@ -36,8 +36,6 @@ function interpolateSample(samples, i, currentTime) {
 
 //Makes sure there is one sample per each specified time chunk
 module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disableMerging }) {
-  //Copy timeout value for other functions
-  timeOut = timeOut;
   //Copy input
   let result = JSON.parse(JSON.stringify(klv));
   //Loop devices and streams
