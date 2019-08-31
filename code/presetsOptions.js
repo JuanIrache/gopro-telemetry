@@ -22,7 +22,7 @@ module.exports = {
   },
   csv: { mandatory: { dateStream: false }, preferred: {} },
   mgjson: {
-    mandatory: { dateStream: true },
+    mandatory: { dateStream: true, timeOut: null },
     preferred: {
       groupTimes: 'frames',
       disableInterpolation: true,
