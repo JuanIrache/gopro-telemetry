@@ -7,7 +7,10 @@ function process2Vals(vals, prop, k) {
   else if (typeof vals[0] === 'number') return vals[0] + (vals[1] - vals[0]) * prop;
   //If date, calculate proportion
   else if (k === 'date') {
-    return new Date(new Date(vals[0]).getTime() + (new Date(vals[1]).getTime() - new Date(vals[0]).getTime()) * prop);
+    return new Date(
+      new Date(vals[0]).getTime() +
+        (new Date(vals[1]).getTime() - new Date(vals[0]).getTime()) * prop
+    );
     //If object (or more likely array) interpolate the sample properties recursively
   } else if (typeof vals[0] === 'object') {
     let result = JSON.parse(JSON.stringify(vals[0]));
@@ -24,7 +27,9 @@ function interpolateSample(samples, i, currentTime) {
   //How much we need to move from i towards i+1
   const proportion = (currentTime - baseTime) / difference;
   //Get all unique keys
-  const keys = new Set([samples[i], samples[i + 1]].reduce((acc, curr) => acc.concat(Object.keys(curr)), []));
+  const keys = new Set(
+    [samples[i], samples[i + 1]].reduce((acc, curr) => acc.concat(Object.keys(curr)), [])
+  );
   let result = Array.isArray(samples[0]) ? [] : {};
   //Loop the keys
   keys.forEach(k => {
@@ -68,9 +73,11 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disa
             //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
             if (group.length > 1) newSamples.push(reduceSamples(group));
             else if (group.length === 1) newSamples.push(group[0]);
-            else if (i > 0 && i < samples.length && !disableInterpolation) newSamples.push(interpolateSample(samples, i - 1, currentTime));
+            else if (i > 0 && i < samples.length && !disableInterpolation)
+              newSamples.push(interpolateSample(samples, i - 1, currentTime));
             //If cts was temporary, remove it
-            if (timeOut === 'date' && newSamples.length) delete newSamples[newSamples.length - 1].cts;
+            if (timeOut === 'date' && newSamples.length)
+              delete newSamples[newSamples.length - 1].cts;
             //Add time to analyse next chunk
             currentTime += groupTimes;
           }
