@@ -178,7 +178,7 @@ describe('Testing reusing parsed data', () => {
         repeatHeaders: true,
         timeOut: 'date',
         timeIn: 'GPS',
-        groupTimes: 1000,
+        groupTimes: 'frames',
         disableInterpolation: true,
         disableMerging: true,
         smooth: 5,

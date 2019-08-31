@@ -73,7 +73,8 @@ function generateStructArr(key) {
   let resultingArr = [];
   str.split(',').forEach(w => {
     if (/.+\[\d+\]$/.test(w)) {
-      for (let i = 0; i < w.match(/(.+)\[(\d+)\]$/)[2]; i++) resultingArr.push(w.match(/(.+)\[(\d+)\]$/)[1]);
+      for (let i = 0; i < w.match(/(.+)\[(\d+)\]$/)[2]; i++)
+        resultingArr.push(w.match(/(.+)\[(\d+)\]$/)[1]);
     } else resultingArr.push(w);
   });
   resultingArr = resultingArr.map(v => (v === 'unused' ? null : v));
@@ -131,6 +132,9 @@ const knownMulti = {
   SCEN: true
 };
 
+//Streams that we can add programmatically based on other data
+const computedStreams = ['dateStream'];
+
 module.exports = {
   keyAndStructParser,
   types,
@@ -143,5 +147,6 @@ module.exports = {
   idKeysTranslation,
   idValuesTranslation,
   names,
-  knownMulti
+  knownMulti,
+  computedStreams
 };

@@ -10,7 +10,17 @@ function toDate(d) {
     MIL = 7;
   let parts = d.match(regex);
   if (parts)
-    return new Date(Date.UTC('20' + parts[YEAR], parts[MONTH] - 1, parts[DAY], parts[HOUR], parts[MIN], parts[SEC], parts[MIL])).getTime();
+    return new Date(
+      Date.UTC(
+        '20' + parts[YEAR],
+        parts[MONTH] - 1,
+        parts[DAY],
+        parts[HOUR],
+        parts[MIN],
+        parts[SEC],
+        parts[MIL]
+      )
+    ).getTime();
   return null;
 }
 
@@ -108,7 +118,11 @@ function fillMP4Time(klv, timing, options) {
   if (options.timeIn === 'GPS') return res;
   //Invent timing data if missing
   if (!timing || !timing.samples || !timing.samples.length) {
-    timing = { frameDuration: 0.03336666666666667, start: new Date(), samples: [{ cts: 0, duration: 1001 }] };
+    timing = {
+      frameDuration: 0.03336666666666667,
+      start: new Date(),
+      samples: [{ cts: 0, duration: 1001 }]
+    };
   }
 
   //Set the initial date, the only one provided by mp4
@@ -126,7 +140,7 @@ function fillMP4Time(klv, timing, options) {
       if (i + 1 < klv.DEVC.length) partialRes.duration = res[i - 1].duration;
     }
     //Deduce the date by adding the starting time to the initial date, and push
-    partialRes.date = initialDate + partialRes.cts;
+    partialRes.date = initialDate + partialRes.cts - (timing.offset || 0);
     res.push(partialRes);
   });
 
@@ -162,7 +176,11 @@ function timeKLV(klv, timing, options) {
         })();
 
         //Create empty stream if needed for timing purposes
-        const dummyStream = { STNM: 'UTC date/time', interpretSamples: 'dateStream', dateStream: ['0'] };
+        const dummyStream = {
+          STNM: 'UTC date/time',
+          interpretSamples: 'dateStream',
+          dateStream: ['0']
+        };
         if (options.dateStream) d.STRM.push(dummyStream);
 
         //Loop streams if present

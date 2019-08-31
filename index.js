@@ -2,6 +2,7 @@ const parseKLV = require('./code/parseKLV');
 const groupDevices = require('./code/groupDevices');
 const deviceList = require('./code/deviceList');
 const streamList = require('./code/streamList');
+const keys = require('./code/keys');
 const timeKLV = require('./code/timeKLV');
 const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
@@ -95,7 +96,7 @@ function process(input, opts) {
   } else {
     if (input.some(i => !i.timing))
       throw new Error('per-source timing is necessary in order to merge sources');
-    let timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
+    timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
     //Sort by in time
     const sortedInput = input
@@ -124,6 +125,17 @@ function process(input, opts) {
 
     //Set single timing for rest of outer function
     timing = timing[0];
+  }
+
+  //Clean unused streams (namely GPS5 used for timing if cached raw data)
+  if (opts.stream && opts.stream.length) {
+    for (const dev in interpreted) {
+      for (const stream in interpreted[dev].streams) {
+        if (!opts.stream.includes(stream) && !keys.computedStreams.includes(stream)) {
+          delete interpreted[dev].streams[stream];
+        }
+      }
+    }
   }
 
   //Read framerate to convert groupTimes to number if needed
