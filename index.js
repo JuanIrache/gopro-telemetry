@@ -128,10 +128,12 @@ function process(input, opts) {
   }
 
   //Clean unused streams (namely GPS5 used for timing if cached raw data)
-  for (const dev in interpreted) {
-    for (const stream in interpreted[dev].streams) {
-      if (!opts.stream.includes(stream) && !keys.computedStreams.includes(stream)) {
-        delete interpreted[dev].streams[stream];
+  if (opts.stream && opts.stream.length) {
+    for (const dev in interpreted) {
+      for (const stream in interpreted[dev].streams) {
+        if (!opts.stream.includes(stream) && !keys.computedStreams.includes(stream)) {
+          delete interpreted[dev].streams[stream];
+        }
       }
     }
   }
