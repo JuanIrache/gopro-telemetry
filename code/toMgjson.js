@@ -28,7 +28,15 @@ function createDataOutlineChildText(matchName, displayName, value) {
 }
 
 //Build the style that After Effects needs for dynamic values: numbers, arrays of numbers (axes) or strings (date)
-function createDynamicDataOutline(matchName, displayName, units, sample, { inn, out } = {}, part) {
+function createDynamicDataOutline(
+  matchName,
+  displayName,
+  units,
+  sample,
+  { inn, out } = {},
+  part,
+  stream
+) {
   const type = getDataOutlineType(sample);
   let result = {
     objectType: 'dataDynamic',
@@ -46,6 +54,8 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
   if (type === 'numberString') {
     //Number saved as string (After Effects reasons)
     if (units) result.displayName += ` [${units}]`;
+    //Add fourCC to help AE identify streams
+    if (stream && stream.length) result.displayName = stream + ': ' + result.displayName;
     result.dataType.numberStringProperties = {
       pattern: {
         //Will be calculated later
@@ -68,8 +78,13 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
     else if (part) result.displayName += ` part ${part + 1}`;
     //Array of numbers, for example axes of a sensor
     let deducedHeaders = deduceHeaders({ name: displayName, units });
-    let selectedHeaders = deducedHeaders.slice(inn, out);
-    if (selectedHeaders.length != sample.length) selectedHeaders = sample.map(s => deducedHeaders[0]);
+    //Fill gaps if present
+    if (deducedHeaders.length != sample.length) {
+      deducedHeaders = sample.map((s, i) => deducedHeaders[i] || deducedHeaders[i - 1]);
+    }
+    deducedHeaders = deducedHeaders.slice(inn, out);
+    //Add fourCC to help AE identify streams
+    if (stream && stream.length) result.displayName = stream + ': ' + result.displayName;
     result.dataType.numberArrayProperties = {
       pattern: {
         isSigned: true,
@@ -92,6 +107,8 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
   } else if (type === 'paddedString') {
     //Any other value is expressed as string
     if (units) result.displayName += `[${units}]`;
+    //Add fourCC to help AE identify streams
+    if (stream && stream.length) result.displayName = stream + ': ' + result.displayName;
     result.dataType.paddedStringProperties = {
       maxLen: 0,
       maxDigitsInStrLength: 0,
@@ -105,12 +122,13 @@ function createDynamicDataOutline(matchName, displayName, units, sample, { inn, 
 //Deduce the kind of structure we need, from the data
 function getDataOutlineType(value) {
   if (typeof value === 'number') return 'numberString';
-  else if (Array.isArray(value) && value.length && typeof value[0] === 'number') return 'numberStringArray';
+  else if (Array.isArray(value) && value.length && typeof value[0] === 'number')
+    return 'numberStringArray';
   else return 'paddedString';
 }
 
-//Returns the GPS data as parts of an mgjson object
-function getGPGS5Data(data) {
+//Returns the data as parts of an mgjson object
+function convertSamples(data) {
   //Will hold the description of each stream
   let dataOutline = [];
   //Holds the streams
@@ -146,7 +164,12 @@ function getGPGS5Data(data) {
 
           //Prepare iteration in case we need to loop over samples more than 3 items long, can be overriden from keys
           let inout;
-          if (Array.isArray(validSample)) inout = { inn: 0, out: mgjsonMaxArrs[stream.slice(0, 4)] || 3, total: validSample.length };
+          if (Array.isArray(validSample))
+            inout = {
+              inn: 0,
+              out: mgjsonMaxArrs[stream.slice(0, 4)] || 3,
+              total: validSample.length
+            };
 
           //Loop until all values are sorted. In most cases just once, decide break at the end
           for (;;) {
@@ -159,7 +182,15 @@ function getGPGS5Data(data) {
             };
 
             //Create the stream structure
-            let dataOutlineChild = createDynamicDataOutline(sampleSetID, streamName, units, validSample, inout, part);
+            let dataOutlineChild = createDynamicDataOutline(
+              sampleSetID,
+              streamName,
+              units,
+              validSample,
+              inout,
+              part,
+              stream
+            );
             //And find the type
             const type = getDataOutlineType(validSample);
 
@@ -182,8 +213,14 @@ function getGPGS5Data(data) {
                 range.occuring.min = Math.min(val, range.occuring.min);
                 range.occuring.max = Math.max(val, range.occuring.max);
                 //And max left and right padding
-                pattern.digitsInteger = Math.max(bigStr(Math.floor(val)).length, pattern.digitsInteger);
-                pattern.digitsDecimal = Math.max(bigStr(val).replace(/^\d*\.?/, '').length, pattern.digitsDecimal);
+                pattern.digitsInteger = Math.max(
+                  bigStr(Math.floor(val)).length,
+                  pattern.digitsInteger
+                );
+                pattern.digitsDecimal = Math.max(
+                  bigStr(val).replace(/^\d*\.?/, '').length,
+                  pattern.digitsDecimal
+                );
               };
 
               //Back to data samples. Check that at least we have the valid values
@@ -249,8 +286,14 @@ function getGPGS5Data(data) {
                 );
               } else if (type === 'paddedString') {
                 //Apply max padding to every sample
-                s.value.str = s.value.str.padEnd(dataOutlineChild.dataType.paddedStringProperties.maxLen, ' ');
-                s.value.length = s.value.length.padStart(dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength, '0');
+                s.value.str = s.value.str.padEnd(
+                  dataOutlineChild.dataType.paddedStringProperties.maxLen,
+                  ' '
+                );
+                s.value.length = s.value.length.padStart(
+                  dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength,
+                  '0'
+                );
               }
             });
             //Save total samples count
@@ -277,7 +320,7 @@ function getGPGS5Data(data) {
 //Converts the processed data to After Effects format
 module.exports = function(data, { name = '' }) {
   if (data['frames/second'] == null) throw new Error('After Effects needs frameRate');
-  const converted = getGPGS5Data(data);
+  const converted = convertSamples(data);
   //The format is very convoluted. This is the outer structure
   let result = {
     version: 'MGJSON2.0.0',
@@ -291,7 +334,10 @@ module.exports = function(data, { name = '' }) {
       }
     },
     //Create first data point with filename
-    dataOutline: [createDataOutlineChildText('filename', 'File name', name), ...converted.dataOutline],
+    dataOutline: [
+      createDataOutlineChildText('filename', 'File name', name),
+      ...converted.dataOutline
+    ],
     //And paste the converted data
     dataDynamicSamples: converted.dataDynamicSamples
   };
