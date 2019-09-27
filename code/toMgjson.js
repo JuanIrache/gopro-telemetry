@@ -80,7 +80,9 @@ function createDynamicDataOutline(
     let deducedHeaders = deduceHeaders({ name: displayName, units });
     //Fill gaps if present
     if (deducedHeaders.length != sample.length) {
-      deducedHeaders = sample.map((s, i) => deducedHeaders[i] || deducedHeaders[i - 1]);
+      deducedHeaders = sample.map(
+        (s, i) => deducedHeaders[i] || deducedHeaders[i - 1] || deducedHeaders[0] || 'undefined'
+      );
     }
     deducedHeaders = deducedHeaders.slice(inn, out);
     //Add fourCC to help AE identify streams
