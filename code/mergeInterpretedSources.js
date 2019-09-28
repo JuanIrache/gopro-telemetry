@@ -1,4 +1,5 @@
 module.exports = interpretedArr => {
+  //Merge samples in interpreted obj
   const interpreted = interpretedArr[0];
   for (let i = 1; i < interpretedArr.length; i++) {
     for (const device in interpretedArr[i]) {

@@ -189,6 +189,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
+- mgJSON without GPS (also with gps!) timing looks out of sync. At least GYRO. Test without hypersmooth
 - Provide progress
 
 ## Maybe To-Do
