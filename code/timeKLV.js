@@ -42,8 +42,9 @@ function fillGPSTime(klv, options) {
         if (d.STRM[key].GPSU != null) {
           date = toDate(d.STRM[key].GPSU);
           //Done with GPSU
-          if (options.stream && !options.stream.includes('GPS5')) delete d.STRM[key];
-          else delete d.STRM[key].GPSU;
+          if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
+            delete d.STRM[key];
+          } else delete d.STRM[key].GPSU;
           break;
         }
       }
