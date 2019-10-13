@@ -44,8 +44,14 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix, geoidHeight 
           if (correction.rating == null || rating > correction.rating) {
             //Use latitude and longitude to find the altitude offset in this location
             correction.rating = rating;
-            const scaling = d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1 ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]] : [1, 1];
-            correction.source = [d.STRM[i].GPS5[0][0] / scaling[0], d.STRM[i].GPS5[0][1] / scaling[1]];
+            const scaling =
+              d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1
+                ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]]
+                : [1, 1];
+            correction.source = [
+              d.STRM[i].GPS5[0][0] / scaling[0],
+              d.STRM[i].GPS5[0][1] / scaling[1]
+            ];
           }
         }
       }
