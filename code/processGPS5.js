@@ -25,8 +25,8 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix, geoidHeight 
     (result.DEVC || []).forEach((d, i, { length }) => {
       //First loop to find a suitable value
       for (let i = (d.STRM || []).length - 1; i >= 0; i--) {
-        //Delete streams that do not pass the test
-        if (d.STRM[i].GPS5 && !approveStream(d.STRM[i])) d.STRM.splice(i, 1);
+        //Mark for deletion streams that do not pass the test, but keep them for possible timing
+        if (d.STRM[i].GPS5 && !approveStream(d.STRM[i])) d.STRM[i].toDelete = true;
         else if (
           (!ellipsoid || geoidHeight) &&
           d.STRM[i].GPSF != null &&
@@ -44,8 +44,14 @@ module.exports = function(klv, { ellipsoid, GPS5Precision, GPS5Fix, geoidHeight 
           if (correction.rating == null || rating > correction.rating) {
             //Use latitude and longitude to find the altitude offset in this location
             correction.rating = rating;
-            const scaling = d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1 ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]] : [1, 1];
-            correction.source = [d.STRM[i].GPS5[0][0] / scaling[0], d.STRM[i].GPS5[0][1] / scaling[1]];
+            const scaling =
+              d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1
+                ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]]
+                : [1, 1];
+            correction.source = [
+              d.STRM[i].GPS5[0][0] / scaling[0],
+              d.STRM[i].GPS5[0][1] / scaling[1]
+            ];
           }
         }
       }
