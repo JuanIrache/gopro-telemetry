@@ -1,6 +1,6 @@
 {
   "name": "gopro-telemetry",
-  "version": "0.6.31",
+  "version": "0.6.32",
   "description": "Reads telemetry from the GPMF track in GoPro cameras (Hero5 and later) and converts it to multiple formats",
   "main": "index.js",
   "scripts": {
