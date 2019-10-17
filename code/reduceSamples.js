@@ -15,7 +15,7 @@ function reduceSamples(samples) {
     //If number, calculate average dividing valid values by total
     if (!isNaN(validVals[0].sample)) {
       result[k] = validVals.reduce(
-        (acc, curr, i, arr) => acc + (curr.sample * curr.weight) / totalWeight,
+        (acc, curr) => acc + (curr.sample * curr.weight) / totalWeight,
         0
       );
     }
@@ -23,8 +23,7 @@ function reduceSamples(samples) {
     else if (k === 'date') {
       result[k] = new Date(
         validVals.reduce(
-          (acc, curr, i, arr) =>
-            acc + (new Date(curr.sample).getTime() * curr.weight) / totalWeight,
+          (acc, curr) => acc + (new Date(curr.sample).getTime() * curr.weight) / totalWeight,
           0
         )
       );
