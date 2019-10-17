@@ -145,10 +145,10 @@ function process(input, opts) {
   }
 
   //Group samples by time if necessary
-  if (opts.groupTimes) interpreted = groupTimes(interpreted, opts);
+  if (opts.smooth) interpreted = smoothSamples(interpreted, opts);
 
   //Group samples by time if necessary
-  if (opts.smooth) interpreted = smoothSamples(interpreted, opts);
+  if (opts.groupTimes) interpreted = groupTimes(interpreted, opts);
 
   //Add framerate to top level
   if (timing && timing.frameDuration != null)
