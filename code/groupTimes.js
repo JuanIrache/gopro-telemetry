@@ -97,7 +97,7 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disa
             }
 
             //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
-            if (group.length > 1) {
+            if (group.length > 2) {
               //get weight of first and last sample in samples array
               newSamples.push(reduceSamples(group));
             } else if (i > 0 && i < samples.length && !disableInterpolation) {
