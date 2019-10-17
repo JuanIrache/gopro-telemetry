@@ -16,9 +16,7 @@ module.exports = function(klv, { smooth, repeatSticky }) {
           for (let i = 0; i < samples.length; i++) {
             const ins = Math.max(0, i - smooth);
             const out = Math.min(i + smooth + 1, samples.length);
-            let newSample = reduceSamples(
-              samples.slice(ins, out).map(s => ({ sample: s, weight: 1 }))
-            );
+            let newSample = reduceSamples(samples.slice(ins, out));
             //Preserve original times
             if (samples[i].cts != null) newSample.cts = samples[i].cts;
             if (samples[i].date != null) newSample.date = samples[i].date;
