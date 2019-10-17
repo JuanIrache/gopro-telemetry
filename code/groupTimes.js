@@ -50,17 +50,42 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disa
         //Gather samples
         const samples = result[key].streams[k].samples;
         if (samples) {
+          let remainderSample = null;
           let currentTime = 0;
           let newSamples = [];
           let reachedEnd = false;
           let i = 0;
+          //Remember maximum time reached by saved samples
+          let maxTimeReached = 0;
           //Loop until the end of the array
           while (!reachedEnd) {
             let group = [];
+            const maxGroupTime = currentTime + groupTimes / 2;
             //Loop one time per each desired time chunk
-            while (samples[i].cts < currentTime + groupTimes) {
-              //Gather all the samples within that chunk
-              group.push(samples[i]);
+            while (maxTimeReached < maxGroupTime) {
+              //add partial sample to the start of the group if it was remaining from previous loop
+              if (remainderSample) {
+                group.push(remainderSample);
+                remainderSample = null;
+              }
+              //Get how much of the sample is inside the target group to weight it
+              const prevSample = samples[Math.max(0, i - 1)];
+              const nextSample = samples[Math.min(samples.length - 1, i + 1)];
+              const sampleStart = samples[i].cts - (samples[i].cts - prevSample.cts) / 2;
+              const sampleEnd = samples[i].cts + (nextSample.cts - samples[i].cts) / 2;
+              const sampleUsableStart = Math.max(sampleStart, currentTime - groupTimes / 2);
+              maxTimeReached = Math.min(sampleEnd, maxGroupTime);
+              //Gather all the samples within that chunk and their weights
+              group.push({ sample: samples[i], weight: maxTimeReached - sampleUsableStart });
+
+              //Save remainder for next group
+              if (maxTimeReached !== sampleEnd) {
+                remainderSample = {
+                  weight: sampleEnd - maxTimeReached,
+                  sample: samples[i]
+                };
+              }
+
               if (i + 1 >= samples.length) {
                 //Until the end is reached
                 reachedEnd = true;
@@ -70,14 +95,20 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disa
               //One sample is just fine if disableMerging
               if (disableMerging) break;
             }
+
             //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
-            if (group.length > 1) newSamples.push(reduceSamples(group));
-            else if (i > 0 && i < samples.length && !disableInterpolation) {
+            if (disableInterpolation && group.length) {
+              newSamples.push(group[Math.floor(group.length / 2)].sample);
+            } else if (group.length > 2) {
+              //get weight of first and last sample in samples array
+              newSamples.push(reduceSamples(group));
+            } else if (i > 0 && i < samples.length) {
               newSamples.push(interpolateSample(samples, i - 1, currentTime));
-            } else if (group.length === 1) newSamples.push(group[0]);
+            }
             //If cts was temporary, remove it
-            if (timeOut === 'date' && newSamples.length)
+            if (timeOut === 'date' && newSamples.length) {
               delete newSamples[newSamples.length - 1].cts;
+            }
             //Add time to analyse next chunk
             currentTime += groupTimes;
           }
