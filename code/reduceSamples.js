@@ -13,14 +13,13 @@ function reduceSamples(samples) {
     const totalWeight = validVals.reduce((acc, cur) => acc + cur.weight, 0);
 
     //If number, calculate average dividing valid values by total
-    if (!isNaN(validVals[0].sample)) {
+    if (!isNaN(validVals[0].sample))
       result[k] = validVals.reduce(
         (acc, curr, i, arr) => acc + (curr.sample * curr.weight) / totalWeight,
         0
       );
-    }
     //If date, calculate average dividing all by total
-    else if (k === 'date') {
+    else if (k === 'date')
       result[k] = new Date(
         validVals.reduce(
           (acc, curr, i, arr) =>
@@ -28,7 +27,6 @@ function reduceSamples(samples) {
           0
         )
       );
-    }
     //If object (or more likely array) merge the samples recursively
     else if (typeof validVals[0] === 'object') result[k] = reduceSamples(validVals);
     //Preserve null values
