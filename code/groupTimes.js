@@ -20,25 +20,6 @@ function process2Vals(vals, prop, k) {
   } else return vals[0];
 }
 
-//Build one sample by interpolating the previous and the next
-function interpolateSample(samples, i, currentTime) {
-  const baseTime = samples[i].cts;
-  const difference = samples[i + 1].cts - baseTime;
-  //How much we need to move from i towards i+1
-  const proportion = (currentTime - baseTime) / difference;
-  //Get all unique keys
-  const keys = new Set(
-    [samples[i], samples[i + 1]].reduce((acc, curr) => acc.concat(Object.keys(curr)), [])
-  );
-  let result = Array.isArray(samples[0]) ? [] : {};
-  //Loop the keys
-  keys.forEach(k => {
-    const validVals = [samples[i], samples[i + 1]].map(s => s[k]).filter(v => v != null);
-    result[k] = process2Vals(validVals, proportion, k);
-  });
-  return result;
-}
-
 //Makes sure there is one sample per each specified time chunk
 module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disableMerging }) {
   //Copy input
@@ -69,21 +50,24 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disa
                 remainderSample = null;
               }
               //Get how much of the sample is inside the target group to weight it
-              const prevSample = samples[Math.max(0, i - 1)];
-              const nextSample = samples[Math.min(samples.length - 1, i + 1)];
+              const prevSample = samples[i - 1] || { cts: 0 };
+              const nextSample = samples[i + 1] || { cts: samples[i].cts };
               const sampleStart = samples[i].cts - (samples[i].cts - prevSample.cts) / 2;
               const sampleEnd = samples[i].cts + (nextSample.cts - samples[i].cts) / 2;
               const sampleUsableStart = Math.max(sampleStart, currentTime - groupTimes / 2);
               maxTimeReached = Math.min(sampleEnd, maxGroupTime);
               //Gather all the samples within that chunk and their weights
-              group.push({ sample: samples[i], weight: maxTimeReached - sampleUsableStart });
-
+              const weight = maxTimeReached - sampleUsableStart;
+              if (weight > 0) group.push({ sample: samples[i], weight });
               //Save remainder for next group
               if (maxTimeReached !== sampleEnd) {
-                remainderSample = {
-                  weight: sampleEnd - maxTimeReached,
-                  sample: samples[i]
-                };
+                const weight = sampleEnd - maxTimeReached;
+                if (weight > 0) {
+                  remainderSample = {
+                    weight,
+                    sample: samples[i]
+                  };
+                }
               }
 
               if (i + 1 >= samples.length) {
@@ -96,14 +80,16 @@ module.exports = function(klv, { groupTimes, timeOut, disableInterpolation, disa
               if (disableMerging) break;
             }
 
-            //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
+            //Decide wether to copy or interpolate (reduce with weights) samples based on the amount found under the time chunk
             if (disableInterpolation && group.length) {
+              console.log('interpolation');
+
               newSamples.push(group[Math.floor(group.length / 2)].sample);
-            } else if (group.length > 2) {
+            } else if (group.length) {
+              console.log('no interpolation');
+
               //get weight of first and last sample in samples array
               newSamples.push(reduceSamples(group));
-            } else if (i > 0 && i < samples.length) {
-              newSamples.push(interpolateSample(samples, i - 1, currentTime));
             }
             //If cts was temporary, remove it
             if (timeOut === 'date' && newSamples.length) {
