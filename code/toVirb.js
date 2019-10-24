@@ -29,7 +29,7 @@ function getGPGS5Data(data) {
               //Use sticky info
               if (sticky.geoidHeight != null)
                 geoidHeight = `
-                <geoidheight>${sticky[key]}</geoidheight>`;
+                <geoidheight>${sticky.geoidHeight}</geoidheight>`;
               //Set elevation if present
               if (s.value.length > 1)
                 ele = `
