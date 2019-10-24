@@ -11,6 +11,7 @@ const smoothSamples = require('./code/smoothSamples');
 const processGPS5 = require('./code/processGPS5');
 const presetsOpts = require('./code/presetsOptions');
 const toGpx = require('./code/toGpx');
+const toVirb = require('./code/toVirb');
 const toKml = require('./code/toKml');
 const toGeojson = require('./code/toGeojson');
 const toCsv = require('./code/toCsv');
@@ -156,6 +157,7 @@ function process(input, opts) {
 
   //Process presets
   if (opts.preset === 'gpx') return toGpx(interpreted, opts);
+  if (opts.preset === 'virb') return toVirb(interpreted, opts);
   if (opts.preset === 'kml') return toKml(interpreted, opts);
   if (opts.preset === 'geojson') return toGeojson(interpreted, opts);
   if (opts.preset === 'csv') return toCsv(interpreted);
