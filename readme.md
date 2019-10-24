@@ -4,7 +4,7 @@ Parses telemetry from the GPMF track in GoPro cameras (Hero5 and later).
 
 Created for the [GoPro Telemetry Extractor](https://tailorandwayne.com/gopro-telemetry-extractor/).
 
-Here's a [playlist with cool uses of the GoPro metadata](https://www.youtube.com/watch?v=Qo6NR71gbU4&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
+Here's a [playlist with cool uses of the GoPro metadata](https://www.youtube.com/watch?v=TAdxsTv4hPU&list=PLgoeWSWqXedK_TbrZXg7L926Kzb-g_CXz).
 
 Accepts an object with binary data and timing data. Returns a JavaScript object (or optionally other file formats) with a key for each device that was found. See **samples/example.js** for a basic implementation.
 
