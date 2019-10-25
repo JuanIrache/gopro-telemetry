@@ -143,6 +143,19 @@ function fillMP4Time(klv, timing, options) {
     //Deduce the date by adding the starting time to the initial date, and push
     partialRes.date = initialDate + partialRes.cts - (timing.offset || 0);
     res.push(partialRes);
+    //Delete GPSU
+    if (d.STRM && d.STRM.length) {
+      for (const key in d.STRM) {
+        //Find the GPSU date in the GPS5 stream
+        if (d.STRM[key].GPSU != null) {
+          //Done with GPSU
+          if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
+            delete d.STRM[key];
+          } else delete d.STRM[key].GPSU;
+          break;
+        }
+      }
+    }
   });
 
   return res;
@@ -158,6 +171,7 @@ function timeKLV(klv, timing, options) {
       //Gather and deduce both types of timing info
       const gpsTimes = fillGPSTime(result, options);
       const mp4Times = fillMP4Time(result, timing, options);
+
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
       let dateSDur = {};
