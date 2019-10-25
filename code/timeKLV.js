@@ -148,7 +148,6 @@ function fillMP4Time(klv, timing, options) {
       for (const key in d.STRM) {
         //Find the GPSU date in the GPS5 stream
         if (d.STRM[key].GPSU != null) {
-          date = toDate(d.STRM[key].GPSU);
           //Done with GPSU
           if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
             delete d.STRM[key];
@@ -172,6 +171,7 @@ function timeKLV(klv, timing, options) {
       //Gather and deduce both types of timing info
       const gpsTimes = fillGPSTime(result, options);
       const mp4Times = fillMP4Time(result, timing, options);
+
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
       let dateSDur = {};
