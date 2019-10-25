@@ -143,6 +143,13 @@ function fillMP4Time(klv, timing, options) {
     //Deduce the date by adding the starting time to the initial date, and push
     partialRes.date = initialDate + partialRes.cts - (timing.offset || 0);
     res.push(partialRes);
+    //Delete GPSU
+    if (d.STRM && d.STRM.length) {
+      for (const key in d.STRM) {
+        //Find the GPSU attr and delete it
+        if (d.STRM[key].GPSU != null) delete d.STRM[key].GPSU;
+      }
+    }
   });
 
   return res;
