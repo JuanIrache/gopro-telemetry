@@ -191,7 +191,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## To-Do
 
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
-- Adjust grouping times better to frame cts
+- Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
 - Provide progress
 
