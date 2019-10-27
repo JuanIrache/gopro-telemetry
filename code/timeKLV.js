@@ -227,6 +227,7 @@ function timeKLV(klv, timing, options) {
                   }
                 });
               }
+              delete s.STMP;
             }
 
             //Divide duration of packet by samples in packet to get sample duration per fourCC type
