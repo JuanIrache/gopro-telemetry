@@ -51,7 +51,7 @@ const stickyTranslations = {
   TMPC: 'temperature [°C]',
   GPSF: 'fix',
   GPSP: 'precision',
-  STMP: 'timestamps [µs]' //Maybe useful for accurate timing, but does not look consecutive or proportional
+  STMP: 'timestamps [µs]'
 };
 
 //Some metadata is not described internally, but the format can be deduced from documentation:
@@ -111,7 +111,7 @@ const names = {
   GPSU: 'UTC time and data from GPS',
   GPSF: 'GPS Fix',
   GPSP: 'GPS Precision - Dilution of Precision (DOP x100)',
-  STMP: 'Microsecond timestampes',
+  STMP: 'Microsecond timestamps',
   MAGN: 'Magnetometer',
   FACE: 'Face detection boundaring boxes',
   FCNM: 'Faces counted per frame',
