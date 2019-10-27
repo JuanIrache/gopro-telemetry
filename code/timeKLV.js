@@ -199,17 +199,43 @@ function timeKLV(klv, timing, options) {
         if (options.dateStream) d.STRM.push(dummyStream);
 
         //Loop streams if present
-        (d.STRM || []).forEach((s, i) => {
+        (d.STRM || []).forEach((s, ii) => {
           //If group of samples found
           if (s.interpretSamples && s[s.interpretSamples].length) {
             const fourCC = s.interpretSamples;
+            //Will store the current Cts
+            let currCts;
+
+            //Use sDuration and cts from microsecond timestamps if available
+            let microCts = false;
+            let microDuration = false;
+            if (s.STMP != null) {
+              currCts = s.STMP / 1000;
+              microCts = true;
+              //Look for next sample of same fourCC
+              if (result.DEVC[i + 1]) {
+                //If next DEVC entry
+                (result.DEVC[i + 1].STRM || []).forEach(ss => {
+                  //Look in each stream
+                  if (ss.interpretSamples === fourCC) {
+                    //Found matchin sample
+                    if (ss.STMP) {
+                      //Has timestamp? Measure duration of all samples and divide by number of samples
+                      sDuration[fourCC] = (ss.STMP / 1000 - currCts) / s[fourCC].length;
+                      microDuration = true;
+                    }
+                  }
+                });
+              }
+            }
+
             //Divide duration of packet by samples in packet to get sample duration per fourCC type
-            if (duration != null) sDuration[fourCC] = duration / s[fourCC].length;
+            if (!microDuration && duration != null) sDuration[fourCC] = duration / s[fourCC].length;
+            if (!microCts) currCts = cts;
 
             //The same for duration of dates
             if (dateDur != null) dateSDur[fourCC] = dateDur / s[fourCC].length;
             //We know the time and date of the first sample
-            let currCts = cts;
             let currDate = date;
 
             //Try to compensate delayed samples proportionally
@@ -219,9 +245,9 @@ function timeKLV(klv, timing, options) {
               if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
               currCts -= s.TIMO * 1000;
               if (currCts < 0) currCts = 0;
-              if (d.STRM[i + 1] && d.STRM[i + 1].TIMO) {
+              if (d.STRM[ii + 1] && d.STRM[ii + 1].TIMO) {
                 //Find difference to next TIMO
-                const timoDiff = d.STRM[i + 1].TIMO - s.TIMO;
+                const timoDiff = d.STRM[ii + 1].TIMO - s.TIMO;
                 //And calculate how much we must compensate each sample (interpolate)
                 timoDur = (100 * timoDiff) / s[fourCC].length;
               }
