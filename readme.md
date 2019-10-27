@@ -190,8 +190,9 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
+- Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
 - Adjust grouping times better to frame cts
-- mgJSON without GPS (also with gps!) timing looks out of sync. At least GYRO. Test without hypersmooth
+- Streams look out of sync some times, improve timing accuracy?
 - Provide progress
 
 ## Maybe To-Do
