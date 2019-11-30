@@ -59,7 +59,10 @@ All options default to _null/false_. Using filters to retrieve the desired resul
 Example:
 
 ```js
-const telemetry = goproTelemetry({ rawData, timing }, { stream: ['ACCL'], repeatSticky: true });
+const telemetry = goproTelemetry(
+  { rawData, timing },
+  { stream: ['ACCL'], repeatSticky: true }
+);
 ```
 
 This slightly more comprehensive example includes the data extraction step with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
@@ -190,6 +193,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
+- Read GPSA -> MSLV to avoid converting geoid to mean sea level
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
