@@ -25,7 +25,9 @@ function parseOne({ rawData, parsedData }, opts) {
   //Parse input
   const parsed = parseKLV(rawData, opts);
   if (!parsed.DEVC) {
-    const error = new Error('Invalid GPMF data. Root object must contain DEVC key');
+    const error = new Error(
+      'Invalid GPMF data. Root object must contain DEVC key'
+    );
     if (opts.tolerant) {
       setImmediate(() => console.error(error));
       return parsed;
@@ -40,17 +42,24 @@ function interpretOne(timing, parsed, opts) {
   const grouped = groupDevices(parsed);
 
   //Correct GPS height and filter out bad GPS data
-  if (!opts.ellipsoid || opts.geoidHeight || opts.GPS5Precision != null || opts.GPS5Fix != null) {
+  if (
+    !opts.ellipsoid ||
+    opts.geoidHeight ||
+    opts.GPS5Precision != null ||
+    opts.GPS5Fix != null
+  ) {
     for (const key in grouped) grouped[key] = processGPS5(grouped[key], opts);
   }
 
   let interpreted = {};
   //Apply scale and matrix transformations
-  for (const key in grouped) interpreted[key] = interpretKLV(grouped[key], opts);
+  for (const key in grouped)
+    interpreted[key] = interpretKLV(grouped[key], opts);
 
   let timed = {};
   //Apply timing (gps and mp4) to every sample
-  for (const key in interpreted) timed[key] = timeKLV(interpreted[key], timing, opts);
+  for (const key in interpreted)
+    timed[key] = timeKLV(interpreted[key], timing, opts);
 
   //Merge samples in sensor entries
   let merged = {};
@@ -62,12 +71,17 @@ function interpretOne(timing, parsed, opts) {
 function process(input, opts) {
   //Prepare presets
   if (presetsOpts[opts.preset]) {
-    opts = { ...opts, ...presetsOpts.general.mandatory, ...presetsOpts[opts.preset].mandatory };
+    opts = {
+      ...opts,
+      ...presetsOpts.general.mandatory,
+      ...presetsOpts[opts.preset].mandatory
+    };
     //Only pick the non mandatory options when the user did not specify them
     for (const key in presetsOpts.general.preferred)
       if (opts[key] == null) opts[key] = presetsOpts.general.preferred[key];
     for (const key in presetsOpts[opts.preset].preferred)
-      if (opts[key] == null) opts[key] = presetsOpts[opts.preset].preferred[key];
+      if (opts[key] == null)
+        opts[key] = presetsOpts[opts.preset].preferred[key];
   }
 
   //Create filter arrays if user didn't
@@ -96,7 +110,9 @@ function process(input, opts) {
     interpreted = interpretOne(timing, parsed, opts);
   } else {
     if (input.some(i => !i.timing))
-      throw new Error('per-source timing is necessary in order to merge sources');
+      throw new Error(
+        'per-source timing is necessary in order to merge sources'
+      );
     timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
     //Sort by in time
@@ -119,7 +135,9 @@ function process(input, opts) {
     if (opts.raw) return parsed;
 
     //Interpret all
-    const interpretedArr = parsed.map((p, i) => interpretOne(timing[i], p, opts));
+    const interpretedArr = parsed.map((p, i) =>
+      interpretOne(timing[i], p, opts)
+    );
 
     //Merge samples in interpreted obj
     interpreted = mergeInterpretedSources(interpretedArr);
@@ -132,7 +150,10 @@ function process(input, opts) {
   if (opts.stream && opts.stream.length) {
     for (const dev in interpreted) {
       for (const stream in interpreted[dev].streams) {
-        if (!opts.stream.includes(stream) && !keys.computedStreams.includes(stream)) {
+        if (
+          !opts.stream.includes(stream) &&
+          !keys.computedStreams.includes(stream)
+        ) {
           delete interpreted[dev].streams[stream];
         }
       }
@@ -141,7 +162,8 @@ function process(input, opts) {
 
   //Read framerate to convert groupTimes to number if needed
   if (opts.groupTimes === 'frames') {
-    if (timing && timing.frameDuration) opts.groupTimes = timing.frameDuration * 1000;
+    if (timing && timing.frameDuration)
+      opts.groupTimes = timing.frameDuration * 1000;
     else throw new Error('Frame rate is needed for your current options');
   }
 
