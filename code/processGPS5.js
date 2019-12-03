@@ -32,6 +32,9 @@ module.exports = function(
         if (d.STRM[i].GPS5 && !approveStream(d.STRM[i]))
           d.STRM[i].toDelete = true;
         else if (
+          //If altitude is mean sea level, no need to process it further
+          //Otherwise check if all needed info is available
+          d.STRM[i].GPSA !== 'MSLV' &&
           (!ellipsoid || geoidHeight) &&
           d.STRM[i].GPSF != null &&
           d.STRM[i].GPSP != null &&
