@@ -2,3 +2,5 @@ node_modules/
 samples/out.json
 samples/ignore/
 out.json
+private_samples/
+samples/v150.bin
