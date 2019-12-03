@@ -51,6 +51,7 @@ const stickyTranslations = {
   TMPC: 'temperature [°C]',
   GPSF: 'fix',
   GPSP: 'precision',
+  GPSA: 'altitude system',
   STMP: 'timestamps [µs]'
 };
 
