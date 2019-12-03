@@ -9,7 +9,13 @@ async function toJSON(filename) {
     const file = await readFileAsync(__dirname + filename);
     const result = goproTelemetry(
       { rawData: file },
-      { stream: 'GPS5', repeatSticky: true, repeatHeaders: true, GPS5Fix: 2, GPSPrecision: 500 }
+      {
+        stream: 'GPS5',
+        repeatSticky: true,
+        repeatHeaders: true,
+        GPS5Fix: 2,
+        GPSPrecision: 500
+      }
     );
     await writeFileAsync('./out.json', JSON.stringify(result));
     console.log('File saved');
