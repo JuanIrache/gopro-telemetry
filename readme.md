@@ -197,6 +197,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - Avoid breaking highlight fourccs (type)
 - interpretSamples does not play well with metadata stream (Video Global Settings), make exception?
 - Use "RMRK": "struct: for headers
+- Use timing from highlight rmrk
 - Add highlights test
 - Add Video Global Settings test
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
