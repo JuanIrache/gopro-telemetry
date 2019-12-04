@@ -1,12 +1,20 @@
-const { translations, ignore, stickyTranslations, idKeysTranslation, idValuesTranslation } = require('./keys');
+const {
+  translations,
+  ignore,
+  stickyTranslations,
+  idKeysTranslation,
+  idValuesTranslation
+} = require('./keys');
 const deduceHeaders = require('./deduceHeaders');
 const hero7Labelling = require('./hero7Labelling');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
-  if (typeof a !== 'object' || typeof b !== 'object' || a == null || b == null) return a === b;
+  if (typeof a !== 'object' || typeof b !== 'object' || a == null || b == null)
+    return a === b;
   if (Object.keys(a).length !== Object.keys(b).length) return false;
-  for (let i = 0; i < Object.keys(a).length; i++) if (!deepEqual(a[Object.keys(a)[i]], b[Object.keys(a)[i]])) return false;
+  for (let i = 0; i < Object.keys(a).length; i++)
+    if (!deepEqual(a[Object.keys(a)[i]], b[Object.keys(a)[i]])) return false;
   return true;
 }
 
@@ -26,7 +34,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
       if (s.interpretSamples && s.interpretSamples !== 'STNM') {
         const fourCC = s.interpretSamples;
         //Initialise stickies
-        stickies[d['device name']][fourCC] = stickies[d['device name']][fourCC] || {};
+        stickies[d['device name']][fourCC] =
+          stickies[d['device name']][fourCC] || {};
 
         //Get the array of samples
         let samples = s[fourCC];
@@ -46,7 +55,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             //Translate keys to human when necessary
             if (translations[key]) description[translations[key]] = s[key];
             //Make the rest sticky, unless we want to ignore them
-            else if (!ignore.includes(key)) sticky[stickyTranslations[key] || key] = s[key];
+            else if (!ignore.includes(key))
+              sticky[stickyTranslations[key] || key] = s[key];
           }
           //Remember previous sticky values, that's why they're sticky
           sticky = { ...stickies[d['device name']][fourCC], ...sticky };
@@ -56,14 +66,19 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           else if (Object.keys(sticky).length && samples.length) {
             for (let key in sticky) {
               //Save sticky values that have changed, discard the rest
-              if (!deepEqual(sticky[key], stickies[d['device name']][fourCC][key])) {
+              if (
+                !deepEqual(sticky[key], stickies[d['device name']][fourCC][key])
+              ) {
                 samples[0].sticky = samples[0].sticky || {};
                 samples[0].sticky[key] = sticky[key];
               }
             }
           }
           //Remember the new sticky values
-          stickies[d['device name']][fourCC] = { ...stickies[d['device name']][fourCC], ...sticky };
+          stickies[d['device name']][fourCC] = {
+            ...stickies[d['device name']][fourCC],
+            ...sticky
+          };
 
           //Use name and units to describe every sample
           const workOnHeaders = function(samples, desc) {
@@ -72,7 +87,10 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             //Add the descriptions and values to samples
             samples = samples.map(ss => {
               //If no available description, use numbers
-              if (Array.isArray(ss.value)) ss.value.forEach((v, i) => (ss[headers[i] || `${headers[0]} (${i})`] = v));
+              if (Array.isArray(ss.value))
+                ss.value.forEach(
+                  (v, i) => (ss[headers[i] || `${headers[0]} (${i})`] = v)
+                );
               else if (headers[0]) ss[headers[0]] = ss.value;
               //Delete value key if we solved the situation
               if (headers.length) delete ss.value;
@@ -95,7 +113,8 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
               description = newResults.description;
             }
             //Add samples to stream entry
-            if (result.streams[fourCC]) result.streams[fourCC].samples.push(...samples);
+            if (result.streams[fourCC])
+              result.streams[fourCC].samples.push(...samples);
             else result.streams[fourCC] = { samples, ...description };
           };
 
@@ -135,7 +154,10 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
 
               if (parts) {
                 //Add previously known units to description
-                description.name = description.name.replace(/\((\w+),?(.*)\)$/i, ` | ${idKey}`);
+                description.name = description.name.replace(
+                  /\((\w+),?(.*)\)$/i,
+                  ` | ${idKey}`
+                );
                 description.units = parts[2].split(',').map(p => p.trim());
               }
               //Add new keys
@@ -144,7 +166,11 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
               completeSample({ samples: newSamples, description });
             } else {
               //Split stream in substreams
-              if (parts) description.name = description.name.replace(/\((\w+),?(.*)\)$/i, `(${parts[2]})`);
+              if (parts)
+                description.name = description.name.replace(
+                  /\((\w+),?(.*)\)$/i,
+                  `(${parts[2]})`
+                );
 
               samples.forEach(ss => {
                 //Loop inner samples
@@ -163,7 +189,11 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
                     //And copy the rest
                     thisSample.value = v.slice(1);
                     //And simplify single values
-                    if (Array.isArray(thisSample.value) && thisSample.value.length === 1) thisSample.value = thisSample.value[0];
+                    if (
+                      Array.isArray(thisSample.value) &&
+                      thisSample.value.length === 1
+                    )
+                      thisSample.value = thisSample.value[0];
                     //Save
                     newSamples[id].push(thisSample);
                   }
@@ -171,16 +201,27 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
               });
               for (const key in newSamples) {
                 //Add id
-                description.subStreamName = `${idKey}:${idValuesTranslation(key, idKey)}`;
+                description.subStreamName = `${idKey}:${idValuesTranslation(
+                  key,
+                  idKey
+                )}`;
                 let desc = description;
                 if (repeatHeaders) {
-                  const newResults = workOnHeaders(newSamples[key], description);
+                  const newResults = workOnHeaders(
+                    newSamples[key],
+                    description
+                  );
                   newSamples[key] = newResults.samples;
                   desc = newResults.description;
                 }
                 //Add samples to stream entry
-                if (result.streams[fourCC + key]) result.streams[fourCC + key].samples.push(...newSamples[key]);
-                else result.streams[fourCC + key] = { samples: newSamples[key], ...desc };
+                if (result.streams[fourCC + key])
+                  result.streams[fourCC + key].samples.push(...newSamples[key]);
+                else
+                  result.streams[fourCC + key] = {
+                    samples: newSamples[key],
+                    ...desc
+                  };
               }
             }
           } else completeSample({ samples, description });
