@@ -196,7 +196,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - Fix broken tests after merging all strings
 - Avoid breaking highlight fourccs (type)
 - interpretSamples does not play well with metadata stream (Video Global Settings), make exception?
-- Rule out empty data "\u0000\u0000\u0000\u0000": [null,null]
 - Use "RMRK": "struct: for headers
 - Add highlights test
 - Add Video Global Settings test

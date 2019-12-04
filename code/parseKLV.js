@@ -8,7 +8,8 @@ function findLastCC(data, start, end) {
   let ks;
   while (start < end) {
     //Retrieve structured data
-    ks = keyAndStructParser.parse(data.slice(start)).result;
+    const tempKs = keyAndStructParser.parse(data.slice(start)).result;
+    if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
     //But don't process it, go to next
     const length = ks.size * ks.repeat;
     const reached = start + 8 + (length >= 0 ? length : 0);
@@ -53,6 +54,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
       //Abort if we are creating a device list. Or a streamList and We have enough info
       const done =
+        ks.fourCC === '\u0000\u0000\u0000\u0000' ||
         (options.deviceList && ks.fourCC === 'STRM') ||
         (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
       if (!done) {
