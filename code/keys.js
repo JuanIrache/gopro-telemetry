@@ -132,6 +132,11 @@ const knownMulti = {
 //Streams that we can add programmatically based on other data
 const computedStreams = ['dateStream'];
 
+//In some cases the lastCC should not be interpreted specially
+const avoidinterpretSamples = {
+  DVNM: 'Video Global Settings'
+};
+
 module.exports = {
   keyAndStructParser,
   types,
@@ -144,5 +149,6 @@ module.exports = {
   idValuesTranslation,
   names,
   knownMulti,
-  computedStreams
+  computedStreams,
+  avoidinterpretSamples
 };

@@ -1,4 +1,4 @@
-const { keyAndStructParser, types } = require('./keys');
+const { keyAndStructParser, types, avoidinterpretSamples } = require('./keys');
 const parseV = require('./parseV');
 const unArrayTypes = require('./unArrayTypes');
 const { generateStructArr } = require('./keys');
@@ -20,16 +20,26 @@ function findLastCC(data, start, end) {
 }
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
-function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
+function parseKLV(
+  data,
+  options = {},
+  start = 0,
+  end = data.length,
+  parent,
+  interpretLast = true
+) {
   let result = {};
   //Will store unknown types
   let unknown = new Set();
   //Will store complex type definitions
   let complexType = [];
   //Find the last, most relevant key
-  let lastCC = findLastCC(data, start, end);
-  //Remember last key for interpreting data later
-  result.interpretSamples = lastCC;
+  let lastCC;
+  if (interpretLast) {
+    lastCC = findLastCC(data, start, end);
+    //Remember last key for interpreting data later
+    result.interpretSamples = lastCC;
+  }
 
   //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if lists or timein is MP4
   if (
@@ -59,6 +69,17 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
         (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
       if (!done) {
         let partialResult = [];
+        let interpretLastChild = true;
+        //Decide if no sample interpretation is needed for children
+        const dontInterpret = (key, result) =>
+          avoidinterpretSamples[key] &&
+          result[key].length &&
+          result[key][0] === avoidinterpretSamples[key];
+
+        for (const key in result) {
+          if (dontInterpret(key, result)) interpretLastChild = false;
+        }
+
         if (length >= 0) {
           //If empty, we still want to store the fourCC
           if (length === 0) partialResult.push(undefined);
@@ -71,7 +92,8 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
               options,
               start + 8,
               start + 8 + length,
-              ks.fourCC
+              ks.fourCC,
+              interpretLastChild
             );
             if (parsed != null) partialResult.push(parsed);
           }
@@ -195,9 +217,11 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   }
 
   //Undo all arrays except the last key, which should be the array of samples
-  for (const key in result)
-    if (key !== lastCC && result[key].length === 1)
+  for (const key in result) {
+    if (key !== lastCC && result[key] && result[key].length === 1) {
       result[key] = result[key][0];
+    }
+  }
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size)

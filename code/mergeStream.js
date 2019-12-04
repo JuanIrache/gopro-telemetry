@@ -29,7 +29,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
   (klv.DEVC || []).forEach(d => {
     //Initialise stickies per device and stream if not done yet
     stickies[d['device name']] = stickies[d['device name']] || {};
-    (d.STRM || []).forEach(s => {
+    (d.STRM || []).forEach((s, i) => {
       //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
       if (s.interpretSamples && s.interpretSamples !== 'STNM') {
         const fourCC = s.interpretSamples;
@@ -226,6 +226,9 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             }
           } else completeSample({ samples, description });
         }
+        //If this not a normal stream with samples, just copy the data
+      } else if (!s.interpretSamples) {
+        result.streams[`Data ${i}`] = JSON.parse(JSON.stringify(d.STRM));
       }
     });
 
