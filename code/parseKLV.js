@@ -87,7 +87,11 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
             else if (types[ks.type].complex && complexType.length)
               axes = complexType.length;
             //Human readable strings should de merged for readability
-            if (types[ks.type].func === 'string') {
+            if (
+              types[ks.type].func === 'string' &&
+              ks.size === 1 &&
+              ks.repeat > 1
+            ) {
               ks.size = length;
               ks.repeat = 1;
             }
