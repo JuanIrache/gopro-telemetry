@@ -135,7 +135,6 @@ const computedStreams = ['dateStream'];
 module.exports = {
   keyAndStructParser,
   types,
-  mergeStrings,
   translations,
   ignore,
   stickyTranslations,
