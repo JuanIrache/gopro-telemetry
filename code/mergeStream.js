@@ -40,7 +40,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
 
         if (samples && samples.length) {
           let sticky = {};
-          let description = {};
+          let description = { name: fourCC };
           //Loop the rest of values
           for (const key in s) {
             //Translate keys to human when necessary
