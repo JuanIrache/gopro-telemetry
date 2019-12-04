@@ -30,10 +30,6 @@ const types = {
   '\u0000': { nested: true }
 };
 
-//Merge known fourCC strings
-//is there no better way than hardcoding it?
-const mergeStrings = ['STNM', 'RMRK', 'TYPE', 'DVNM'];
-
 //Make some fourCC keys human readable
 const translations = {
   SIUN: 'units',

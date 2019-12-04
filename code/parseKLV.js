@@ -1,4 +1,4 @@
-const { keyAndStructParser, types, mergeStrings } = require('./keys');
+const { keyAndStructParser, types } = require('./keys');
 const parseV = require('./parseV');
 const unArrayTypes = require('./unArrayTypes');
 const { generateStructArr } = require('./keys');
@@ -75,7 +75,7 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
             //Detect them when the type is complex
             else if (types[ks.type].complex && complexType.length) axes = complexType.length;
             //Human readable strings should de merged for readability
-            if (mergeStrings.includes(ks.fourCC)) {
+            if (types[ks.type].func === 'string') {
               ks.size = length;
               ks.repeat = 1;
             }
