@@ -18,59 +18,80 @@ function interpretKLV(klv, options) {
         else result.STNM = labels;
       }
       //Loop through the samples to interpret them
-      result[result.interpretSamples] = result[result.interpretSamples].map(s => {
-        //If scaling data
-        if (result.hasOwnProperty('SCAL')) {
-          //If single value, scale, otherwise loop through array
-          if (typeof s === 'number') s = s / result.SCAL;
-          else if (s != null) {
-            //If scaling is array, apply to each "axis", otherwise apply to all
-            if (result.SCAL.length === s.length) s = s.map((ss, i) => ss / result.SCAL[i]);
-            else s = s.map(ss => ss / result.SCAL);
+      result[result.interpretSamples] = result[result.interpretSamples].map(
+        s => {
+          //If scaling data
+          if (result.hasOwnProperty('SCAL')) {
+            //If single value, scale, otherwise loop through array
+            if (typeof s === 'number') s = s / result.SCAL;
+            else if (s != null) {
+              //If scaling is array, apply to each "axis", otherwise apply to all
+              if (result.SCAL.length === s.length)
+                s = s.map((ss, i) =>
+                  typeof ss === 'number' ? ss / result.SCAL : ss[i]
+                );
+              else
+                s = s.map(ss =>
+                  typeof ss === 'number' ? ss / result.SCAL : ss
+                );
+            }
           }
-        }
 
-        //Fix altitude
-        if (result.hasOwnProperty('altitudeFix') && result.GPS5 && s && s.length > 2) s[2] = s[2] - result.altitudeFix;
+          //Fix altitude
+          if (
+            result.hasOwnProperty('altitudeFix') &&
+            result.GPS5 &&
+            s &&
+            s.length > 2
+          )
+            s[2] = s[2] - result.altitudeFix;
 
-        if (result.hasOwnProperty('ORIN') && result.hasOwnProperty('ORIO')) {
-          //Transform with this if no matrix present, otherwise will transform with matrix later
-          if (!result.hasOwnProperty('MTRX')) {
+          if (result.hasOwnProperty('ORIN') && result.hasOwnProperty('ORIO')) {
+            //Transform with this if no matrix present, otherwise will transform with matrix later
+            if (!result.hasOwnProperty('MTRX')) {
+              let newS = [];
+              const len = result.ORIN.length;
+              for (let y = 0; y < len; y++) {
+                for (let x = 0; x < len; x++) {
+                  if (result.ORIN[y].toUpperCase() === result.ORIO[x]) {
+                    if (result.ORIN[y] === result.ORIO[x]) newS[x] = s[y];
+                    else newS[x] = -s[y];
+                  }
+                }
+              }
+              s = newS;
+            }
+          }
+
+          if (result.hasOwnProperty('MTRX')) {
+            //Transform axis, including potential calibration data
             let newS = [];
-            const len = result.ORIN.length;
+            const len = Math.sqrt(result.MTRX.length);
             for (let y = 0; y < len; y++) {
               for (let x = 0; x < len; x++) {
-                if (result.ORIN[y].toUpperCase() === result.ORIO[x]) {
-                  if (result.ORIN[y] === result.ORIO[x]) newS[x] = s[y];
-                  else newS[x] = -s[y];
-                }
+                if (result.MTRX[y * len + x] !== 0)
+                  newS[x] = s[y] * result.MTRX[y * len + x];
               }
             }
             s = newS;
           }
-        }
 
-        if (result.hasOwnProperty('MTRX')) {
-          //Transform axis, including potential calibration data
-          let newS = [];
-          const len = Math.sqrt(result.MTRX.length);
-          for (let y = 0; y < len; y++) {
-            for (let x = 0; x < len; x++) {
-              if (result.MTRX[y * len + x] !== 0) newS[x] = s[y] * result.MTRX[y * len + x];
-            }
+          //Add name if missing and possible
+          if (
+            !result.hasOwnProperty('STNM') &&
+            names[result.interpretSamples]
+          ) {
+            result.STNM = names[result.interpretSamples];
           }
-          s = newS;
-        }
 
-        //Add name if missing and possible
-        if (!result.hasOwnProperty('STNM') && names[result.interpretSamples]) {
-          result.STNM = names[result.interpretSamples];
+          return s;
         }
-
-        return s;
-      });
+      );
       //If we did not interpret, look deeper
-    } else result[result.interpretSamples] = result[result.interpretSamples].map(s => interpretKLV(s, options));
+    } else
+      result[result.interpretSamples] = result[result.interpretSamples].map(s =>
+        interpretKLV(s, options)
+      );
     toInterpret.forEach(k => delete result[k]);
   }
   return result;

@@ -194,7 +194,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## To-Do
 
 - Fix broken tests after merging all strings
-- Avoid breaking highlight fourccs (type)
 - Use "RMRK": "struct: for headers
 - Use timing from highlight rmrk
 - Don't add timing if no timing present?
