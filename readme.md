@@ -193,9 +193,11 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
-- Optimise for file metadata (Video Global Settings) and highlights
+- Fix broken tests after merging all strings
+- Avoid breaking highlight fourccs (type)
 - interpretSamples does not play well with metadata stream (Video Global Settings), make exception?
 - Rule out empty data "\u0000\u0000\u0000\u0000": [null,null]
+- Use "RMRK": "struct: for headers
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
