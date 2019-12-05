@@ -40,7 +40,7 @@ function getGPGS5Data(data) {
                 if (s.date != null) firstRow.push('date');
                 //Fill missing headers
                 for (let i = 0; i < s.value.length; i++) {
-                  firstRow.push(headers[i] || headers[0] || i);
+                  firstRow.push(headers[i] || i);
                 }
                 //Add stickies headers
                 firstRow.push(...Object.keys(sticky));
