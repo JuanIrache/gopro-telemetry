@@ -184,6 +184,10 @@ const telemetry = goproTelemetry({ parsedData, timing });
 
 The 'raw' data option is sensitive to the options: **device**, **stream**, **deviceList**, **streamList**, **tolerant**, **debug** and indirectly to some **presets**. Meaning this approach should not be used if any of these options is going to change between calls.
 
+## MP4 header data
+
+Additionally to the GPMF track, the mp4 header contains a GPMF atom embedded within the 'udta' atom. It contains, for example, manual and atomated **highlight** tags and **video settings**. Its structure is slightly different to the common GPMF track, so some different (and opinionated) interpretation is applied when such data is detected. It is also recommended to use the **noTime** option to avoid applying timing assumtions to the data.
+
 ## More creative coding
 
 If you liked this you might like some of my [app prototyping](https://prototyping.barcelona).
@@ -194,7 +198,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
-- Document new readable data form mp4 header
 - Add highlights test
 - Add Video Global Settings test
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
