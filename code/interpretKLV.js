@@ -14,6 +14,8 @@ function interpretKLV(klv, options) {
     if (someMatch(toInterpret, Object.keys(result))) {
       //set label based on transformation
       if (result.hasOwnProperty('ORIN') && result.hasOwnProperty('ORIO')) {
+        if (typeof result.ORIO === 'string')
+          result.ORIO = result.ORIO.split('');
         const labels = `(${result.ORIO.map(o => o.toLowerCase()).join(',')})`;
         if (result.STNM) result.STNM += ` ${labels}`;
         else result.STNM = labels;
