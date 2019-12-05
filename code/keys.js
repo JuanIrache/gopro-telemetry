@@ -132,10 +132,8 @@ const knownMulti = {
 //Streams that we can add programmatically based on other data
 const computedStreams = ['dateStream'];
 
-//In some cases the lastCC should not be interpreted specially
-const avoidinterpretSamples = {
-  DVNM: 'Video Global Settings'
-};
+//Treat mp4 header samples as stream
+const mp4ValidSamples = ['HLMT'];
 
 module.exports = {
   keyAndStructParser,
@@ -150,5 +148,5 @@ module.exports = {
   names,
   knownMulti,
   computedStreams,
-  avoidinterpretSamples
+  mp4ValidSamples
 };

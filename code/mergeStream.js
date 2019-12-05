@@ -3,7 +3,8 @@ const {
   ignore,
   stickyTranslations,
   idKeysTranslation,
-  idValuesTranslation
+  idValuesTranslation,
+  mp4ValidSamples
 } = require('./keys');
 const deduceHeaders = require('./deduceHeaders');
 const hero7Labelling = require('./hero7Labelling');
@@ -19,7 +20,7 @@ function deepEqual(a, b) {
 }
 
 //Merges all samples of every device under the same key
-function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
+function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
   //Will return a list of streams for a device
   let result = { streams: {} };
 
@@ -31,7 +32,11 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
     stickies[d['device name']] = stickies[d['device name']] || {};
     (d.STRM || []).forEach((s, i) => {
       //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
-      if (s.interpretSamples && s.interpretSamples !== 'STNM') {
+      if (
+        (!mp4header || mp4ValidSamples.includes(s.interpretSamples)) &&
+        s.interpretSamples &&
+        s.interpretSamples !== 'STNM'
+      ) {
         const fourCC = s.interpretSamples;
         //Initialise stickies
         stickies[d['device name']][fourCC] =
@@ -225,7 +230,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
           } else completeSample({ samples, description });
         }
         //If this not a normal stream with samples, just copy the data
-      } else if (!s.interpretSamples) {
+      } else {
         result.streams[`Data ${i}`] = JSON.parse(JSON.stringify(d.STRM));
       }
     });

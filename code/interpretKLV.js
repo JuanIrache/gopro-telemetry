@@ -98,10 +98,16 @@ function interpretKLV(klv, options) {
         }
       );
       //If we did not interpret, look deeper
-    } else
+    } else if (Array.isArray(result[result.interpretSamples])) {
       result[result.interpretSamples] = result[result.interpretSamples].map(s =>
         interpretKLV(s, options)
       );
+    } else {
+      result[result.interpretSamples] = interpretKLV(
+        result[result.interpretSamples],
+        options
+      );
+    }
     toInterpret.forEach(k => delete result[k]);
   }
   return result;

@@ -7,7 +7,7 @@ describe('Testing with mp4 header', () => {
   beforeAll(() => {
     filename = 'mp4header';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file }, {});
+    result = goproTelemetry({ rawData: file }, { mp4header: true });
   });
 
   test(`The sample should have 3 highlight tags`, () => {
