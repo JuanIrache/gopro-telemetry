@@ -59,8 +59,7 @@ function interpretOne(timing, parsed, opts) {
   let timed = {};
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
-    if (opts.noTime && !opts.repeatHeaders) timed[key] = interpreted[key];
-    else timed[key] = timeKLV(interpreted[key], timing, opts);
+    timed[key] = timeKLV(interpreted[key], timing, opts);
   }
 
   //Merge samples in sensor entries

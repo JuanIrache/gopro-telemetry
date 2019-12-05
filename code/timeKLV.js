@@ -28,7 +28,7 @@ function toDate(d) {
 function fillGPSTime(klv, options) {
   let res = [];
   //Ignore if timeIn selects the other time input
-  if (options.timeIn === 'MP4') return res;
+  if (options.timeIn === 'MP4' || options.noTime) return res;
   let initialDate;
   let missingDates = [];
   klv.DEVC.forEach((d, i) => {
@@ -122,7 +122,7 @@ function fillGPSTime(klv, options) {
 function fillMP4Time(klv, timing, options) {
   let res = [];
   //Ignore if timeIn selects the other time input
-  if (options.timeIn === 'GPS') return res;
+  if (options.timeIn === 'GPS' || options.noTime) return res;
   //Invent timing data if missing
   if (!timing || !timing.samples || !timing.samples.length) {
     timing = {
@@ -272,7 +272,11 @@ function timeKLV(klv, timing, options) {
             //Loop samples and replace them with timed samples
             s[fourCC] = s[fourCC].map(value => {
               //If timing data avaiable
-              if (currCts != null && sDuration[fourCC] != null) {
+              if (
+                !options.noTime &&
+                currCts != null &&
+                sDuration[fourCC] != null
+              ) {
                 let timedSample = { value };
                 //Filter out if timeOut option, but keep cts if needed for merging times
                 if (options.timeOut !== 'date' || options.groupTimes)
