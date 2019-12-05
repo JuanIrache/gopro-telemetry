@@ -194,14 +194,13 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
-- Deduceheaders application set question mark when unknown?
 - Document new readable data form mp4 header
+- Add highlights test
+- Add Video Global Settings test
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
 - Provide progress
-- Add highlights test
-- Add Video Global Settings test
 
 ## Maybe To-Do
 
