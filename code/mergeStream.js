@@ -231,6 +231,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
         }
         //If this not a normal stream with samples, just copy the data
       } else {
+        if (s.interpretSamples) delete s.interpretSamples;
         result.streams[`Data ${i}`] = JSON.parse(JSON.stringify(d.STRM));
       }
     });
