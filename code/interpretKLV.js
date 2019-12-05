@@ -25,11 +25,11 @@ function interpretKLV(klv, options) {
           if (result.hasOwnProperty('SCAL')) {
             //If single value, scale, otherwise loop through array
             if (typeof s === 'number') s = s / result.SCAL;
-            else if (s != null) {
+            else if (Array.isArray(s) && s != null) {
               //If scaling is array, apply to each "axis", otherwise apply to all
               if (result.SCAL.length === s.length)
                 s = s.map((ss, i) =>
-                  typeof ss === 'number' ? ss / result.SCAL : ss[i]
+                  typeof ss === 'number' ? ss / result.SCAL[i] : ss
                 );
               else
                 s = s.map(ss =>
