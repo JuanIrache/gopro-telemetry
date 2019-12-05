@@ -214,7 +214,7 @@ function timeKLV(klv, timing, options) {
           if (s.interpretSamples && s[s.interpretSamples].length) {
             const fourCC = s.interpretSamples;
 
-            if (options.noTime) {
+            if (!options.noTime) {
               //Will store the current Cts
               let currCts;
 
