@@ -1,4 +1,5 @@
 const { names } = require('./keys');
+const rmrkToNameUnits = require('./rmrkToNameUnits');
 
 //Apply scale and matrix transformations to data
 function interpretKLV(klv, options) {
@@ -77,11 +78,14 @@ function interpretKLV(klv, options) {
           }
 
           //Add name if missing and possible
-          if (
-            !result.hasOwnProperty('STNM') &&
-            names[result.interpretSamples]
-          ) {
-            result.STNM = names[result.interpretSamples];
+          if (!result.hasOwnProperty('STNM')) {
+            if (names[result.interpretSamples]) {
+              result.STNM = names[result.interpretSamples];
+            } else if (result.RMRK && /^struct: (.*)/.test(result.RMRK)) {
+              const { name, units } = rmrkToNameUnits(result.RMRK);
+              result.STNM = name;
+              if (!result.hasOwnProperty('UNIT')) result.UNIT = units;
+            }
           }
 
           return s;
