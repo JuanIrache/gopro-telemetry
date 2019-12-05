@@ -42,7 +42,10 @@ function fillGPSTime(klv, options) {
         if (d.STRM[key].GPSU != null) {
           date = toDate(d.STRM[key].GPSU);
           //Done with GPSU
-          if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
+          if (
+            (options.stream && !options.stream.includes('GPS5')) ||
+            d.STRM[key].toDelete
+          ) {
             delete d.STRM[key];
           } else delete d.STRM[key].GPSU;
           break;
@@ -56,7 +59,8 @@ function fillGPSTime(klv, options) {
       partialRes = { date };
       // Assign duration for previous pack. The last one will lack it
       if (res.length && res[res.length - 1] && res[res.length - 1].date)
-        res[res.length - 1].duration = partialRes.date - res[res.length - 1].date;
+        res[res.length - 1].duration =
+          partialRes.date - res[res.length - 1].date;
     }
     if (partialRes) {
       //Deduce starting time from date and push result
@@ -103,11 +107,13 @@ function fillGPSTime(klv, options) {
 
   //Fill missing durations
   missingDurations.forEach(i => {
-    if (res[i + 1] && res[i + 1].date) res[i].duration = res[i + 1].date - res[i].date;
+    if (res[i + 1] && res[i + 1].date)
+      res[i].duration = res[i + 1].date - res[i].date;
   });
 
   //If only one group of samples, invent duration to get at least some useful results
-  if (res.length === 1 && res[0] != null && res[0].duration == null) res[0].duration = 1001;
+  if (res.length === 1 && res[0] != null && res[0].duration == null)
+    res[0].duration = 1001;
 
   return res;
 }
@@ -133,7 +139,8 @@ function fillMP4Time(klv, timing, options) {
     //Will contain the timing data about the packet
     let partialRes = {};
     //Copy cts and duration from mp4 if present
-    if (timing.samples[i] != null) partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
+    if (timing.samples[i] != null)
+      partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
     else {
       //Deduce it from previous sample
       partialRes.cts = res[i - 1].cts + res[i - 1].duration;
@@ -149,7 +156,10 @@ function fillMP4Time(klv, timing, options) {
         //Find the GPSU date in the GPS5 stream
         if (d.STRM[key].GPSU != null) {
           //Done with GPSU
-          if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
+          if (
+            (options.stream && !options.stream.includes('GPS5')) ||
+            d.STRM[key].toDelete
+          ) {
             delete d.STRM[key];
           } else delete d.STRM[key].GPSU;
           break;
@@ -221,7 +231,8 @@ function timeKLV(klv, timing, options) {
                     //Found matchin sample
                     if (ss.STMP) {
                       //Has timestamp? Measure duration of all samples and divide by number of samples
-                      sDuration[fourCC] = (ss.STMP / 1000 - currCts) / s[fourCC].length;
+                      sDuration[fourCC] =
+                        (ss.STMP / 1000 - currCts) / s[fourCC].length;
                       microDuration = true;
                     }
                   }
@@ -231,7 +242,8 @@ function timeKLV(klv, timing, options) {
             }
 
             //Divide duration of packet by samples in packet to get sample duration per fourCC type
-            if (!microDuration && duration != null) sDuration[fourCC] = duration / s[fourCC].length;
+            if (!microDuration && duration != null)
+              sDuration[fourCC] = duration / s[fourCC].length;
             if (!microCts) currCts = cts;
 
             //The same for duration of dates
@@ -263,8 +275,10 @@ function timeKLV(klv, timing, options) {
               if (currCts != null && sDuration[fourCC] != null) {
                 let timedSample = { value };
                 //Filter out if timeOut option, but keep cts if needed for merging times
-                if (options.timeOut !== 'date' || options.groupTimes) timedSample.cts = currCts;
-                if (options.timeOut !== 'cts') timedSample.date = new Date(currDate);
+                if (options.timeOut !== 'date' || options.groupTimes)
+                  timedSample.cts = currCts;
+                if (options.timeOut !== 'cts')
+                  timedSample.date = new Date(currDate);
                 //increment time and date for the next sample and compensate time offset
                 currCts += sDuration[fourCC] - timoDur;
                 currDate += dateSDur[fourCC] - timoDur;
