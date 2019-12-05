@@ -1,4 +1,5 @@
 const { names } = require('./keys');
+const rmrkToNameUnits = require('./rmrkToNameUnits');
 
 //Apply scale and matrix transformations to data
 function interpretKLV(klv, options) {
@@ -26,11 +27,16 @@ function interpretKLV(klv, options) {
           if (result.hasOwnProperty('SCAL')) {
             //If single value, scale, otherwise loop through array
             if (typeof s === 'number') s = s / result.SCAL;
-            else if (s != null) {
+            else if (Array.isArray(s) && s != null) {
               //If scaling is array, apply to each "axis", otherwise apply to all
               if (result.SCAL.length === s.length)
-                s = s.map((ss, i) => ss / result.SCAL[i]);
-              else s = s.map(ss => ss / result.SCAL);
+                s = s.map((ss, i) =>
+                  typeof ss === 'number' ? ss / result.SCAL[i] : ss
+                );
+              else
+                s = s.map(ss =>
+                  typeof ss === 'number' ? ss / result.SCAL : ss
+                );
             }
           }
 
@@ -73,13 +79,20 @@ function interpretKLV(klv, options) {
             s = newS;
           }
 
-          //Add name if missing and possible
-          if (
-            !result.hasOwnProperty('STNM') &&
-            names[result.interpretSamples]
-          ) {
-            result.STNM = names[result.interpretSamples];
+          //Add name and units if missing and possible
+          let rmrkName, rmrkUnits;
+          if (result.RMRK && /^struct: (.*)/.test(result.RMRK)) {
+            const { name, units } = rmrkToNameUnits(result.RMRK);
+            rmrkName = name;
+            rmrkUnits = units;
           }
+          if (!result.hasOwnProperty('STNM')) {
+            if (names[result.interpretSamples]) {
+              result.STNM = names[result.interpretSamples];
+            } else if (rmrkName) result.STNM = rmrkName;
+          }
+          if (!result.hasOwnProperty('UNIT') && rmrkUnits)
+            result.UNIT = rmrkUnits;
 
           return s;
         }

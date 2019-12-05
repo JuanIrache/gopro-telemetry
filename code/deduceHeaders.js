@@ -31,14 +31,21 @@ module.exports = function({ units, name }, { inn, out } = {}) {
     for (let i = 0; i < Math.max(parts.length, unitsHeaders.length); i++) {
       //Repeat elements if not enough iterations
       let part = parts[i] || parts[0] ? `(${parts[i] || parts[0]})` : '';
-      let unit = unitsHeaders[i] || unitsHeaders[0] ? `[${unitsHeaders[i] || unitsHeaders[0]}]` : '';
+      let unit =
+        unitsHeaders[i] || unitsHeaders[0]
+          ? `[${unitsHeaders[i] || unitsHeaders[0]}]`
+          : '';
       //And merge
       headers[i] = [name, part, unit].filter(e => e.length).join(' ');
     }
   } else {
     //Repeat elements if not enough iterations
-    let part = parts.slice(inn, out).length ? `(${parts.slice(inn, out).join(',')})` : '';
-    let unit = unitsHeaders.slice(inn, out).length ? `[${unitsHeaders.slice(inn, out).join(',')}]` : '';
+    let part = parts.slice(inn, out).length
+      ? `(${parts.slice(inn, out).join(',')})`
+      : '';
+    let unit = unitsHeaders.slice(inn, out).length
+      ? `[${unitsHeaders.slice(inn, out).join(',')}]`
+      : '';
     //And merge
     headers = [name, part, unit].filter(e => e.length).join(' ');
   }

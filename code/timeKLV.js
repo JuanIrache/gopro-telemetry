@@ -28,7 +28,7 @@ function toDate(d) {
 function fillGPSTime(klv, options) {
   let res = [];
   //Ignore if timeIn selects the other time input
-  if (options.timeIn === 'MP4') return res;
+  if (options.timeIn === 'MP4' || options.noTime) return res;
   let initialDate;
   let missingDates = [];
   klv.DEVC.forEach((d, i) => {
@@ -42,7 +42,10 @@ function fillGPSTime(klv, options) {
         if (d.STRM[key].GPSU != null) {
           date = toDate(d.STRM[key].GPSU);
           //Done with GPSU
-          if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
+          if (
+            (options.stream && !options.stream.includes('GPS5')) ||
+            d.STRM[key].toDelete
+          ) {
             delete d.STRM[key];
           } else delete d.STRM[key].GPSU;
           break;
@@ -56,7 +59,8 @@ function fillGPSTime(klv, options) {
       partialRes = { date };
       // Assign duration for previous pack. The last one will lack it
       if (res.length && res[res.length - 1] && res[res.length - 1].date)
-        res[res.length - 1].duration = partialRes.date - res[res.length - 1].date;
+        res[res.length - 1].duration =
+          partialRes.date - res[res.length - 1].date;
     }
     if (partialRes) {
       //Deduce starting time from date and push result
@@ -103,11 +107,13 @@ function fillGPSTime(klv, options) {
 
   //Fill missing durations
   missingDurations.forEach(i => {
-    if (res[i + 1] && res[i + 1].date) res[i].duration = res[i + 1].date - res[i].date;
+    if (res[i + 1] && res[i + 1].date)
+      res[i].duration = res[i + 1].date - res[i].date;
   });
 
   //If only one group of samples, invent duration to get at least some useful results
-  if (res.length === 1 && res[0] != null && res[0].duration == null) res[0].duration = 1001;
+  if (res.length === 1 && res[0] != null && res[0].duration == null)
+    res[0].duration = 1001;
 
   return res;
 }
@@ -116,7 +122,7 @@ function fillGPSTime(klv, options) {
 function fillMP4Time(klv, timing, options) {
   let res = [];
   //Ignore if timeIn selects the other time input
-  if (options.timeIn === 'GPS') return res;
+  if (options.timeIn === 'GPS' || options.noTime) return res;
   //Invent timing data if missing
   if (!timing || !timing.samples || !timing.samples.length) {
     timing = {
@@ -133,7 +139,8 @@ function fillMP4Time(klv, timing, options) {
     //Will contain the timing data about the packet
     let partialRes = {};
     //Copy cts and duration from mp4 if present
-    if (timing.samples[i] != null) partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
+    if (timing.samples[i] != null)
+      partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
     else {
       //Deduce it from previous sample
       partialRes.cts = res[i - 1].cts + res[i - 1].duration;
@@ -149,7 +156,10 @@ function fillMP4Time(klv, timing, options) {
         //Find the GPSU date in the GPS5 stream
         if (d.STRM[key].GPSU != null) {
           //Done with GPSU
-          if ((options.stream && !options.stream.includes('GPS5')) || d.STRM[key].toDelete) {
+          if (
+            (options.stream && !options.stream.includes('GPS5')) ||
+            d.STRM[key].toDelete
+          ) {
             delete d.STRM[key];
           } else delete d.STRM[key].GPSU;
           break;
@@ -203,76 +213,89 @@ function timeKLV(klv, timing, options) {
           //If group of samples found
           if (s.interpretSamples && s[s.interpretSamples].length) {
             const fourCC = s.interpretSamples;
-            //Will store the current Cts
-            let currCts;
 
-            //Use sDuration and cts from microsecond timestamps if available
-            let microCts = false;
-            let microDuration = false;
-            if (s.STMP != null) {
-              currCts = s.STMP / 1000;
-              microCts = true;
-              //Look for next sample of same fourCC
-              if (result.DEVC[i + 1]) {
-                //If next DEVC entry
-                (result.DEVC[i + 1].STRM || []).forEach(ss => {
-                  //Look in each stream
-                  if (ss.interpretSamples === fourCC) {
-                    //Found matchin sample
-                    if (ss.STMP) {
-                      //Has timestamp? Measure duration of all samples and divide by number of samples
-                      sDuration[fourCC] = (ss.STMP / 1000 - currCts) / s[fourCC].length;
-                      microDuration = true;
+            if (!options.noTime) {
+              //Will store the current Cts
+              let currCts;
+
+              //Use sDuration and cts from microsecond timestamps if available
+              let microCts = false;
+              let microDuration = false;
+              if (s.STMP != null) {
+                currCts = s.STMP / 1000;
+                microCts = true;
+                //Look for next sample of same fourCC
+                if (result.DEVC[i + 1]) {
+                  //If next DEVC entry
+                  (result.DEVC[i + 1].STRM || []).forEach(ss => {
+                    //Look in each stream
+                    if (ss.interpretSamples === fourCC) {
+                      //Found matchin sample
+                      if (ss.STMP) {
+                        //Has timestamp? Measure duration of all samples and divide by number of samples
+                        sDuration[fourCC] =
+                          (ss.STMP / 1000 - currCts) / s[fourCC].length;
+                        microDuration = true;
+                      }
                     }
-                  }
-                });
+                  });
+                }
+                delete s.STMP;
               }
-              delete s.STMP;
-            }
 
-            //Divide duration of packet by samples in packet to get sample duration per fourCC type
-            if (!microDuration && duration != null) sDuration[fourCC] = duration / s[fourCC].length;
-            if (!microCts) currCts = cts;
+              //Divide duration of packet by samples in packet to get sample duration per fourCC type
+              if (!microDuration && duration != null)
+                sDuration[fourCC] = duration / s[fourCC].length;
+              if (!microCts) currCts = cts;
 
-            //The same for duration of dates
-            if (dateDur != null) dateSDur[fourCC] = dateDur / s[fourCC].length;
-            //We know the time and date of the first sample
-            let currDate = date;
+              //The same for duration of dates
+              if (dateDur != null)
+                dateSDur[fourCC] = dateDur / s[fourCC].length;
+              //We know the time and date of the first sample
+              let currDate = date;
 
-            //Try to compensate delayed samples proportionally
-            let timoDur = 0;
-            if (s.TIMO) {
-              //Substract time offset, but don't go under 0
-              if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
-              currCts -= s.TIMO * 1000;
-              if (currCts < 0) currCts = 0;
-              if (d.STRM[ii + 1] && d.STRM[ii + 1].TIMO) {
-                //Find difference to next TIMO
-                const timoDiff = d.STRM[ii + 1].TIMO - s.TIMO;
-                //And calculate how much we must compensate each sample (interpolate)
-                timoDur = (100 * timoDiff) / s[fourCC].length;
+              //Try to compensate delayed samples proportionally
+              let timoDur = 0;
+              if (s.TIMO) {
+                //Substract time offset, but don't go under 0
+                if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
+                currCts -= s.TIMO * 1000;
+                if (currCts < 0) currCts = 0;
+                if (d.STRM[ii + 1] && d.STRM[ii + 1].TIMO) {
+                  //Find difference to next TIMO
+                  const timoDiff = d.STRM[ii + 1].TIMO - s.TIMO;
+                  //And calculate how much we must compensate each sample (interpolate)
+                  timoDur = (100 * timoDiff) / s[fourCC].length;
+                }
+                //And compensate date
+                currDate = currDate - s.TIMO * 1000;
+                delete s.TIMO;
               }
-              //And compensate date
-              currDate = currDate - s.TIMO * 1000;
-              delete s.TIMO;
+
+              //Loop samples and replace them with timed samples
+              s[fourCC] = s[fourCC].map(value => {
+                //If timing data avaiable
+                if (currCts != null && sDuration[fourCC] != null) {
+                  let timedSample = { value };
+                  //Filter out if timeOut option, but keep cts if needed for merging times
+                  if (options.timeOut !== 'date' || options.groupTimes)
+                    timedSample.cts = currCts;
+                  if (options.timeOut !== 'cts')
+                    timedSample.date = new Date(currDate);
+                  //increment time and date for the next sample and compensate time offset
+                  currCts += sDuration[fourCC] - timoDur;
+                  currDate += dateSDur[fourCC] - timoDur;
+
+                  return timedSample;
+                  //Otherwise return value without timing data
+                } else return { value };
+              });
+            } else {
+              //If no time required just store samples in value
+              s[fourCC] = s[fourCC].map(value => ({
+                value
+              }));
             }
-
-            //Loop samples and replace them with timed samples
-            s[fourCC] = s[fourCC].map(value => {
-              //If timing data avaiable
-              if (currCts != null && sDuration[fourCC] != null) {
-                let timedSample = { value };
-                //Filter out if timeOut option, but keep cts if needed for merging times
-                if (options.timeOut !== 'date' || options.groupTimes) timedSample.cts = currCts;
-                if (options.timeOut !== 'cts') timedSample.date = new Date(currDate);
-                //increment time and date for the next sample and compensate time offset
-                currCts += sDuration[fourCC] - timoDur;
-                currDate += dateSDur[fourCC] - timoDur;
-
-                return timedSample;
-                //Otherwise return value without timing data
-              } else return { value };
-            });
           }
         });
       });

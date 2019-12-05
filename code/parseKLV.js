@@ -1,4 +1,4 @@
-const { keyAndStructParser, types, mergeStrings } = require('./keys');
+const { keyAndStructParser, types, avoidinterpretSamples } = require('./keys');
 const parseV = require('./parseV');
 const unArrayTypes = require('./unArrayTypes');
 const { generateStructArr } = require('./keys');
@@ -8,7 +8,8 @@ function findLastCC(data, start, end) {
   let ks;
   while (start < end) {
     //Retrieve structured data
-    ks = keyAndStructParser.parse(data.slice(start)).result;
+    const tempKs = keyAndStructParser.parse(data.slice(start)).result;
+    if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
     //But don't process it, go to next
     const length = ks.size * ks.repeat;
     const reached = start + 8 + (length >= 0 ? length : 0);
@@ -19,16 +20,26 @@ function findLastCC(data, start, end) {
 }
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
-function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
+function parseKLV(
+  data,
+  options = {},
+  start = 0,
+  end = data.length,
+  parent,
+  interpretLast = true
+) {
   let result = {};
   //Will store unknown types
   let unknown = new Set();
   //Will store complex type definitions
   let complexType = [];
   //Find the last, most relevant key
-  let lastCC = findLastCC(data, start, end);
-  //Remember last key for interpreting data later
-  result.interpretSamples = lastCC;
+  let lastCC;
+  if (interpretLast) {
+    lastCC = findLastCC(data, start, end);
+    //Remember last key for interpreting data later
+    result.interpretSamples = lastCC;
+  }
 
   //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if lists or timein is MP4
   if (
@@ -53,10 +64,22 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
 
       //Abort if we are creating a device list. Or a streamList and We have enough info
       const done =
+        ks.fourCC === '\u0000\u0000\u0000\u0000' ||
         (options.deviceList && ks.fourCC === 'STRM') ||
         (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
       if (!done) {
         let partialResult = [];
+        let interpretLastChild = true;
+        //Decide if no sample interpretation is needed for children
+        const dontInterpret = (key, result) =>
+          avoidinterpretSamples[key] &&
+          result[key].length &&
+          result[key][0] === avoidinterpretSamples[key];
+
+        for (const key in result) {
+          if (dontInterpret(key, result)) interpretLastChild = false;
+        }
+
         if (length >= 0) {
           //If empty, we still want to store the fourCC
           if (length === 0) partialResult.push(undefined);
@@ -64,18 +87,33 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
           else if (!types[ks.type]) unknown.add(ks.type);
           //Recursive call to parse nested data
           else if (types[ks.type].nested) {
-            const parsed = parseKLV(data, options, start + 8, start + 8 + length, ks.fourCC);
+            const parsed = parseKLV(
+              data,
+              options,
+              start + 8,
+              start + 8 + length,
+              ks.fourCC,
+              interpretLastChild
+            );
             if (parsed != null) partialResult.push(parsed);
           }
           //We can parse the Value
-          else if (types[ks.type].func || (types[ks.type].complex && complexType)) {
+          else if (
+            types[ks.type].func ||
+            (types[ks.type].complex && complexType)
+          ) {
             //Detect data with multiple axes
             let axes = 1;
             if (types[ks.type].size > 1) axes = ks.size / types[ks.type].size;
             //Detect them when the type is complex
-            else if (types[ks.type].complex && complexType.length) axes = complexType.length;
+            else if (types[ks.type].complex && complexType.length)
+              axes = complexType.length;
             //Human readable strings should de merged for readability
-            if (mergeStrings.includes(ks.fourCC)) {
+            if (
+              types[ks.type].func === 'string' &&
+              ks.size === 1 &&
+              ks.repeat > 1
+            ) {
               ks.size = length;
               ks.repeat = 1;
             }
@@ -87,11 +125,20 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
             if (ks.repeat > 1) {
               for (let i = 0; i < ks.repeat; i++)
                 partialResult.push(
-                  parseV(environment, start + 8 + i * ks.size, ks.size, specifics)
+                  parseV(
+                    environment,
+                    start + 8 + i * ks.size,
+                    ks.size,
+                    specifics
+                  )
                 );
-            } else partialResult.push(parseV(environment, start + 8, length, specifics));
+            } else
+              partialResult.push(
+                parseV(environment, start + 8, length, specifics)
+              );
             //If we just read a TYPE value, store it. Will be necessary in this nest
-            if (ks.fourCC === 'TYPE') complexType = unArrayTypes(partialResult[0]);
+            if (ks.fourCC === 'TYPE')
+              complexType = unArrayTypes(partialResult[0]);
             //Abort if we are selecting devices and this one is not selected
             else if (
               ks.fourCC === 'DVID' &&
@@ -107,7 +154,9 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
           //Try to define unknown data based on documentation
           if (ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
             //Create the string for inside the parenthesis, and remove nulls
-            let extraDescription = generateStructArr(ks.fourCC).filter(v => v != null);
+            let extraDescription = generateStructArr(ks.fourCC).filter(
+              v => v != null
+            );
             let newValueArr = [];
             //Loop partial results
             partialResult.forEach((p, i) => {
@@ -126,7 +175,8 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
               });
               //Save new values if worth it
               if (newP.length) partialResult[i] = newP;
-              if (descCandidate.length > extraDescription.length) extraDescription = descCandidate;
+              if (descCandidate.length > extraDescription.length)
+                extraDescription = descCandidate;
             });
 
             if (newValueArr.length) partialResult[0] = newValueArr;
@@ -134,7 +184,10 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
               const extraDescString = extraDescription.join(',');
               if (!/\(.+\)$/.test(result.STNM)) {
                 result.STNM = `${result.STNM || ''} (${extraDescString})`;
-              } else if (result.STNM.match(/\((.+)\)$/)[1].length < extraDescString.length) {
+              } else if (
+                result.STNM.match(/\((.+)\)$/)[1].length <
+                extraDescString.length
+              ) {
                 result.STNM.replace(/\(.+\)$/, `(${extraDescString})`);
               }
             }
@@ -164,8 +217,11 @@ function parseKLV(data, options = {}, start = 0, end = data.length, parent) {
   }
 
   //Undo all arrays except the last key, which should be the array of samples
-  for (const key in result)
-    if (key !== lastCC && result[key].length === 1) result[key] = result[key][0];
+  for (const key in result) {
+    if (key !== lastCC && result[key] && result[key].length === 1) {
+      result[key] = result[key][0];
+    }
+  }
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size)
