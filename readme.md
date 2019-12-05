@@ -195,7 +195,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## To-Do
 
 - noTime and repeatHeades not working together
-- Fix broken tests after merging all strings
 - Document new readable data form mp4 header
 - Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
