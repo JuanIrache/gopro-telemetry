@@ -292,9 +292,9 @@ function timeKLV(klv, timing, options) {
               });
             } else {
               //If no time required just store samples in value
-              s[fourCC] = s[fourCC].map(value => {
-                value;
-              });
+              s[fourCC] = s[fourCC].map(value => ({
+                value
+              }));
             }
           }
         });
