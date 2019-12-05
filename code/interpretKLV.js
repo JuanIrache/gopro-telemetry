@@ -77,16 +77,20 @@ function interpretKLV(klv, options) {
             s = newS;
           }
 
-          //Add name if missing and possible
+          //Add name and units if missing and possible
+          let rmrkName, rmrkUnits;
+          if (result.RMRK && /^struct: (.*)/.test(result.RMRK)) {
+            const { name, units } = rmrkToNameUnits(result.RMRK);
+            rmrkName = name;
+            rmrkUnits = units;
+          }
           if (!result.hasOwnProperty('STNM')) {
             if (names[result.interpretSamples]) {
               result.STNM = names[result.interpretSamples];
-            } else if (result.RMRK && /^struct: (.*)/.test(result.RMRK)) {
-              const { name, units } = rmrkToNameUnits(result.RMRK);
-              result.STNM = name;
-              if (!result.hasOwnProperty('UNIT')) result.UNIT = units;
-            }
+            } else if (rmrkName) result.STNM = rmrkName;
           }
+          if (!result.hasOwnProperty('UNIT') && rmrkUnits)
+            result.UNIT = rmrkUnits;
 
           return s;
         }
