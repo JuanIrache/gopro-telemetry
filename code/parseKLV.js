@@ -8,10 +8,13 @@ function findLastCC(data, start, end) {
   let ks;
   while (start < end) {
     //Retrieve structured data
-    const tempKs = keyAndStructParser.parse(data.slice(start)).result;
-    if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
-    //But don't process it, go to next
-    const length = ks.size * ks.repeat;
+    let length = 0;
+    try {
+      const tempKs = keyAndStructParser.parse(data.slice(start)).result;
+      if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
+      //But don't process it, go to next
+      length = ks.size * ks.repeat;
+    } catch (error) {}
     const reached = start + 8 + (length >= 0 ? length : 0);
     //Align to 32 bits
     while (start < reached) start += 4;
@@ -51,16 +54,20 @@ function parseKLV(
     return undefined;
 
   while (start < end) {
-    let length;
+    let length = 0;
+    let ks;
     try {
-      //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
-      const ks = keyAndStructParser.parse(data.slice(start)).result;
+      try {
+        //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
+        ks = keyAndStructParser.parse(data.slice(start)).result;
 
-      //Get the length of the value (or values, or nested values)
-      length = ks.size * ks.repeat;
+        //Get the length of the value (or values, or nested values)
+        length = ks.size * ks.repeat;
+      } catch (error) {}
 
       //Abort if we are creating a device list. Or a streamList and We have enough info
       const done =
+        !ks ||
         ks.fourCC === '\u0000\u0000\u0000\u0000' ||
         (options.deviceList && ks.fourCC === 'STRM') ||
         (options.streamList && ks.fourCC === lastCC && parent === 'STRM');
