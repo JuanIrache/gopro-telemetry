@@ -88,9 +88,7 @@ function mergeStreams(klv, { repeatHeaders, repeatSticky }) {
             samples = samples.map(ss => {
               //If no available description, use numbers
               if (Array.isArray(ss.value))
-                ss.value.forEach(
-                  (v, i) => (ss[headers[i] || `${headers[0]} (${i})`] = v)
-                );
+                ss.value.forEach((v, i) => (ss[headers[i] || `(${i})`] = v));
               else if (headers[0]) ss[headers[0]] = ss.value;
               //Delete value key if we solved the situation
               if (headers.length) delete ss.value;
