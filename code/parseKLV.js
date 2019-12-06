@@ -1,7 +1,7 @@
 const { keyAndStructParser, types } = require('./keys');
 const parseV = require('./parseV');
 const unArrayTypes = require('./unArrayTypes');
-const { generateStructArr } = require('./keys');
+const { generateStructArr, mp4ValidSamples } = require('./keys');
 
 //quick function to find the last, most relevant fourCC key
 function findLastCC(data, start, end) {
@@ -38,6 +38,8 @@ function parseKLV(
   let complexType = [];
   //Find the last, most relevant key
   let lastCC = findLastCC(data, start, end);
+  //Undo unarraying of last if this is a valid sample structure, despite being an mp4Header
+  if (mp4ValidSamples.includes(lastCC)) unarrayLast = true;
   //Remember last key for interpreting data later
   result.interpretSamples = lastCC;
 
