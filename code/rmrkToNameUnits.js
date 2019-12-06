@@ -6,11 +6,11 @@ module.exports = rmrk => {
 
   const parenthesisRx = / ?\(.*?\)/g;
   //Remove parenthesis and fix known limitations to get a better result with headers later
-  const name = `(${rmrk
-    .match(rx)[1]
+
+  let broadString = rmrk.match(rx)[1].replace(/\) (.*)/g, '), $1');
+  const name = `(${broadString
     .replace(parenthesisRx, '')
     .replace(/\bXYZ\b/, 'X, Y, Z')})`;
-  let broadString = rmrk.match(rx)[1];
 
   //Replace commas inside parenthesis temporarily
   const commasRx = /(\([^)]*?),([^)]*?\))/g;
