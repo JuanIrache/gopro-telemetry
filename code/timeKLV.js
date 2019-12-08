@@ -211,7 +211,11 @@ function timeKLV(klv, timing, options) {
         //Loop streams if present
         (d.STRM || []).forEach((s, ii) => {
           //If group of samples found
-          if (s.interpretSamples && s[s.interpretSamples].length) {
+          if (
+            s.interpretSamples &&
+            s[s.interpretSamples] &&
+            s[s.interpretSamples].length
+          ) {
             const fourCC = s.interpretSamples;
 
             if (!options.mp4header) {
