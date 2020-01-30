@@ -3,6 +3,12 @@ const fs = require('fs');
 
 let filename, file, result;
 
+const timing = {
+  frameDuration: 0.03336666666666666,
+  start: new Date('2017-12-31T12:15:25.000Z'),
+  samples: [{ cts: 0, duration: 1001 }]
+};
+
 describe('Testing with karma file', () => {
   beforeAll(() => {
     filename = 'karma';
@@ -11,7 +17,9 @@ describe('Testing with karma file', () => {
   });
 
   test(`Karma should have two devices`, () => {
-    expect(JSON.stringify(result)).toBe('{"1":"Camera","16835857":"GoPro Karma v1.0"}');
+    expect(JSON.stringify(result)).toBe(
+      '{"1":"Camera","16835857":"GoPro Karma v1.0"}'
+    );
   });
 });
 
@@ -48,7 +56,9 @@ describe('Testing deeper with hero6+ble file', () => {
   });
 
   test(`repeatSticky should be working for all samples`, () => {
-    expect(JSON.stringify(result['16778241'].streams.acc1.samples[5].MFGI)).toBeDefined();
+    expect(
+      JSON.stringify(result['16778241'].streams.acc1.samples[5].MFGI)
+    ).toBeDefined();
   });
 });
 
@@ -67,7 +77,9 @@ describe('Testing with hero7 file', () => {
   });
 
   test(`repeatHeaders should describe each value on each sample`, () => {
-    expect(result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s2]']).toBeDefined();
+    expect(
+      result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s2]']
+    ).toBeDefined();
   });
 });
 
@@ -75,7 +87,10 @@ describe('Testing GPS5 with hero7 file', () => {
   beforeAll(() => {
     filename = 'hero7';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file }, { stream: 'GPS5', smooth: 20, GPS5Precision: 140 });
+    result = goproTelemetry(
+      { rawData: file, timing },
+      { stream: 'GPS5', smooth: 20, GPS5Precision: 140, timeIn: 'MP4' }
+    );
   });
 
   test(`GPS5Precision should leave us with fewer, better samples`, () => {
@@ -83,11 +98,19 @@ describe('Testing GPS5 with hero7 file', () => {
   });
 
   test(`smooth should return averaged values`, () => {
-    expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(42.34258096153846);
+    expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(
+      42.34258096153846
+    );
+  });
+
+  test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
+    expect(result['1'].streams.GPS5.samples[0].date).toEqual(
+      '2017-12-31T12:15:27.002Z'
+    );
   });
 });
 
-describe('Testing GPSFix with hero6 file', () => {
+describe('Testing with hero6 file', () => {
   beforeAll(() => {
     filename = 'hero6';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
@@ -111,22 +134,12 @@ describe('Testing with Fusion file', () => {
   beforeAll(() => {
     filename = 'Fusion';
 
-    const timing = {
-      frameDuration: 0.03336666666666666,
-      start: new Date('2017-12-31T12:15:25.000Z'),
-      samples: [{ cts: 0, duration: 1001 }]
-    };
-
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file, timing }, { ellipsoid: true, timeIn: 'MP4' });
+    result = goproTelemetry({ rawData: file, timing }, { ellipsoid: true });
   });
 
   test(`ellipsoid option should give bad height (relative to sea level)`, () => {
     expect(result['1'].streams.GPS5.samples[0].value[2]).toBe(-18.524);
-  });
-
-  test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
-    expect(result['1'].streams.GYRO.samples[0].date).toEqual(new Date('2017-12-31T12:15:25.000Z'));
   });
 });
 
@@ -160,12 +173,6 @@ describe('Testing joining consecutive files', () => {
 describe('Testing reusing parsed data', () => {
   beforeAll(() => {
     filename = 'hero6';
-
-    const timing = {
-      frameDuration: 0.03336666666666666,
-      start: new Date('2017-12-31T12:15:25.000Z'),
-      samples: [{ cts: 0, duration: 1001 }]
-    };
 
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = [goproTelemetry({ rawData: file, timing })];

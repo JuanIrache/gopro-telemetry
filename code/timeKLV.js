@@ -199,6 +199,13 @@ function timeKLV(klv, timing, options) {
           else if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
           return { date: null, duration: null };
         })();
+        //Choose initial date in case it's necessary
+        const initialDate = (() => {
+          if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[0].date;
+          else if (mp4Times.length && mp4Times[i] != null)
+            return mp4Times[0].date;
+          return 0;
+        })();
 
         //Create empty stream if needed for timing purposes
         const dummyStream = {
@@ -221,12 +228,20 @@ function timeKLV(klv, timing, options) {
             if (!options.mp4header) {
               //Will store the current Cts
               let currCts;
+              let currDate;
 
               //Use sDuration and cts from microsecond timestamps if available
               let microCts = false;
               let microDuration = false;
+              let microDate = false;
+              let microDateDuration = false;
               if (s.STMP != null) {
                 currCts = s.STMP / 1000;
+                if (options.timeIn === 'MP4') {
+                  //Use timeStamps for date if MP4 timing is selected
+                  currDate = initialDate + currCts;
+                  microDate = true;
+                }
                 microCts = true;
                 //Look for next sample of same fourCC
                 if (result.DEVC[i + 1]) {
@@ -240,6 +255,11 @@ function timeKLV(klv, timing, options) {
                         sDuration[fourCC] =
                           (ss.STMP / 1000 - currCts) / s[fourCC].length;
                         microDuration = true;
+                        if (options.timeIn === 'MP4') {
+                          //Use timeStamps for date if MP4 timing is selected
+                          dateSDur[fourCC] = sDuration[fourCC];
+                          microDateDuration = true;
+                        }
                       }
                     }
                   });
@@ -248,15 +268,17 @@ function timeKLV(klv, timing, options) {
               }
 
               //Divide duration of packet by samples in packet to get sample duration per fourCC type
-              if (!microDuration && duration != null)
+              if (!microDuration && duration != null) {
                 sDuration[fourCC] = duration / s[fourCC].length;
+              }
               if (!microCts) currCts = cts;
 
               //The same for duration of dates
-              if (dateDur != null)
+              if (!microDateDuration && dateDur != null) {
                 dateSDur[fourCC] = dateDur / s[fourCC].length;
+              }
               //We know the time and date of the first sample
-              let currDate = date;
+              if (!microDate) currDate = date;
 
               //Try to compensate delayed samples proportionally
               let timoDur = 0;

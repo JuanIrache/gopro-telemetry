@@ -12,16 +12,34 @@ module.exports = {
   },
   //geoidheight saves the altitude offset when ellipsoid is enabled, for 3d party interpretation
   gpx: {
-    mandatory: { dateStream: false, stream: 'GPS5', timeOut: null, geoidHeight: true },
+    mandatory: {
+      dateStream: false,
+      stream: 'GPS5',
+      timeOut: null,
+      geoidHeight: true
+    },
     preferred: { ellipsoid: true }
   },
   virb: {
-    mandatory: { dateStream: false, stream: 'GPS5', timeOut: null, geoidHeight: true },
+    mandatory: {
+      dateStream: false,
+      stream: 'GPS5',
+      timeOut: null,
+      geoidHeight: true
+    },
     preferred: { ellipsoid: true, groupTimes: 1000 }
   },
-  kml: { mandatory: { dateStream: false, stream: 'GPS5', timeOut: null }, preferred: {} },
+  kml: {
+    mandatory: { dateStream: false, stream: 'GPS5', timeOut: null },
+    preferred: {}
+  },
   geojson: {
-    mandatory: { dateStream: false, stream: 'GPS5', timeOut: null, geoidHeight: true },
+    mandatory: {
+      dateStream: false,
+      stream: 'GPS5',
+      timeOut: null,
+      geoidHeight: true
+    },
     preferred: { ellipsoid: true }
   },
   csv: { mandatory: { dateStream: false }, preferred: {} },
