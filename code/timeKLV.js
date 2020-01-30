@@ -268,8 +268,9 @@ function timeKLV(klv, timing, options) {
               }
 
               //Divide duration of packet by samples in packet to get sample duration per fourCC type
-              if (!microDuration && duration != null)
+              if (!microDuration && duration != null) {
                 sDuration[fourCC] = duration / s[fourCC].length;
+              }
               if (!microCts) currCts = cts;
 
               //The same for duration of dates
