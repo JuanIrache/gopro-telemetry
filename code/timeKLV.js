@@ -277,10 +277,8 @@ function timeKLV(klv, timing, options) {
               if (!microDateDuration && dateDur != null) {
                 dateSDur[fourCC] = dateDur / s[fourCC].length;
               }
-              if (!microDate) {
-                //We know the time and date of the first sample
-                currDate = date;
-              }
+              //We know the time and date of the first sample
+              if (!microDate) currDate = date;
 
               //Try to compensate delayed samples proportionally
               let timoDur = 0;
