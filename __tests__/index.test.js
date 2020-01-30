@@ -3,6 +3,12 @@ const fs = require('fs');
 
 let filename, file, result;
 
+const timing = {
+  frameDuration: 0.03336666666666666,
+  start: new Date('2017-12-31T12:15:25.000Z'),
+  samples: [{ cts: 0, duration: 1001 }]
+};
+
 describe('Testing with karma file', () => {
   beforeAll(() => {
     filename = 'karma';
@@ -111,12 +117,6 @@ describe('Testing with Fusion file', () => {
   beforeAll(() => {
     filename = 'Fusion';
 
-    const timing = {
-      frameDuration: 0.03336666666666666,
-      start: new Date('2017-12-31T12:15:25.000Z'),
-      samples: [{ cts: 0, duration: 1001 }]
-    };
-
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = goproTelemetry({ rawData: file, timing }, { ellipsoid: true, timeIn: 'MP4' });
   });
@@ -160,12 +160,6 @@ describe('Testing joining consecutive files', () => {
 describe('Testing reusing parsed data', () => {
   beforeAll(() => {
     filename = 'hero6';
-
-    const timing = {
-      frameDuration: 0.03336666666666666,
-      start: new Date('2017-12-31T12:15:25.000Z'),
-      samples: [{ cts: 0, duration: 1001 }]
-    };
 
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = [goproTelemetry({ rawData: file, timing })];
