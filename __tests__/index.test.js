@@ -110,7 +110,7 @@ describe('Testing GPS5 with hero7 file', () => {
   });
 });
 
-describe('Testing GPSFix with hero6 file', () => {
+describe('Testing with hero6 file', () => {
   beforeAll(() => {
     filename = 'hero6';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
