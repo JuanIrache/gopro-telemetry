@@ -81,7 +81,10 @@ describe('Testing GPS5 with hero7 file', () => {
   beforeAll(() => {
     filename = 'hero7';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file }, { stream: 'GPS5', smooth: 20, GPS5Precision: 140 });
+    result = goproTelemetry(
+      { rawData: file, timing },
+      { stream: 'GPS5', smooth: 20, GPS5Precision: 140, timeIn: 'MP4' }
+    );
   });
 
   test(`GPS5Precision should leave us with fewer, better samples`, () => {
@@ -89,7 +92,15 @@ describe('Testing GPS5 with hero7 file', () => {
   });
 
   test(`smooth should return averaged values`, () => {
-    expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(42.34258096153846);
+    expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(
+      42.34258096153846
+    );
+  });
+
+  test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
+    expect(result['1'].streams.GPS5.samples[0].date).toEqual(
+      '2017-12-31T12:15:27.002Z'
+    );
   });
 });
 
@@ -118,15 +129,11 @@ describe('Testing with Fusion file', () => {
     filename = 'Fusion';
 
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file, timing }, { ellipsoid: true, timeIn: 'MP4' });
+    result = goproTelemetry({ rawData: file, timing }, { ellipsoid: true });
   });
 
   test(`ellipsoid option should give bad height (relative to sea level)`, () => {
     expect(result['1'].streams.GPS5.samples[0].value[2]).toBe(-18.524);
-  });
-
-  test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
-    expect(result['1'].streams.GYRO.samples[0].date).toEqual(new Date('2017-12-31T12:15:25.000Z'));
   });
 });
 
