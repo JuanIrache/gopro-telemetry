@@ -17,7 +17,9 @@ describe('Testing with karma file', () => {
   });
 
   test(`Karma should have two devices`, () => {
-    expect(JSON.stringify(result)).toBe('{"1":"Camera","16835857":"GoPro Karma v1.0"}');
+    expect(JSON.stringify(result)).toBe(
+      '{"1":"Camera","16835857":"GoPro Karma v1.0"}'
+    );
   });
 });
 
@@ -54,7 +56,9 @@ describe('Testing deeper with hero6+ble file', () => {
   });
 
   test(`repeatSticky should be working for all samples`, () => {
-    expect(JSON.stringify(result['16778241'].streams.acc1.samples[5].MFGI)).toBeDefined();
+    expect(
+      JSON.stringify(result['16778241'].streams.acc1.samples[5].MFGI)
+    ).toBeDefined();
   });
 });
 
@@ -73,7 +77,9 @@ describe('Testing with hero7 file', () => {
   });
 
   test(`repeatHeaders should describe each value on each sample`, () => {
-    expect(result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s2]']).toBeDefined();
+    expect(
+      result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s2]']
+    ).toBeDefined();
   });
 });
 
