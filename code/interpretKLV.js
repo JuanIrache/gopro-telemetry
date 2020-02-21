@@ -21,8 +21,9 @@ function interpretKLV(klv, options) {
         else result.STNM = labels;
       }
       //Loop through the samples to interpret them
-      result[result.interpretSamples] = result[result.interpretSamples].map(
-        s => {
+      result[result.interpretSamples] = result[result.interpretSamples]
+        .filter(s => s != null)
+        .map(s => {
           //If scaling data
           if (result.hasOwnProperty('SCAL')) {
             //If single value, scale, otherwise loop through array
@@ -95,8 +96,7 @@ function interpretKLV(klv, options) {
             result.UNIT = rmrkUnits;
 
           return s;
-        }
-      );
+        });
       //If we did not interpret, look deeper
     } else if (Array.isArray(result[result.interpretSamples])) {
       result[result.interpretSamples] = result[result.interpretSamples].map(s =>
