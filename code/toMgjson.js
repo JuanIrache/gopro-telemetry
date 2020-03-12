@@ -37,7 +37,9 @@ function createDynamicDataOutline(
   part,
   stream
 ) {
-  const type = getDataOutlineType(sample);
+  const type = getDataOutlineType(
+    Array.isArray(sample) ? sample.slice(inn, out) : sample
+  );
   let result = {
     objectType: 'dataDynamic',
     displayName,
@@ -53,10 +55,18 @@ function createDynamicDataOutline(
 
   if (type === 'numberString') {
     //Number saved as string (After Effects reasons)
-    if (units) result.displayName += ` [${units}]`;
+    if (units && Array.isArray(sample)) {
+      const unitsArr = units.split(',');
+      result.displayName += ` [${unitsArr[unitsArr.length - 1]}]`;
+    } else if (units) result.displayName += ` [${units}]`;
     //Add fourCC to help AE identify streams
     if (stream && stream.length)
       result.displayName = stream + ': ' + result.displayName;
+
+    if (Array.isArray(sample) && part) {
+      //Try to create a different display name by specifying the part
+      result.displayName += ` part ${part + 1}`;
+    }
     result.dataType.numberStringProperties = {
       pattern: {
         //Will be calculated later
@@ -133,7 +143,11 @@ function createDynamicDataOutline(
 
 //Deduce the kind of structure we need, from the data
 function getDataOutlineType(value) {
-  if (typeof value === 'number') return 'numberString';
+  if (
+    typeof value === 'number' ||
+    (Array.isArray(value) && value.length && value.length === 1)
+  )
+    return 'numberString';
   else if (Array.isArray(value) && value.length && typeof value[0] === 'number')
     return 'numberStringArray';
   else return 'paddedString';
@@ -217,7 +231,11 @@ function convertSamples(data) {
               stream
             );
             //And find the type
-            const type = getDataOutlineType(validSample);
+            const type = getDataOutlineType(
+              Array.isArray(validSample)
+                ? validSample.slice(inout.inn, inout.out)
+                : validSample
+            );
 
             const setMaxMinPadStr = function(val, outline) {
               //Set found max lengths
@@ -252,11 +270,14 @@ function convertSamples(data) {
               if (s.value != null) {
                 let sample = { time: s.date };
                 if (type === 'numberString') {
+                  //Extract the last lonely value of a fragmented array
+                  let singleVal = s.value;
+                  if (Array.isArray(s.value)) singleVal = s.value[inout.inn];
                   //Save numbers as strings
-                  sample.value = bigStr(s.value);
+                  sample.value = bigStr(singleVal);
                   //Update mins, maxes and padding
                   setMaxMinPadNum(
-                    s.value,
+                    singleVal,
                     dataOutlineChild.dataType.numberStringProperties.pattern,
                     dataOutlineChild.dataType.numberStringProperties.range
                   );
