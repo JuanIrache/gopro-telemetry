@@ -55,7 +55,8 @@ function createDynamicDataOutline(
     //Number saved as string (After Effects reasons)
     if (units) result.displayName += ` [${units}]`;
     //Add fourCC to help AE identify streams
-    if (stream && stream.length) result.displayName = stream + ': ' + result.displayName;
+    if (stream && stream.length)
+      result.displayName = stream + ': ' + result.displayName;
     result.dataType.numberStringProperties = {
       pattern: {
         //Will be calculated later
@@ -73,7 +74,10 @@ function createDynamicDataOutline(
     };
   } else if (type === 'numberStringArray') {
     //Try to create a different display name, either by using the repeatheaders technique or specifying the part
-    const partialName = deduceHeaders({ name: displayName, units }, { inn, out });
+    const partialName = deduceHeaders(
+      { name: displayName, units },
+      { inn, out }
+    );
     if (partialName != result.displayName) result.displayName = partialName;
     else if (part) result.displayName += ` part ${part + 1}`;
     //Array of numbers, for example axes of a sensor
@@ -81,12 +85,17 @@ function createDynamicDataOutline(
     //Fill gaps if present
     if (deducedHeaders.length != sample.length) {
       deducedHeaders = sample.map(
-        (s, i) => deducedHeaders[i] || deducedHeaders[i - 1] || deducedHeaders[0] || 'undefined'
+        (s, i) =>
+          deducedHeaders[i] ||
+          deducedHeaders[i - 1] ||
+          deducedHeaders[0] ||
+          'undefined'
       );
     }
     deducedHeaders = deducedHeaders.slice(inn, out);
     //Add fourCC to help AE identify streams
-    if (stream && stream.length) result.displayName = stream + ': ' + result.displayName;
+    if (stream && stream.length)
+      result.displayName = stream + ': ' + result.displayName;
     result.dataType.numberArrayProperties = {
       pattern: {
         isSigned: true,
@@ -110,7 +119,8 @@ function createDynamicDataOutline(
     //Any other value is expressed as string
     if (units) result.displayName += `[${units}]`;
     //Add fourCC to help AE identify streams
-    if (stream && stream.length) result.displayName = stream + ': ' + result.displayName;
+    if (stream && stream.length)
+      result.displayName = stream + ': ' + result.displayName;
     result.dataType.paddedStringProperties = {
       maxLen: 0,
       maxDigitsInStrLength: 0,
@@ -141,11 +151,16 @@ function convertSamples(data) {
       //Save a static entry with the device name
       let device = key;
       if (data[key]['device name'] != null) device = data[key]['device name'];
-      dataOutline.push(createDataOutlineChildText(`DEVC${key}`, 'Device name', device));
+      dataOutline.push(
+        createDataOutlineChildText(`DEVC${key}`, 'Device name', device)
+      );
 
       for (const stream in data[key].streams) {
         //We try to save all valid streams
-        if (data[key].streams[stream].samples && data[key].streams[stream].samples.length) {
+        if (
+          data[key].streams[stream].samples &&
+          data[key].streams[stream].samples.length
+        ) {
           //Save the stream name for display
           let streamName = stream;
           if (data[key].streams[stream].name != null) {
@@ -155,14 +170,18 @@ function convertSamples(data) {
             }
           }
           let units;
-          if (data[key].streams[stream].units != null) units = data[key].streams[stream].units;
+          if (data[key].streams[stream].units != null)
+            units = data[key].streams[stream].units;
 
           const getValidValue = function(arr, key) {
             for (const s of arr) if (s[key] != null) return s[key];
           };
 
           //Find a valid value to base the data structure on
-          let validSample = getValidValue(data[key].streams[stream].samples, 'value');
+          let validSample = getValidValue(
+            data[key].streams[stream].samples,
+            'value'
+          );
 
           //Prepare iteration in case we need to loop over samples more than 3 items long, can be overriden from keys
           let inout;
@@ -177,7 +196,11 @@ function convertSamples(data) {
           for (;;) {
             //Prepare sample set
             const part = inout ? inout.inn / (inout.out - inout.inn) : 0;
-            const sampleSetID = `stream${key + 'X' + stream + 'X' + (part ? part + 1 : '')}`;
+            const sampleSetID = `stream${key +
+              'X' +
+              stream +
+              'X' +
+              (part ? part + 1 : '')}`;
             let sampleSet = {
               sampleSetID,
               samples: []
@@ -246,7 +269,8 @@ function convertSamples(data) {
                     setMaxMinPadNum(
                       v,
                       dataOutlineChild.dataType.numberArrayProperties.pattern,
-                      dataOutlineChild.dataType.numberArrayProperties.arrayRanges.ranges[i]
+                      dataOutlineChild.dataType.numberArrayProperties
+                        .arrayRanges.ranges[i]
                     );
                   });
                 } else if (type === 'paddedString') {
@@ -258,10 +282,16 @@ function convertSamples(data) {
                       s.value = s.date.toISOString();
                     } catch (error) {
                       s.value = s.date;
-                      setImmediate(() => console.error(error.message || error), s.date);
+                      setImmediate(
+                        () => console.error(error.message || error),
+                        s.date
+                      );
                     }
                   }
-                  sample.value = { length: s.value.length.toString(), str: s.value };
+                  sample.value = {
+                    length: s.value.length.toString(),
+                    str: s.value
+                  };
                   setMaxMinPadStr(s.value, dataOutlineChild);
                 }
                 //Save sample
@@ -274,16 +304,20 @@ function convertSamples(data) {
                 //Apply max padding to every sample
                 s.value = padStringNumber(
                   s.value,
-                  dataOutlineChild.dataType.numberStringProperties.pattern.digitsInteger,
-                  dataOutlineChild.dataType.numberStringProperties.pattern.digitsDecimal
+                  dataOutlineChild.dataType.numberStringProperties.pattern
+                    .digitsInteger,
+                  dataOutlineChild.dataType.numberStringProperties.pattern
+                    .digitsDecimal
                 );
               } else if (type === 'numberStringArray') {
                 //Apply max padding to every sample
                 s.value = s.value.map(v =>
                   padStringNumber(
                     v,
-                    dataOutlineChild.dataType.numberArrayProperties.pattern.digitsInteger,
-                    dataOutlineChild.dataType.numberArrayProperties.pattern.digitsDecimal
+                    dataOutlineChild.dataType.numberArrayProperties.pattern
+                      .digitsInteger,
+                    dataOutlineChild.dataType.numberArrayProperties.pattern
+                      .digitsDecimal
                   )
                 );
               } else if (type === 'paddedString') {
@@ -293,7 +327,8 @@ function convertSamples(data) {
                   ' '
                 );
                 s.value.length = s.value.length.padStart(
-                  dataOutlineChild.dataType.paddedStringProperties.maxDigitsInStrLength,
+                  dataOutlineChild.dataType.paddedStringProperties
+                    .maxDigitsInStrLength,
                   '0'
                 );
               }
@@ -321,7 +356,8 @@ function convertSamples(data) {
 
 //Converts the processed data to After Effects format
 module.exports = function(data, { name = '' }) {
-  if (data['frames/second'] == null) throw new Error('After Effects needs frameRate');
+  if (data['frames/second'] == null)
+    throw new Error('After Effects needs frameRate');
   const converted = convertSamples(data);
   //The format is very convoluted. This is the outer structure
   let result = {
