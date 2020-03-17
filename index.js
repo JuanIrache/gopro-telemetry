@@ -37,7 +37,7 @@ function parseOne({ rawData, parsedData }, opts) {
   return parsed;
 }
 
-function interpretOne(timing, parsed, opts) {
+function interpretOne(timing, parsed, opts, toMerge) {
   //Group it by device
   const grouped = groupDevices(parsed);
 
@@ -59,7 +59,7 @@ function interpretOne(timing, parsed, opts) {
   let timed = {};
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
-    timed[key] = timeKLV(interpreted[key], timing, opts);
+    timed[key] = timeKLV(interpreted[key], timing, opts, toMerge);
   }
 
   //Merge samples in sensor entries
@@ -137,7 +137,7 @@ function process(input, opts) {
 
     //Interpret all
     const interpretedArr = parsed.map((p, i) =>
-      interpretOne(timing[i], p, opts)
+      interpretOne(timing[i], p, opts, true)
     );
 
     //Merge samples in interpreted obj
