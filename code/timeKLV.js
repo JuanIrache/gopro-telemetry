@@ -172,7 +172,7 @@ function fillMP4Time(klv, timing, options) {
 }
 
 //Assign time data to each sample
-function timeKLV(klv, timing, options) {
+function timeKLV(klv, timing, options, toMerge) {
   //Copy the klv data
   let result = JSON.parse(JSON.stringify(klv));
   try {
@@ -185,6 +185,11 @@ function timeKLV(klv, timing, options) {
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
       let dateSDur = {};
+
+      //If file is a second chunk of a long video, timestamps will be off
+      let foundTimeStamps = false;
+      let timeStampOffset = 0;
+
       //Loop through packets of samples
       result.DEVC.forEach((d, i) => {
         //Choose timing type for time (relative to the video start) data.
@@ -236,7 +241,16 @@ function timeKLV(klv, timing, options) {
               let microDate = false;
               let microDateDuration = false;
               if (s.STMP != null) {
-                currCts = s.STMP / 1000;
+                // Arbitrary, if first timestamp higher than 10 seconds, consider split video chunk
+                if (!foundTimeStamps && s.STMP / 1000 > 1000 * 10 && !toMerge) {
+                  timeStampOffset = s.STMP;
+                }
+
+                foundTimeStamps = true;
+                //Make sure we don't end up with negative time stamps
+                if (s.STMP < timeStampOffset) timeStampOffset = s.STMP;
+
+                currCts = (s.STMP - timeStampOffset) / 1000;
                 if (options.timeIn === 'MP4') {
                   //Use timeStamps for date if MP4 timing is selected
                   currDate = initialDate + currCts;
@@ -253,7 +267,8 @@ function timeKLV(klv, timing, options) {
                       if (ss.STMP) {
                         //Has timestamp? Measure duration of all samples and divide by number of samples
                         sDuration[fourCC] =
-                          (ss.STMP / 1000 - currCts) / s[fourCC].length;
+                          ((ss.STMP - timeStampOffset) / 1000 - currCts) /
+                          s[fourCC].length;
                         microDuration = true;
                         if (options.timeIn === 'MP4') {
                           //Use timeStamps for date if MP4 timing is selected
