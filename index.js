@@ -137,7 +137,7 @@ function process(input, opts) {
 
     //Interpret all
     const interpretedArr = parsed.map((p, i) =>
-      interpretOne(timing[i], p, opts, toMerge)
+      interpretOne(timing[i], p, opts, true)
     );
 
     //Merge samples in interpreted obj
