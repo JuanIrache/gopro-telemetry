@@ -160,7 +160,7 @@ These are the available preset formats:
 - **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 - **csv** (.csv) Comma separated values, readable by Excel and other spreadsheet software. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present).
 - **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
-- **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](http://www.garmin.com/xmlschemas/TrackPointExtension/v2). Will group samples in 1Hz if **groupTimes** is not specified.
+- **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](http://www.garmin.com/xmlschemas/TrackPointExtension/v2). Will group samples in 1Hz and use MP4 time if **groupTimes** and **timeIn** are not specified.
 
 ## Merging consecutive files
 
