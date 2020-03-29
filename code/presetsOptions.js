@@ -27,7 +27,7 @@ module.exports = {
       timeOut: null,
       geoidHeight: true
     },
-    preferred: { ellipsoid: true, groupTimes: 1000 }
+    preferred: { ellipsoid: true, groupTimes: 1000, timeIn: 'MP4' }
   },
   kml: {
     mandatory: { dateStream: false, stream: 'GPS5', timeOut: null },
