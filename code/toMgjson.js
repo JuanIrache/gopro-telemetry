@@ -27,6 +27,34 @@ function createDataOutlineChildText(matchName, displayName, value) {
   };
 }
 
+//Build the style that After Effects needs for static numbers
+function createDataOutlineChildNumber(matchName, displayName, value) {
+  console.log(value);
+  if (isNaN(value)) value = 0;
+  else value = +value;
+  const digitsInteger = Math.max(bigStr(Math.floor(value)).length, 0);
+  const digitsDecimal = Math.max(
+    bigStr(value).replace(/^\d*\.?/, '').length,
+    0
+  );
+  return {
+    objectType: 'dataStatic',
+    displayName,
+    dataType: {
+      type: 'number',
+      numberStringProperties: {
+        pattern: { isSigned: true, digitsInteger, digitsDecimal }, //aqui
+        range: {
+          occuring: { min: value, max: value },
+          legal: { min: -largestMGJSONNum, max: largestMGJSONNum }
+        }
+      }
+    },
+    matchName,
+    value
+  };
+}
+
 //Build the style that After Effects needs for dynamic values: numbers, arrays of numbers (axes) or strings (date)
 function createDynamicDataOutline(
   matchName,
@@ -400,6 +428,16 @@ module.exports = function(data, { name = '' }) {
     //And paste the converted data
     dataDynamicSamples: converted.dataDynamicSamples
   };
+
+  if (data['frames/second'] != null) {
+    result.dataOutline.push(
+      createDataOutlineChildNumber(
+        'framerate',
+        'Frame rate',
+        data['frames/second']
+      )
+    );
+  }
 
   //Remove dynamic data if no samples
   if (!result.dataDynamicSamples.length) {
