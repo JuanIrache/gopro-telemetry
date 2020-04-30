@@ -69,6 +69,10 @@ function interpretOne(timing, parsed, opts, toMerge) {
   return merged;
 }
 
+function progress(options, amount) {
+  if (options.progress) options.progress(amount);
+}
+
 function process(input, opts) {
   //Prepare presets
   if (presetsOpts[opts.preset]) {
@@ -92,6 +96,9 @@ function process(input, opts) {
   let interpreted;
   let timing;
 
+  // Provide approximate progress updates
+  progress(opts, 0.01);
+
   //Check if input is array of sources
   if (Array.isArray(input) && input.length === 1) input = input[0];
   if (!Array.isArray(input)) {
@@ -101,6 +108,8 @@ function process(input, opts) {
     }
     const parsed = parseOne(input, opts);
 
+    progress(opts, 0.1);
+
     //Return list of devices/streams only
     if (opts.deviceList) return deviceList(parsed);
     if (opts.streamList) return streamList(parsed);
@@ -109,6 +118,7 @@ function process(input, opts) {
     if (opts.raw) return parsed;
 
     interpreted = interpretOne(timing, parsed, opts);
+    progress(opts, 0.4);
   } else {
     if (input.some(i => !i.timing))
       throw new Error(
@@ -127,6 +137,7 @@ function process(input, opts) {
       if (i > 0) setSourceOffset(timing[i - 1], timing[i]);
       parsed.push(parseOne(sortedInput[i], opts));
     }
+    progress(opts, 0.1);
 
     //Return list of devices/streams only
     if (opts.deviceList) return parsed.map(p => deviceList(p));
@@ -139,9 +150,11 @@ function process(input, opts) {
     const interpretedArr = parsed.map((p, i) =>
       interpretOne(timing[i], p, opts, true)
     );
+    progress(opts, 0.3);
 
     //Merge samples in interpreted obj
     interpreted = mergeInterpretedSources(interpretedArr);
+    progress(opts, 0.4);
 
     //Set single timing for rest of outer function
     timing = timing[0];
@@ -171,12 +184,16 @@ function process(input, opts) {
   //Group samples by time if necessary
   if (opts.smooth) interpreted = smoothSamples(interpreted, opts);
 
+  progress(opts, 0.6);
+
   //Group samples by time if necessary
   if (opts.groupTimes) interpreted = groupTimes(interpreted, opts);
 
   //Add framerate to top level
   if (timing && timing.frameDuration != null)
     interpreted['frames/second'] = 1 / timing.frameDuration;
+
+  progress(opts, 0.9);
 
   //Process presets
   if (opts.preset === 'gpx') return toGpx(interpreted, opts);
@@ -186,10 +203,12 @@ function process(input, opts) {
   if (opts.preset === 'csv') return toCsv(interpreted);
   if (opts.preset === 'mgjson') return toMgjson(interpreted, opts);
 
+  progress(opts, 1);
+
   return interpreted;
 }
 
-module.exports = function(input, options = {}) {
+module.exports = function (input, options = {}) {
   if (options.promisify) {
     return new Promise((resolve, reject) => {
       setImmediate(() => {

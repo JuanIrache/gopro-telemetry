@@ -54,6 +54,7 @@ const telemetry = goproTelemetry(input, options); //Get your input with gpmf-ext
 - **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
 - **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See details below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
+- **progress** (function) Function to execute when progress (between 0 and 1) is made in the extraction process. Not proportional.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
 
@@ -203,7 +204,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
 - Test rmrkToNameUnits
-- Provide progress
 
 ## Maybe To-Do
 
