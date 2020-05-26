@@ -29,7 +29,6 @@ function createDataOutlineChildText(matchName, displayName, value) {
 
 //Build the style that After Effects needs for static numbers
 function createDataOutlineChildNumber(matchName, displayName, value) {
-  console.log(value);
   if (isNaN(value)) value = 0;
   else value = +value;
   const digitsInteger = Math.max(bigStr(Math.floor(value)).length, 0);
