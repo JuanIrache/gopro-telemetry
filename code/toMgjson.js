@@ -42,7 +42,7 @@ function createDataOutlineChildNumber(matchName, displayName, value) {
     dataType: {
       type: 'number',
       numberStringProperties: {
-        pattern: { isSigned: true, digitsInteger, digitsDecimal }, //aqui
+        pattern: { isSigned: true, digitsInteger, digitsDecimal },
         range: {
           occuring: { min: value, max: value },
           legal: { min: -largestMGJSONNum, max: largestMGJSONNum }
