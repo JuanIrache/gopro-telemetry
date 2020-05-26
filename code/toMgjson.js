@@ -214,7 +214,7 @@ function convertSamples(data) {
           if (data[key].streams[stream].units != null)
             units = data[key].streams[stream].units;
 
-          const getValidValue = function(arr, key) {
+          const getValidValue = function (arr, key) {
             for (const s of arr) if (s[key] != null) return s[key];
           };
 
@@ -237,11 +237,9 @@ function convertSamples(data) {
           for (;;) {
             //Prepare sample set
             const part = inout ? inout.inn / (inout.out - inout.inn) : 0;
-            const sampleSetID = `stream${key +
-              'X' +
-              stream +
-              'X' +
-              (part ? part + 1 : '')}`;
+            const sampleSetID = `stream${
+              key + 'X' + stream + 'X' + (part ? part + 1 : '')
+            }`;
             let sampleSet = {
               sampleSetID,
               samples: []
@@ -264,7 +262,7 @@ function convertSamples(data) {
                 : validSample
             );
 
-            const setMaxMinPadStr = function(val, outline) {
+            const setMaxMinPadStr = function (val, outline) {
               //Set found max lengths
               outline.dataType.paddedStringProperties.maxLen = Math.max(
                 val.toString().length,
@@ -278,7 +276,7 @@ function convertSamples(data) {
 
             //Loop all the samples
             data[key].streams[stream].samples.forEach(s => {
-              const setMaxMinPadNum = function(val, pattern, range) {
+              const setMaxMinPadNum = function (val, pattern, range) {
                 //Update mins and maxes
                 range.occuring.min = Math.min(val, range.occuring.min);
                 range.occuring.max = Math.max(val, range.occuring.max);
@@ -403,7 +401,7 @@ function convertSamples(data) {
 }
 
 //Converts the processed data to After Effects format
-module.exports = function(data, { name = '' }) {
+module.exports = function (data, { name = '' }) {
   if (data['frames/second'] == null)
     throw new Error('After Effects needs frameRate');
   const converted = convertSamples(data);
