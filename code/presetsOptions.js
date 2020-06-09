@@ -23,11 +23,10 @@ module.exports = {
   virb: {
     mandatory: {
       dateStream: false,
-      stream: 'GPS5',
       timeOut: null,
       geoidHeight: true
     },
-    preferred: { ellipsoid: true, groupTimes: 1000, timeIn: 'MP4' }
+    preferred: { ellipsoid: true, timeIn: 'MP4', stream: 'GPS5' }
   },
   kml: {
     mandatory: { dateStream: false, stream: 'GPS5', timeOut: null },

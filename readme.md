@@ -161,7 +161,7 @@ These are the available preset formats:
 - **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 - **csv** (.csv) Comma separated values, readable by Excel and other spreadsheet software. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present).
 - **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
-- **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd). Will group samples in 1Hz and use MP4 time if **groupTimes** and **timeIn** are not specified.
+- **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd). Also supports the the _stream_ filter to be _ACCL_, which will create a GPX file with empty location data but valid acceleration data, based on [Garmin's Acceleration Extension](https://www8.garmin.com/xmlschemas/AccelerationExtensionv1.xsd). Bot GPS and accelerometer are not allowed at the same time, for now. Will use MP4 time if **timeIn** is not specified.
 
 ## Merging consecutive files
 
@@ -199,8 +199,8 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
+- Find out why Virb edit does not read recorded speed in their own extensions format. [Details here](https://forums.garmin.com/apps-software/mac-windows-software/f/virb-edit-windows/223058/virb-edit-not-reading-trackpointextension-speed)
 - Rewview CSV conversion (when only 1 sticky value, it does not print)
-- Get the hold of short LRV samples of Hero8 and Max, for testing microsecond timestamps
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
 - Test rmrkToNameUnits
