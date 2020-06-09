@@ -3,7 +3,8 @@ function getGPGS5Data(data) {
   let frameRate;
   let inner = '';
   let device = '';
-  if (data['frames/second'] != null) frameRate = `${Math.round(data['frames/second'])} fps`;
+  if (data['frames/second'] != null)
+    frameRate = `${Math.round(data['frames/second'])} fps`;
   for (const key in data) {
     if (data[key]['device name'] != null) device = data[key]['device name'];
     if (data[key].streams) {
@@ -11,7 +12,8 @@ function getGPGS5Data(data) {
         //If we find a GPS5 stream, we won't look on any other DEVCS
         if (stream === 'GPS5' && data[key].streams.GPS5.samples) {
           let name;
-          if (data[key].streams.GPS5.name != null) name = data[key].streams.GPS5.name;
+          if (data[key].streams.GPS5.name != null)
+            name = data[key].streams.GPS5.name;
           let units;
           if (data[key].streams.GPS5.units != null)
             units = `[${data[key].streams.GPS5.units.toString()}]`;
@@ -43,7 +45,10 @@ function getGPGS5Data(data) {
                 } catch (error) {
                   time = `
                 <time>${s.date}</time>`;
-                  setImmediate(() => console.error(error.message || error), s.date);
+                  setImmediate(
+                    () => console.error(error.message || error),
+                    s.date
+                  );
                 }
               }
               //Set speed if present, in Garmin format: https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd
