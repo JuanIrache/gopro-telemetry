@@ -213,19 +213,8 @@ async function process(input, opts) {
   return interpreted;
 }
 
-module.exports = function (input, options = {}) {
-  if (options.promisify) {
-    return new Promise((resolve, reject) => {
-      setImmediate(() => {
-        try {
-          resolve(process(input, options));
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
-  }
-
-  const result = (async () => await process(input, options))();
-  return typeof result;
+module.exports = async function (input, options = {}, callback) {
+  const result = await process(input, options);
+  if (!callback) return result;
+  callback(result);
 };
