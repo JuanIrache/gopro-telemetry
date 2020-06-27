@@ -10,7 +10,7 @@ async function getGPGS5Data(data) {
       properties.device = data[key]['device name'];
     if (data[key].streams) {
       for (const stream in data[key].streams) {
-        await promisify(async () => {
+        const promiseResult = await promisify(async () => {
           //If we find a GPS5 stream, we won't look on any other DEVCS
           if (
             stream === 'GPS5' &&
@@ -49,6 +49,7 @@ async function getGPGS5Data(data) {
             return { coordinates, properties };
           }
         });
+        if (promiseResult) return promiseResult;
       }
     }
   }

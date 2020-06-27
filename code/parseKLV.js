@@ -60,7 +60,7 @@ async function parseKLV(
     let length = 0;
     let ks;
     try {
-      await promisify(async () => {
+      const promiseResult = await promisify(async () => {
         try {
           //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
           ks = keyAndStructParser.parse(data.slice(start)).result;
@@ -207,9 +207,12 @@ async function parseKLV(
             } else result[ks.fourCC] = partialResult;
 
             //Parsing error
-          } else throw new Error('Error, negative length');
+          } else return { error: 'Error, negative length' };
         }
+        return 'ok';
       });
+      if (promiseResult === undefined) return undefined;
+      else if (promiseResult.error) throw new Error(promiseResult.error);
     } catch (err) {
       if (options.tolerant) setImmediate(() => console.error(err));
       else throw err;
