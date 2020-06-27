@@ -7,8 +7,7 @@ describe('Test merging', () => {
   beforeAll(async () => {
     const file = readFileSync(`${__dirname}/../samples/partials/timed.json`);
     result = await mergeStream(JSON.parse(file)['1'], {
-      stream: 'ACCL',
-      promisify: true
+      stream: 'ACCL'
     });
   });
 

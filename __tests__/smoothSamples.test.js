@@ -7,8 +7,7 @@ describe('Test smoothing', () => {
   beforeAll(async () => {
     const file = readFileSync(`${__dirname}/../samples/partials/merged.json`);
     result = await smoothSamples(JSON.parse(file), {
-      smooth: 25,
-      promisify: true
+      smooth: 25
     });
   });
 

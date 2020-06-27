@@ -13,10 +13,7 @@ describe('Testing with karma file', () => {
   beforeAll(async () => {
     filename = 'karma';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await goproTelemetry(
-      { rawData: file },
-      { deviceList: true, promisify: true }
-    );
+    result = await goproTelemetry({ rawData: file }, { deviceList: true });
   });
 
   test(`Karma should have two devices`, () => {
@@ -30,10 +27,7 @@ describe('Testing with hero6+ble.raw file', () => {
   beforeAll(async () => {
     filename = 'hero6+ble';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await goproTelemetry(
-      { rawData: file },
-      { streamList: true, promisify: true }
-    );
+    result = await goproTelemetry({ rawData: file }, { streamList: true });
   });
 
   test(`hero6+ble.raw should have specific keys`, () => {
@@ -57,7 +51,7 @@ describe('Testing deeper with hero6+ble file', () => {
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
-      { device: 16778241, stream: 'acc1', repeatSticky: true, promisify: true }
+      { device: 16778241, stream: 'acc1', repeatSticky: true }
     );
   });
 
@@ -74,7 +68,7 @@ describe('Testing with hero7 file', () => {
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
-      { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000, promisify: true }
+      { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000 }
     );
   });
 
@@ -99,8 +93,7 @@ describe('Testing GPS5 with hero7 file', () => {
         stream: 'GPS5',
         smooth: 20,
         GPS5Precision: 140,
-        timeIn: 'MP4',
-        promisify: true
+        timeIn: 'MP4'
       }
     );
   });
@@ -128,7 +121,7 @@ describe('Testing with hero6 file', () => {
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
-      { GPS5Fix: 2, timeOut: 'cts', promisify: true }
+      { GPS5Fix: 2, timeOut: 'cts' }
     );
   });
 
@@ -152,7 +145,7 @@ describe('Testing with Fusion file', () => {
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file, timing },
-      { ellipsoid: true, promisify: true }
+      { ellipsoid: true }
     );
   });
 
@@ -173,13 +166,10 @@ describe('Testing joining consecutive files', () => {
 
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     const file2 = fs.readFileSync(`${__dirname}/../samples/${filename2}.raw`);
-    result = await goproTelemetry(
-      [
-        { rawData: file, timing: timing[0] },
-        { rawData: file2, timing: timing[1] }
-      ],
-      { promisify: true }
-    );
+    result = await goproTelemetry([
+      { rawData: file, timing: timing[0] },
+      { rawData: file2, timing: timing[1] }
+    ]);
   });
 
   test(`Consecutive files should add samples from two files`, () => {
@@ -213,8 +203,7 @@ describe('Testing reusing parsed data', () => {
         ellipsoid: true,
         geoidHeight: true,
         GPS5Precision: 200,
-        GPS5Fix: 3,
-        promisify: true
+        GPS5Fix: 3
       }
     );
     result.push(goproTelemetry({ parsedData, timing }));
