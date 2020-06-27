@@ -1,9 +1,18 @@
 const mergeStream = require('../code/mergeStream');
 const { readFileSync } = require('fs');
 
-const file = readFileSync(`${__dirname}/../samples/partials/timed.json`);
-const result = mergeStream(JSON.parse(file)['1'], { stream: 'ACCL' });
+let result;
 
-test(`mergeStream should merge and name strams`, () => {
-  expect(result.streams.ACCL.name).toBe('Accelerometer (z,x,y)');
+describe('Test merging', () => {
+  beforeAll(async () => {
+    const file = readFileSync(`${__dirname}/../samples/partials/timed.json`);
+    result = await mergeStream(JSON.parse(file)['1'], {
+      stream: 'ACCL',
+      promisify: true
+    });
+  });
+
+  test(`mergeStream should merge and name strams`, () => {
+    expect(result.streams.ACCL.name).toBe('Accelerometer (z,x,y)');
+  });
 });
