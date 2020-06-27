@@ -1,15 +1,16 @@
 //Export to Adobe After Effect's mgJSON format. It's poorly documented, but here's a minimal working example: https://github.com/JuanIrache/mgjson
 
-const deduceHeaders = require('./deduceHeaders');
-const padStringNumber = require('./padStringNumber');
-const bigStr = require('./bigStr');
-const { mgjsonMaxArrs } = require('./keys');
+const deduceHeaders = require('../utils/deduceHeaders');
+const padStringNumber = require('../utils/padStringNumber');
+const bigStr = require('../utils/bigStr');
+const { mgjsonMaxArrs } = require('../data/keys');
+const promisify = require('../utils/promisify');
 
 //After Effects can't read larger numbers
 const largestMGJSONNum = 2147483648;
 
 //Build the style that After Effects needs for static text
-function createDataOutlineChildText(matchName, displayName, value) {
+async function createDataOutlineChildText(matchName, displayName, value) {
   if (typeof value != 'string') value = value.toString();
   return {
     objectType: 'dataStatic',
@@ -28,7 +29,7 @@ function createDataOutlineChildText(matchName, displayName, value) {
 }
 
 //Build the style that After Effects needs for static numbers
-function createDataOutlineChildNumber(matchName, displayName, value) {
+async function createDataOutlineChildNumber(matchName, displayName, value) {
   if (isNaN(value)) value = 0;
   else value = +value;
   const digitsInteger = Math.max(bigStr(Math.floor(value)).length, 0);
@@ -55,7 +56,7 @@ function createDataOutlineChildNumber(matchName, displayName, value) {
 }
 
 //Build the style that After Effects needs for dynamic values: numbers, arrays of numbers (axes) or strings (date)
-function createDynamicDataOutline(
+async function createDynamicDataOutline(
   matchName,
   displayName,
   units,
@@ -64,7 +65,7 @@ function createDynamicDataOutline(
   part,
   stream
 ) {
-  const type = getDataOutlineType(
+  const type = await getDataOutlineType(
     Array.isArray(sample) ? sample.slice(inn, out) : sample
   );
   let result = {
@@ -169,7 +170,7 @@ function createDynamicDataOutline(
 }
 
 //Deduce the kind of structure we need, from the data
-function getDataOutlineType(value) {
+async function getDataOutlineType(value) {
   if (
     typeof value === 'number' ||
     (Array.isArray(value) && value.length && value.length === 1)
@@ -181,7 +182,7 @@ function getDataOutlineType(value) {
 }
 
 //Returns the data as parts of an mgjson object
-function convertSamples(data) {
+async function convertSamples(data) {
   //Will hold the description of each stream
   let dataOutline = [];
   //Holds the streams
@@ -193,7 +194,7 @@ function convertSamples(data) {
       let device = key;
       if (data[key]['device name'] != null) device = data[key]['device name'];
       dataOutline.push(
-        createDataOutlineChildText(`DEVC${key}`, 'Device name', device)
+        await createDataOutlineChildText(`DEVC${key}`, 'Device name', device)
       );
 
       for (const stream in data[key].streams) {
@@ -214,12 +215,12 @@ function convertSamples(data) {
           if (data[key].streams[stream].units != null)
             units = data[key].streams[stream].units;
 
-          const getValidValue = function (arr, key) {
+          const getValidValue = async function (arr, key) {
             for (const s of arr) if (s[key] != null) return s[key];
           };
 
           //Find a valid value to base the data structure on
-          let validSample = getValidValue(
+          let validSample = await getValidValue(
             data[key].streams[stream].samples,
             'value'
           );
@@ -246,7 +247,7 @@ function convertSamples(data) {
             };
 
             //Create the stream structure
-            let dataOutlineChild = createDynamicDataOutline(
+            let dataOutlineChild = await createDynamicDataOutline(
               sampleSetID,
               streamName,
               units,
@@ -256,7 +257,7 @@ function convertSamples(data) {
               stream
             );
             //And find the type
-            const type = getDataOutlineType(
+            const type = await getDataOutlineType(
               Array.isArray(validSample)
                 ? validSample.slice(inout.inn, inout.out)
                 : validSample
@@ -275,110 +276,114 @@ function convertSamples(data) {
             };
 
             //Loop all the samples
-            data[key].streams[stream].samples.forEach(s => {
-              const setMaxMinPadNum = function (val, pattern, range) {
-                //Update mins and maxes
-                range.occuring.min = Math.min(val, range.occuring.min);
-                range.occuring.max = Math.max(val, range.occuring.max);
-                //And max left and right padding
-                pattern.digitsInteger = Math.max(
-                  bigStr(Math.floor(val)).length,
-                  pattern.digitsInteger
-                );
-                pattern.digitsDecimal = Math.max(
-                  bigStr(val).replace(/^\d*\.?/, '').length,
-                  pattern.digitsDecimal
-                );
-              };
+            for (const s of data[key].streams[stream].samples) {
+              await promisify(() => {
+                const setMaxMinPadNum = function (val, pattern, range) {
+                  //Update mins and maxes
+                  range.occuring.min = Math.min(val, range.occuring.min);
+                  range.occuring.max = Math.max(val, range.occuring.max);
+                  //And max left and right padding
+                  pattern.digitsInteger = Math.max(
+                    bigStr(Math.floor(val)).length,
+                    pattern.digitsInteger
+                  );
+                  pattern.digitsDecimal = Math.max(
+                    bigStr(val).replace(/^\d*\.?/, '').length,
+                    pattern.digitsDecimal
+                  );
+                };
 
-              //Back to data samples. Check that at least we have the valid values
-              if (s.value != null) {
-                let sample = { time: s.date };
+                //Back to data samples. Check that at least we have the valid values
+                if (s.value != null) {
+                  let sample = { time: s.date };
+                  if (type === 'numberString') {
+                    //Extract the last lonely value of a fragmented array
+                    let singleVal = s.value;
+                    if (Array.isArray(s.value)) singleVal = s.value[inout.inn];
+                    //Save numbers as strings
+                    sample.value = bigStr(singleVal);
+                    //Update mins, maxes and padding
+                    setMaxMinPadNum(
+                      singleVal,
+                      dataOutlineChild.dataType.numberStringProperties.pattern,
+                      dataOutlineChild.dataType.numberStringProperties.range
+                    );
+                  } else if (type === 'numberStringArray') {
+                    //Save arrays of numbers as arrays of strings
+                    sample.value = [];
+                    s.value.slice(inout.inn, inout.out).forEach((v, i) => {
+                      sample.value[i] = bigStr(v);
+                      //And update, mins, maxs and paddings
+                      setMaxMinPadNum(
+                        v,
+                        dataOutlineChild.dataType.numberArrayProperties.pattern,
+                        dataOutlineChild.dataType.numberArrayProperties
+                          .arrayRanges.ranges[i]
+                      );
+                    });
+                  } else if (type === 'paddedString') {
+                    //Save anything else as (padded)string
+                    //If dateStream, save date as string instead of dummy value
+                    if (stream === 'dateStream') {
+                      if (typeof s.date != 'object') s.date = new Date(s.date);
+                      try {
+                        s.value = s.date.toISOString();
+                      } catch (error) {
+                        s.value = s.date;
+                        setImmediate(
+                          () => console.error(error.message || error),
+                          s.date
+                        );
+                      }
+                    }
+                    sample.value = {
+                      length: s.value.length.toString(),
+                      str: s.value
+                    };
+                    setMaxMinPadStr(s.value, dataOutlineChild);
+                  }
+                  //Save sample
+                  sampleSet.samples.push(sample);
+                }
+              });
+            }
+
+            for (const s of sampleSet.samples) {
+              await promisify(() => {
                 if (type === 'numberString') {
-                  //Extract the last lonely value of a fragmented array
-                  let singleVal = s.value;
-                  if (Array.isArray(s.value)) singleVal = s.value[inout.inn];
-                  //Save numbers as strings
-                  sample.value = bigStr(singleVal);
-                  //Update mins, maxes and padding
-                  setMaxMinPadNum(
-                    singleVal,
-                    dataOutlineChild.dataType.numberStringProperties.pattern,
-                    dataOutlineChild.dataType.numberStringProperties.range
+                  //Apply max padding to every sample
+                  s.value = padStringNumber(
+                    s.value,
+                    dataOutlineChild.dataType.numberStringProperties.pattern
+                      .digitsInteger,
+                    dataOutlineChild.dataType.numberStringProperties.pattern
+                      .digitsDecimal
                   );
                 } else if (type === 'numberStringArray') {
-                  //Save arrays of numbers as arrays of strings
-                  sample.value = [];
-                  s.value.slice(inout.inn, inout.out).forEach((v, i) => {
-                    sample.value[i] = bigStr(v);
-                    //And update, mins, maxs and paddings
-                    setMaxMinPadNum(
+                  //Apply max padding to every sample
+                  s.value = s.value.map(v =>
+                    padStringNumber(
                       v,
-                      dataOutlineChild.dataType.numberArrayProperties.pattern,
-                      dataOutlineChild.dataType.numberArrayProperties
-                        .arrayRanges.ranges[i]
-                    );
-                  });
+                      dataOutlineChild.dataType.numberArrayProperties.pattern
+                        .digitsInteger,
+                      dataOutlineChild.dataType.numberArrayProperties.pattern
+                        .digitsDecimal
+                    )
+                  );
                 } else if (type === 'paddedString') {
-                  //Save anything else as (padded)string
-                  //If dateStream, save date as string instead of dummy value
-                  if (stream === 'dateStream') {
-                    if (typeof s.date != 'object') s.date = new Date(s.date);
-                    try {
-                      s.value = s.date.toISOString();
-                    } catch (error) {
-                      s.value = s.date;
-                      setImmediate(
-                        () => console.error(error.message || error),
-                        s.date
-                      );
-                    }
-                  }
-                  sample.value = {
-                    length: s.value.length.toString(),
-                    str: s.value
-                  };
-                  setMaxMinPadStr(s.value, dataOutlineChild);
+                  //Apply max padding to every sample
+                  s.value.str = s.value.str.padEnd(
+                    dataOutlineChild.dataType.paddedStringProperties.maxLen,
+                    ' '
+                  );
+                  s.value.length = s.value.length.padStart(
+                    dataOutlineChild.dataType.paddedStringProperties
+                      .maxDigitsInStrLength,
+                    '0'
+                  );
                 }
-                //Save sample
-                sampleSet.samples.push(sample);
-              }
-            });
-
-            sampleSet.samples.forEach(s => {
-              if (type === 'numberString') {
-                //Apply max padding to every sample
-                s.value = padStringNumber(
-                  s.value,
-                  dataOutlineChild.dataType.numberStringProperties.pattern
-                    .digitsInteger,
-                  dataOutlineChild.dataType.numberStringProperties.pattern
-                    .digitsDecimal
-                );
-              } else if (type === 'numberStringArray') {
-                //Apply max padding to every sample
-                s.value = s.value.map(v =>
-                  padStringNumber(
-                    v,
-                    dataOutlineChild.dataType.numberArrayProperties.pattern
-                      .digitsInteger,
-                    dataOutlineChild.dataType.numberArrayProperties.pattern
-                      .digitsDecimal
-                  )
-                );
-              } else if (type === 'paddedString') {
-                //Apply max padding to every sample
-                s.value.str = s.value.str.padEnd(
-                  dataOutlineChild.dataType.paddedStringProperties.maxLen,
-                  ' '
-                );
-                s.value.length = s.value.length.padStart(
-                  dataOutlineChild.dataType.paddedStringProperties
-                    .maxDigitsInStrLength,
-                  '0'
-                );
-              }
-            });
+              });
+            }
             //Save total samples count
             dataOutlineChild.sampleCount = sampleSet.samples.length;
             //Save stream
@@ -401,10 +406,10 @@ function convertSamples(data) {
 }
 
 //Converts the processed data to After Effects format
-module.exports = function (data, { name = '' }) {
+module.exports = async function (data, { name = '' }) {
   if (data['frames/second'] == null)
     throw new Error('After Effects needs frameRate');
-  const converted = convertSamples(data);
+  const converted = await convertSamples(data);
   //The format is very convoluted. This is the outer structure
   let result = {
     version: 'MGJSON2.0.0',
@@ -419,7 +424,7 @@ module.exports = function (data, { name = '' }) {
     },
     //Create first data point with filename
     dataOutline: [
-      createDataOutlineChildText('filename', 'File name', name),
+      await createDataOutlineChildText('filename', 'File name', name),
       ...converted.dataOutline
     ],
     //And paste the converted data
@@ -428,7 +433,7 @@ module.exports = function (data, { name = '' }) {
 
   if (data['frames/second'] != null) {
     result.dataOutline.push(
-      createDataOutlineChildNumber(
+      await createDataOutlineChildNumber(
         'framerate',
         'Frame rate',
         data['frames/second']

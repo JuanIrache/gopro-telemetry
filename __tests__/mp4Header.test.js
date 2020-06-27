@@ -4,10 +4,10 @@ const fs = require('fs');
 let filename, file, result;
 
 describe('Testing with mp4 header', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'mp4header';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = goproTelemetry({ rawData: file }, { mp4header: true });
+    result = await goproTelemetry({ rawData: file }, { mp4header: true });
   });
 
   test(`The sample should have 3 highlight tags`, () => {

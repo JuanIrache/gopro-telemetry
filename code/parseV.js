@@ -2,7 +2,7 @@
 
 //Binary-parser does not support 64bits. Use @gmod/binary-parser
 const Parser = require('@gmod/binary-parser').Parser;
-const { types } = require('./keys');
+const { types } = require('./data/keys');
 //Will store unknown types
 let unknown = new Set();
 
@@ -24,20 +24,31 @@ function parseV(environment, slice, len, specifics) {
       if (!types[innerType]) {
         unknown.add(type);
         res.push(null);
-      } else res.push(parseV(environment, slice + (i * ks.size) / ax, len / ax, { ax: 1, type: innerType, complexType }));
+      } else
+        res.push(
+          parseV(environment, slice + (i * ks.size) / ax, len / ax, {
+            ax: 1,
+            type: innerType,
+            complexType
+          })
+        );
     }
 
     //If debugging, print unexpected types
-    if (options.debug && unknown.size) setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
+    if (options.debug && unknown.size)
+      setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
     return res;
 
     //Otherwise, read a single value
   } else if (!types[type].complex) {
     //Add options required by type
     let opts = { length: len };
-    if (types[type].opt) for (const key in types[type].opt) opts[key] = types[type].opt[key];
+    if (types[type].opt)
+      for (const key in types[type].opt) opts[key] = types[type].opt[key];
     //We pick the necessary function based on data format (stored in types)
-    let valParser = new Parser().endianess('big')[types[type].func]('value', opts);
+    let valParser = new Parser()
+      .endianess('big')
+      [types[type].func]('value', opts);
     const parsed = valParser.parse(data.slice(slice)).result;
 
     return parsed.value;

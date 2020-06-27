@@ -1,19 +1,26 @@
-const toCsv = require('../code/toCsv');
+const toCsv = require('../code/presets/toCsv');
 const { readFileSync } = require('fs');
 
-const file = readFileSync(`${__dirname}/../samples/partials/merged.json`);
-const result = toCsv(JSON.parse(file), {});
+let result;
 
-test(`toCsv should label results by device-stream`, () => {
-  expect(result['Hero6 Black-ACCL']).toBeDefined();
-});
+describe('Test CSV', () => {
+  beforeAll(async () => {
+    const file = readFileSync(`${__dirname}/../samples/partials/merged.json`);
 
-test(`toCsv should return key-string pairs`, () => {
-  expect(result['Hero6 Black-ACCL'].length).toBeGreaterThan(20000);
-});
+    result = await toCsv(JSON.parse(file), {});
+  });
 
-test(`toCsv's result should start with the csv header row`, () => {
-  expect(result['Hero6 Black-ACCL'].slice(0, 112)).toBe(
-    '"cts","date","Accelerometer (z) [m/s2]","Accelerometer (x) [m/s2]","Accelerometer (y) [m/s2]","temperature [°C]"'
-  );
+  test(`toCsv should label results by device-stream`, () => {
+    expect(result['Hero6 Black-ACCL']).toBeDefined();
+  });
+
+  test(`toCsv should return key-string pairs`, () => {
+    expect(result['Hero6 Black-ACCL'].length).toBeGreaterThan(20000);
+  });
+
+  test(`toCsv's result should start with the csv header row`, () => {
+    expect(result['Hero6 Black-ACCL'].slice(0, 112)).toBe(
+      '"cts","date","Accelerometer (z) [m/s2]","Accelerometer (x) [m/s2]","Accelerometer (y) [m/s2]","temperature [°C]"'
+    );
+  });
 });

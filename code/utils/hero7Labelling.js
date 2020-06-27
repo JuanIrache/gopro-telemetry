@@ -1,7 +1,7 @@
-const { idKeysTranslation } = require('./keys');
+const { idKeysTranslation } = require('../data/keys');
 
 //Simplify Hero7 Labelling style
-module.exports = function(str, multi) {
+module.exports = function (str, multi) {
   const newStyle = /\[\[([\w,\s]+)\][,\s\.]*\]/;
   if (str && newStyle.test(str)) {
     const inner = str

@@ -4,10 +4,10 @@ const fs = require('fs');
 let filename, file, result;
 
 describe('Testing with Fusion file', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'Fusion';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = parseKLV(file);
+    result = await parseKLV(file);
   });
 
   test(`Fusion should return valid metadata (DEVC)`, () => {
@@ -34,10 +34,10 @@ describe('Testing with Fusion file', () => {
 });
 
 describe('Testing with hero5 file', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'hero5';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = parseKLV(file);
+    result = await parseKLV(file);
   });
 
   test(`hero5 should return valid metadata (DEVC)`, () => {
@@ -56,15 +56,17 @@ describe('Testing with hero5 file', () => {
     expect(result.DEVC[0].STRM[1].SIUN).toBe('rad/s');
   });
   test(`hero5 should have stream names (STNM)`, () => {
-    expect(result.DEVC[0].STRM[0].STNM).toBe('Accelerometer (up/down, right/left, forward/back)');
+    expect(result.DEVC[0].STRM[0].STNM).toBe(
+      'Accelerometer (up/down, right/left, forward/back)'
+    );
   });
 });
 
 describe('Testing with hero6 file', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'hero6';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = parseKLV(file);
+    result = await parseKLV(file);
   });
 
   test(`hero6 should return valid metadata (DEVC)`, () => {
@@ -88,10 +90,10 @@ describe('Testing with hero6 file', () => {
 });
 
 describe('Testing with hero6+ble file', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'hero6+ble';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = parseKLV(file);
+    result = await parseKLV(file);
   });
 
   test(`hero6+ble should contain two devices (DEVC)`, () => {
@@ -115,10 +117,10 @@ describe('Testing with hero6+ble file', () => {
 });
 
 describe('Testing with karma file', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'karma';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = parseKLV(file);
+    result = await parseKLV(file);
   });
 
   test(`karma should contain two devices (DEVC)`, () => {
@@ -133,10 +135,10 @@ describe('Testing with karma file', () => {
 });
 
 describe('Testing with hero7 file', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     filename = 'hero7';
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = parseKLV(file);
+    result = await parseKLV(file);
   });
 
   test(`hero7 should contain multiple device entries (DEVC)`, () => {

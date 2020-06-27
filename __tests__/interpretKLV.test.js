@@ -1,13 +1,22 @@
 const interpretKLV = require('../code/interpretKLV');
 const { readFileSync } = require('fs');
 
-const file = readFileSync(`${__dirname}/../samples/partials/altitudeFix.json`);
-const result = interpretKLV(JSON.parse(file)['1'], {});
+let result;
 
-test(`interpretKLV should apply scaling data`, () => {
-  expect(result.DEVC[0].STRM[0].ACCL[0][0]).toBe(10.275119617224881);
-});
+describe('Test interpretation', () => {
+  beforeAll(async () => {
+    const file = readFileSync(
+      `${__dirname}/../samples/partials/altitudeFix.json`
+    );
 
-test(`interpretKLV should fix altitude`, () => {
-  expect(result.DEVC[0].STRM[2].GPS5[0][2]).toBe(17.210718339310986);
+    result = await interpretKLV(JSON.parse(file)['1'], {});
+  });
+
+  test(`interpretKLV should apply scaling data`, () => {
+    expect(result.DEVC[0].STRM[0].ACCL[0][0]).toBe(10.275119617224881);
+  });
+
+  test(`interpretKLV should fix altitude`, () => {
+    expect(result.DEVC[0].STRM[2].GPS5[0][2]).toBe(17.210718339310986);
+  });
 });
