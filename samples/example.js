@@ -9,7 +9,7 @@ const writeFileAsync = promisify(fs.writeFile);
 async function toJSON(filename) {
   try {
     const file = await readFileAsync(path.join(__dirname, filename));
-    const result = goproTelemetry(
+    const result = await goproTelemetry(
       { rawData: file },
       {
         stream: 'GPS5',
