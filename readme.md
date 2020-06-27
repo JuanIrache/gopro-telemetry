@@ -6,14 +6,16 @@ Created for the [GoPro Telemetry Extractor](https://goprotelemetryextractor.com/
 
 Here's a [gallery with cool uses of the GoPro telemetry](https://goprotelemetryextractor.com/gallery).
 
-Accepts an object with binary data and timing data. Returns a JavaScript object (or optionally other file formats) with a key for each device that was found. See **samples/example.js** for a basic implementation.
+Accepts an object with binary data and timing data. Returns a promise that resolves to a JavaScript object (or optionally to other file formats) with a key for each device that was found. See **samples/example.js** for a basic implementation.
 
 You must extract the raw GMPF data from the video file first. You can do so with [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
 
-**gopro-telemetry** expects an object with the following properties:
+**gopro-telemetry** expects, as the mandatory first parameter, an object with the following properties:
 
 - **rawData** (buffer) The GPMF track of the video file.
 - **timing** (object) Provides timing information such as starting time, framerate, payload duration... as extracted from [gpmf-extract](https://github.com/JuanIrache/gpmf-extract).
+
+An **options** object and a **callback** function are additional optional parameters. If a callback is provided, it will receive the extracted data, and the promise will not resolve the result.
 
 Install:
 
@@ -21,18 +23,29 @@ Install:
 $ npm i gopro-telemetry
 ```
 
-Use:
+Use as promise:
 
 ```js
 const goproTelemetry = require('gopro-telemetry');
-const telemetry = goproTelemetry(input, options); //Get your input with gpmf-extract
+const telemetry = await goproTelemetry(input, options); //Get your input with gpmf-extract
+```
+
+Use with callback:
+
+```js
+const goproTelemetry = require('gopro-telemetry');
+function callback(data) {
+  // Do sometging with the data
+}
+const telemetry = goproTelemetry(input, options, callback);
 ```
 
 ## Options
 
+The options must be an object. The following keys are supported.
+
 - **debug** (boolean) Outputs some feedback.
 - **tolerant** (boolean) Returns data even if format does not match expectations.
-- **promisify** (boolean) Runs code asynchronously and returns a Promise that will resolve to the data when ready.
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**.
 - **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**.
 - **device** (array of numbers) Filters the results by device id.
@@ -61,7 +74,7 @@ All options default to _null/false_. Using filters to retrieve the desired resul
 Example:
 
 ```js
-const telemetry = goproTelemetry(
+const telemetry = await goproTelemetry(
   { rawData, timing },
   { stream: ['ACCL'], repeatSticky: true }
 );
@@ -78,9 +91,10 @@ const file = fs.readFileSync('path_to_your_file.mp4');
 
 gpmfExtract(file)
   .then(extracted => {
-    let telemetry = goproTelemetry(extracted);
-    fs.writeFileSync('output_path.json', JSON.stringify(telemetry));
-    console.log('Telemetry saved as JSON');
+    goproTelemetry(extracted, {}, telemetry => {
+      fs.writeFileSync('output_path.json', JSON.stringify(telemetry));
+      console.log('Telemetry saved as JSON');
+    });
   })
   .catch(error => console.log(error));
 ```
@@ -200,7 +214,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## To-Do
 
 - Find out why Virb edit does not read recorded speed in their own extensions format. [Details here](https://forums.garmin.com/apps-software/mac-windows-software/f/virb-edit-windows/223058/virb-edit-not-reading-trackpointextension-speed)
-- Rewview CSV conversion (when only 1 sticky value, it does not print)
+- Review CSV conversion (when only 1 sticky value, it does not print)
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
 - Test rmrkToNameUnits
