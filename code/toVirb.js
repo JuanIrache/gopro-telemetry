@@ -1,5 +1,7 @@
+const promisify = require('./utils/promisify');
+
 //Returns the GPS data as a string
-function getGPGS5Data(data) {
+async function getGPGS5Data(data) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -19,55 +21,57 @@ function getGPGS5Data(data) {
             units = `[${data[key].streams.GPS5.units.toString()}]`;
           let sticky = {};
           //Loop all the samples
-          data[key].streams.GPS5.samples.forEach(s => {
-            //Check that at least we have the valid values
-            if (s.value && s.value.length > 1) {
-              //Update and remember sticky data
-              if (s.sticky) sticky = { ...sticky, ...s.sticky };
-              let time = '';
-              let ele = '';
-              let speed = '';
-              let geoidHeight = '';
-              //Use sticky info
-              if (sticky.geoidHeight != null)
-                geoidHeight = `
+          for (const s of data[key].streams.GPS5.samples) {
+            await promisify(() => {
+              //Check that at least we have the valid values
+              if (s.value && s.value.length > 1) {
+                //Update and remember sticky data
+                if (s.sticky) sticky = { ...sticky, ...s.sticky };
+                let time = '';
+                let ele = '';
+                let speed = '';
+                let geoidHeight = '';
+                //Use sticky info
+                if (sticky.geoidHeight != null)
+                  geoidHeight = `
                 <geoidheight>${sticky.geoidHeight}</geoidheight>`;
-              //Set elevation if present
-              if (s.value.length > 1)
-                ele = `
+                //Set elevation if present
+                if (s.value.length > 1)
+                  ele = `
                 <ele>${s.value[2]}</ele>`;
-              //Set time if present
-              if (s.date != null) {
-                if (typeof s.date != 'object') s.date = new Date(s.date);
-                try {
-                  time = `
+                //Set time if present
+                if (s.date != null) {
+                  if (typeof s.date != 'object') s.date = new Date(s.date);
+                  try {
+                    time = `
                 <time>${s.date.toISOString()}</time>`;
-                } catch (error) {
-                  time = `
+                  } catch (error) {
+                    time = `
                 <time>${s.date}</time>`;
-                  setImmediate(
-                    () => console.error(error.message || error),
-                    s.date
-                  );
+                    setImmediate(
+                      () => console.error(error.message || error),
+                      s.date
+                    );
+                  }
                 }
-              }
-              //Set speed if present, in Garmin format: https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd
-              if (s.value.length > 4)
-                speed = `
+                //Set speed if present, in Garmin format: https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd
+                if (s.value.length > 4)
+                  speed = `
                 <extensions>
                   <gpxtpx:TrackPointExtension>
                     <gpxtpx:speed>${s.value[4]}</gpxtpx:speed>
                   </gpxtpx:TrackPointExtension>
                 </extensions>`;
-              //Create sample string
-              const partial = `
+                //Create sample string
+                const partial = `
             <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
                 ${(ele + time + geoidHeight + speed).trim()}
             </trkpt>`;
-              //Add it to samples
-              inner += `${partial}`;
-            }
-          });
+                //Add it to samples
+                inner += `${partial}`;
+              }
+            });
+          }
           //Create description of file/stream
           const description = [frameRate, name, units]
             .filter(e => e != null)
@@ -81,7 +85,7 @@ function getGPGS5Data(data) {
 }
 
 // Creates accelerometer GPX content for Virb
-function getACCLData(data) {
+async function getACCLData(data) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -98,48 +102,50 @@ function getACCLData(data) {
             name = data[key].streams.ACCL.name;
           let units = `[g]`;
           //Loop all the samples
-          data[key].streams.ACCL.samples.forEach(s => {
-            //Check that at least we have the valid values
-            if (s.value && s.value.length) {
-              let time = '';
-              let acceleration = '';
+          for (const s of data[key].streams.ACCL.samples) {
+            await promisify(() => {
+              //Check that at least we have the valid values
+              if (s.value && s.value.length) {
+                let time = '';
+                let acceleration = '';
 
-              //Set time if present
-              if (s.date != null) {
-                if (typeof s.date != 'object') s.date = new Date(s.date);
-                try {
-                  time = `
-                <time>${s.date.toISOString()}</time>`;
-                } catch (error) {
-                  time = `
-                <time>${s.date}</time>`;
-                  setImmediate(
-                    () => console.error(error.message || error),
-                    s.date
-                  );
+                //Set time if present
+                if (s.date != null) {
+                  if (typeof s.date != 'object') s.date = new Date(s.date);
+                  try {
+                    time = `
+                  <time>${s.date.toISOString()}</time>`;
+                  } catch (error) {
+                    time = `
+                  <time>${s.date}</time>`;
+                    setImmediate(
+                      () => console.error(error.message || error),
+                      s.date
+                    );
+                  }
                 }
-              }
 
-              acceleration = `
-                <extensions>
-                  <gpxacc:AccelerationExtension>
-                    <gpxacc:accel offset="0" x="${s.value[1] / 9.80665}" y="${
-                s.value[2] / 9.80665
-              }" z="${s.value[0] / 9.80665}"/>
-                    <gpxacc:accel offset="0" x="${s.value[1] / 9.80665}" y="${
-                s.value[2] / 9.80665
-              }" z="${s.value[0] / 9.80665}"/>
-                  </gpxacc:AccelerationExtension>
-                </extensions>`;
-              //Create sample string
-              const partial = `
-            <trkpt lat="0" lon="0">
-                ${(time + acceleration).trim()}
-            </trkpt>`;
-              //Add it to samples
-              inner += `${partial}`;
-            }
-          });
+                acceleration = `
+                  <extensions>
+                    <gpxacc:AccelerationExtension>
+                      <gpxacc:accel offset="0" x="${s.value[1] / 9.80665}" y="${
+                  s.value[2] / 9.80665
+                }" z="${s.value[0] / 9.80665}"/>
+                      <gpxacc:accel offset="0" x="${s.value[1] / 9.80665}" y="${
+                  s.value[2] / 9.80665
+                }" z="${s.value[0] / 9.80665}"/>
+                    </gpxacc:AccelerationExtension>
+                  </extensions>`;
+                //Create sample string
+                const partial = `
+              <trkpt lat="0" lon="0">
+                  ${(time + acceleration).trim()}
+              </trkpt>`;
+                //Add it to samples
+                inner += `${partial}`;
+              }
+            });
+          }
           //Create description of file/stream
           const description = [frameRate, name, units]
             .filter(e => e != null)
@@ -153,10 +159,10 @@ function getACCLData(data) {
 }
 
 //Converts the processed data to GPX
-module.exports = function (data, { name, stream }) {
+module.exports = async function (data, { name, stream }) {
   let converted;
-  if (stream[0] === 'GPS5') converted = getGPGS5Data(data);
-  else if (stream[0] === 'ACCL') converted = getACCLData(data);
+  if (stream[0] === 'GPS5') converted = await getGPGS5Data(data);
+  else if (stream[0] === 'ACCL') converted = await getACCLData(data);
   else return undefined;
   if (!converted) return undefined;
   let string = `\
