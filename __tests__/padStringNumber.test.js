@@ -1,4 +1,4 @@
-const pad = require('../code/padStringNumber');
+const pad = require('../code/utils/padStringNumber');
 
 test(`Full numbers should pad correctly`, () => {
   expect(pad('123', 3, 1)).toBe('+123.0');

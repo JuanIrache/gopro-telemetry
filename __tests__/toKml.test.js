@@ -1,4 +1,4 @@
-const toKml = require('../code/toKml');
+const toKml = require('../code/presets/toKml');
 const { readFileSync } = require('fs');
 
 let result;

@@ -1,4 +1,4 @@
-const toVirb = require('../code/toVirb');
+const toVirb = require('../code/presets/toVirb');
 const { readFileSync } = require('fs');
 
 let result;

@@ -1,4 +1,4 @@
-const toGpx = require('../code/toGpx');
+const toGpx = require('../code/presets/toGpx');
 const { readFileSync } = require('fs');
 
 let result;

@@ -1,4 +1,4 @@
-const toMgjson = require('../code/toMgjson');
+const toMgjson = require('../code/presets/toMgjson');
 const { readFileSync } = require('fs');
 
 let result;

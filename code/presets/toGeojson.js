@@ -1,4 +1,4 @@
-const promisify = require('./utils/promisify');
+const promisify = require('../utils/promisify');
 
 //Returns the GPS data as an object for geojson
 async function getGPGS5Data(data) {

@@ -1,5 +1,5 @@
-const { names } = require('./keys');
-const rmrkToNameUnits = require('./rmrkToNameUnits');
+const { names } = require('./data/keys');
+const rmrkToNameUnits = require('./utils/rmrkToNameUnits');
 
 //Apply scale and matrix transformations to data
 async function interpretKLV(klv, options) {

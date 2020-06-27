@@ -1,5 +1,5 @@
-const deduceHeaders = require('./deduceHeaders');
-const promisify = require('./utils/promisify');
+const deduceHeaders = require('../utils/deduceHeaders');
+const promisify = require('../utils/promisify');
 
 //Returns the data as a string
 async function createCSV(data) {

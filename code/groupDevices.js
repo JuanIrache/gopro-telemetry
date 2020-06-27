@@ -1,4 +1,4 @@
-const { ignore } = require('./keys');
+const { ignore } = require('./data/keys');
 const promisify = require('./utils/promisify');
 
 //Groups DEVC entries by device

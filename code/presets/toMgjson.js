@@ -1,10 +1,10 @@
 //Export to Adobe After Effect's mgJSON format. It's poorly documented, but here's a minimal working example: https://github.com/JuanIrache/mgjson
 
-const deduceHeaders = require('./deduceHeaders');
-const padStringNumber = require('./padStringNumber');
-const bigStr = require('./bigStr');
-const { mgjsonMaxArrs } = require('./keys');
-const promisify = require('./utils/promisify');
+const deduceHeaders = require('../utils/deduceHeaders');
+const padStringNumber = require('../utils/padStringNumber');
+const bigStr = require('../utils/bigStr');
+const { mgjsonMaxArrs } = require('../data/keys');
+const promisify = require('../utils/promisify');
 
 //After Effects can't read larger numbers
 const largestMGJSONNum = 2147483648;

@@ -5,9 +5,9 @@ const {
   idKeysTranslation,
   idValuesTranslation,
   mp4ValidSamples
-} = require('./keys');
-const deduceHeaders = require('./deduceHeaders');
-const hero7Labelling = require('./hero7Labelling');
+} = require('./data/keys');
+const deduceHeaders = require('./utils/deduceHeaders');
+const hero7Labelling = require('./utils/hero7Labelling');
 const promisify = require('./utils/promisify');
 
 //Compare equality of values, including objects

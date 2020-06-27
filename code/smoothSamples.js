@@ -1,4 +1,4 @@
-const reduceSamples = require('./reduceSamples');
+const reduceSamples = require('./utils/reduceSamples');
 const promisify = require('./utils/promisify');
 
 //Smoothens contrast between samples by averaging the specified number of them

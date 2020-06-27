@@ -1,4 +1,4 @@
-const promisify = require('./utils/promisify');
+const promisify = require('../utils/promisify');
 
 //Change some terms to more human readable
 const translations = {

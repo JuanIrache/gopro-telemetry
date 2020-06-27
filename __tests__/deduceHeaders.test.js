@@ -1,4 +1,4 @@
-const deduceHeaders = require('../code/deduceHeaders');
+const deduceHeaders = require('../code/utils/deduceHeaders');
 
 test(`DeduceHeaders should create a header per sample with description and unit`, () => {
   expect(
@@ -6,7 +6,13 @@ test(`DeduceHeaders should create a header per sample with description and unit`
       name: 'GPS (Lat., Long., Alt., 2D speed, 3D speed)',
       units: ['deg', 'deg', 'm', 'm/s', 'm/s']
     })
-  ).toEqual(['GPS (Lat.) [deg]', 'GPS (Long.) [deg]', 'GPS (Alt.) [m]', 'GPS (2D speed) [m/s]', 'GPS (3D speed) [m/s]']);
+  ).toEqual([
+    'GPS (Lat.) [deg]',
+    'GPS (Long.) [deg]',
+    'GPS (Alt.) [m]',
+    'GPS (2D speed) [m/s]',
+    'GPS (3D speed) [m/s]'
+  ]);
 });
 
 test(`DeduceHeaders should create new headers dynamically`, () => {

@@ -1,4 +1,4 @@
-const reduceSamples = require('./reduceSamples');
+const reduceSamples = require('./utils/reduceSamples');
 const promisify = require('./utils/promisify');
 
 function process2Vals(vals, prop, k) {

@@ -1,4 +1,4 @@
-const toGeojson = require('../code/toGeojson');
+const toGeojson = require('../code/presets/toGeojson');
 const { readFileSync } = require('fs');
 
 let result;
