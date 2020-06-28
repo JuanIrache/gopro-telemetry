@@ -32,7 +32,9 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
     await breathe();
     //Initialise stickies per device and stream if not done yet
     stickies[d['device name']] = stickies[d['device name']] || {};
-    (d.STRM || []).forEach((s, i) => {
+    for (let i = 0; i < d.STRM.length; i++) {
+      // await breathe();
+      let s = d.STRM[i] || {};
       //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
       if (
         (!mp4header || mp4ValidSamples.includes(s.interpretSamples)) &&
@@ -68,7 +70,12 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
           //Remember previous sticky values, that's why they're sticky
           sticky = { ...stickies[d['device name']][fourCC], ...sticky };
           //If repeatSticky, add the sticky values to every sample
-          if (repeatSticky) samples = samples.map(ss => ({ ...ss, ...sticky }));
+          if (repeatSticky) {
+            for (let i = 0; i < samples.length; i++) {
+              if (i % 1000 === 0) await breathe();
+              samples[i] = { ...samples[i], ...sticky };
+            }
+          }
           //If have both samples and stickies
           else if (Object.keys(sticky).length && samples.length) {
             for (let key in sticky) {
@@ -88,19 +95,21 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
           };
 
           //Use name and units to describe every sample
-          const workOnHeaders = function (samples, desc) {
+          const workOnHeaders = async function (samples, desc) {
             let description = JSON.parse(JSON.stringify(desc));
             let headers = deduceHeaders(description);
             //Add the descriptions and values to samples
-            samples = samples.map(ss => {
+            for (let i = 0; i < samples.length; i++) {
+              if (i % 1000 === 0) await breathe();
               //If no available description, use numbers
-              if (Array.isArray(ss.value))
-                ss.value.forEach((v, i) => (ss[headers[i] || `(${i})`] = v));
-              else if (headers[0]) ss[headers[0]] = ss.value;
+              if (Array.isArray(samples[i].value))
+                samples[i].value.forEach(
+                  (v, i) => (samples[i][headers[i] || `(${i})`] = v)
+                );
+              else if (headers[0]) samples[i][headers[0]] = samples[i].value;
               //Delete value key if we solved the situation
-              if (headers.length) delete ss.value;
-              return ss;
-            });
+              if (headers.length) delete samples[i].value;
+            }
             //Delete names and units, not needed any more
             delete description.units;
             delete description.name;
@@ -111,9 +120,9 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
           description.name = hero7Labelling(description.name);
 
           //This bit saved as function for more than one condition to use it
-          const completeSample = ({ samples, description }) => {
+          const completeSample = async ({ samples, description }) => {
             if (repeatHeaders) {
-              const newResults = workOnHeaders(samples, description);
+              const newResults = await workOnHeaders(samples, description);
               samples = newResults.samples;
               description = newResults.description;
             }
@@ -144,7 +153,9 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
               const headers = [];
               const newSamples = [];
               //Grab the id of each substream, save it for the description, and save the second value as the only value
-              samples.forEach((ss, i) => {
+              for (let i = 0; i < samples.length; i++) {
+                if (i % 1000 === 0) await breathe();
+                const ss = samples[i];
                 //Loop inner samples
                 const newSample = { ...ss, value: [] };
                 (ss.value || []).forEach((v, x) => {
@@ -155,7 +166,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                 });
 
                 newSamples.push(newSample);
-              });
+              }
 
               if (parts) {
                 //Add previously known units to description
@@ -168,7 +179,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
               //Add new keys
               description.name += ` (${headers.join(',')})`;
 
-              completeSample({ samples: newSamples, description });
+              await completeSample({ samples: newSamples, description });
             } else {
               //Split stream in substreams
               if (parts)
@@ -177,7 +188,9 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                   `(${parts[2]})`
                 );
 
-              samples.forEach(ss => {
+              for (let i = 0; i < samples.length; i++) {
+                if (i % 1000 === 0) await breathe();
+                const ss = samples[i];
                 //Loop inner samples
                 (ss.value || []).forEach(v => {
                   if (v != null && Array.isArray(v)) {
@@ -203,7 +216,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                     newSamples[id].push(thisSample);
                   }
                 });
-              });
+              }
               for (const key in newSamples) {
                 //Add id
                 description.subStreamName = `${idKey}:${idValuesTranslation(
@@ -212,7 +225,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                 )}`;
                 let desc = description;
                 if (repeatHeaders) {
-                  const newResults = workOnHeaders(
+                  const newResults = await workOnHeaders(
                     newSamples[key],
                     description
                   );
@@ -229,14 +242,14 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                   };
               }
             }
-          } else completeSample({ samples, description });
+          } else await completeSample({ samples, description });
         }
         //If this not a normal stream with samples, just copy the data
       } else {
         if (s.interpretSamples) delete s.interpretSamples;
         result.streams[`Data ${i}`] = JSON.parse(JSON.stringify(d.STRM));
       }
-    });
+    }
 
     //Delete used data
     delete d.DVID;
