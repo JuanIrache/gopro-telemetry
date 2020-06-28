@@ -232,7 +232,7 @@ async function parseKLV(
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size)
-    setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
+    setImmediate(() => console.warn('unknown types:', [...unknown].join(',')));
 
   return result;
 }
