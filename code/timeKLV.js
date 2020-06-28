@@ -1,4 +1,4 @@
-const promisify = require('./utils/promisify');
+const breathe = require('./utils/breathe');
 
 //Parse GPSU date format
 function toDate(d) {
@@ -194,159 +194,154 @@ async function timeKLV(klv, timing, options, toMerge) {
 
       //Loop through packets of samples
       for (let i = 0; i < result.DEVC.length; i++) {
-        await promisify(() => {
-          const d = result.DEVC[i];
-          //Choose timing type for time (relative to the video start) data.
-          const { cts, duration } = (() => {
-            if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
-            else if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[i];
-            return { cts: null, duration: null };
-          })();
-          //Choose timing type for dates (ideally based on GPS).
-          const { date, duration: dateDur } = (() => {
-            if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[i];
-            else if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
-            return { date: null, duration: null };
-          })();
-          //Choose initial date in case it's necessary
-          const initialDate = (() => {
-            if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
-            else if (mp4Times.length && mp4Times[0] != null)
-              return mp4Times[0].date;
-            return 0;
-          })();
+        await breathe();
+        const d = result.DEVC[i];
+        //Choose timing type for time (relative to the video start) data.
+        const { cts, duration } = (() => {
+          if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
+          else if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[i];
+          return { cts: null, duration: null };
+        })();
+        //Choose timing type for dates (ideally based on GPS).
+        const { date, duration: dateDur } = (() => {
+          if (gpsTimes.length && gpsTimes[i] != null) return gpsTimes[i];
+          else if (mp4Times.length && mp4Times[i] != null) return mp4Times[i];
+          return { date: null, duration: null };
+        })();
+        //Choose initial date in case it's necessary
+        const initialDate = (() => {
+          if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
+          else if (mp4Times.length && mp4Times[0] != null)
+            return mp4Times[0].date;
+          return 0;
+        })();
 
-          //Create empty stream if needed for timing purposes
-          const dummyStream = {
-            STNM: 'UTC date/time',
-            interpretSamples: 'dateStream',
-            dateStream: ['0']
-          };
-          if (options.dateStream) d.STRM.push(dummyStream);
+        //Create empty stream if needed for timing purposes
+        const dummyStream = {
+          STNM: 'UTC date/time',
+          interpretSamples: 'dateStream',
+          dateStream: ['0']
+        };
+        if (options.dateStream) d.STRM.push(dummyStream);
 
-          //Loop streams if present
-          (d.STRM || []).forEach((s, ii) => {
-            //If group of samples found
-            if (
-              s.interpretSamples &&
-              s[s.interpretSamples] &&
-              s[s.interpretSamples].length
-            ) {
-              const fourCC = s.interpretSamples;
+        //Loop streams if present
+        (d.STRM || []).forEach((s, ii) => {
+          //If group of samples found
+          if (
+            s.interpretSamples &&
+            s[s.interpretSamples] &&
+            s[s.interpretSamples].length
+          ) {
+            const fourCC = s.interpretSamples;
 
-              if (!options.mp4header) {
-                //Will store the current Cts
-                let currCts;
-                let currDate;
+            if (!options.mp4header) {
+              //Will store the current Cts
+              let currCts;
+              let currDate;
 
-                //Use sDuration and cts from microsecond timestamps if available
-                let microCts = false;
-                let microDuration = false;
-                let microDate = false;
-                let microDateDuration = false;
-                if (s.STMP != null) {
-                  // Arbitrary, if first timestamp higher than 10 seconds, consider split video chunk
-                  if (
-                    !foundTimeStamps &&
-                    s.STMP / 1000 > 1000 * 10 &&
-                    !toMerge
-                  ) {
-                    timeStampOffset = s.STMP;
-                  }
+              //Use sDuration and cts from microsecond timestamps if available
+              let microCts = false;
+              let microDuration = false;
+              let microDate = false;
+              let microDateDuration = false;
+              if (s.STMP != null) {
+                // Arbitrary, if first timestamp higher than 10 seconds, consider split video chunk
+                if (!foundTimeStamps && s.STMP / 1000 > 1000 * 10 && !toMerge) {
+                  timeStampOffset = s.STMP;
+                }
 
-                  foundTimeStamps = true;
-                  //Make sure we don't end up with negative time stamps
-                  if (s.STMP < timeStampOffset) timeStampOffset = s.STMP;
+                foundTimeStamps = true;
+                //Make sure we don't end up with negative time stamps
+                if (s.STMP < timeStampOffset) timeStampOffset = s.STMP;
 
-                  currCts = (s.STMP - timeStampOffset) / 1000;
-                  if (options.timeIn === 'MP4') {
-                    //Use timeStamps for date if MP4 timing is selected
-                    currDate = initialDate + currCts;
-                    microDate = true;
-                  }
-                  microCts = true;
-                  //Look for next sample of same fourCC
-                  if (result.DEVC[i + 1]) {
-                    //If next DEVC entry
-                    (result.DEVC[i + 1].STRM || []).forEach(ss => {
-                      //Look in each stream
-                      if (ss.interpretSamples === fourCC) {
-                        //Found matchin sample
-                        if (ss.STMP) {
-                          //Has timestamp? Measure duration of all samples and divide by number of samples
-                          sDuration[fourCC] =
-                            ((ss.STMP - timeStampOffset) / 1000 - currCts) /
-                            s[fourCC].length;
-                          microDuration = true;
-                          if (options.timeIn === 'MP4') {
-                            //Use timeStamps for date if MP4 timing is selected
-                            dateSDur[fourCC] = sDuration[fourCC];
-                            microDateDuration = true;
-                          }
+                currCts = (s.STMP - timeStampOffset) / 1000;
+                if (options.timeIn === 'MP4') {
+                  //Use timeStamps for date if MP4 timing is selected
+                  currDate = initialDate + currCts;
+                  microDate = true;
+                }
+                microCts = true;
+                //Look for next sample of same fourCC
+                if (result.DEVC[i + 1]) {
+                  //If next DEVC entry
+                  (result.DEVC[i + 1].STRM || []).forEach(ss => {
+                    //Look in each stream
+                    if (ss.interpretSamples === fourCC) {
+                      //Found matchin sample
+                      if (ss.STMP) {
+                        //Has timestamp? Measure duration of all samples and divide by number of samples
+                        sDuration[fourCC] =
+                          ((ss.STMP - timeStampOffset) / 1000 - currCts) /
+                          s[fourCC].length;
+                        microDuration = true;
+                        if (options.timeIn === 'MP4') {
+                          //Use timeStamps for date if MP4 timing is selected
+                          dateSDur[fourCC] = sDuration[fourCC];
+                          microDateDuration = true;
                         }
                       }
-                    });
-                  }
-                  delete s.STMP;
+                    }
+                  });
                 }
-
-                //Divide duration of packet by samples in packet to get sample duration per fourCC type
-                if (!microDuration && duration != null) {
-                  sDuration[fourCC] = duration / s[fourCC].length;
-                }
-                if (!microCts) currCts = cts;
-
-                //The same for duration of dates
-                if (!microDateDuration && dateDur != null) {
-                  dateSDur[fourCC] = dateDur / s[fourCC].length;
-                }
-                //We know the time and date of the first sample
-                if (!microDate) currDate = date;
-
-                //Try to compensate delayed samples proportionally
-                let timoDur = 0;
-                if (s.TIMO) {
-                  //Substract time offset, but don't go under 0
-                  if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
-                  currCts -= s.TIMO * 1000;
-                  if (currCts < 0) currCts = 0;
-                  if (d.STRM[ii + 1] && d.STRM[ii + 1].TIMO) {
-                    //Find difference to next TIMO
-                    const timoDiff = d.STRM[ii + 1].TIMO - s.TIMO;
-                    //And calculate how much we must compensate each sample (interpolate)
-                    timoDur = (100 * timoDiff) / s[fourCC].length;
-                  }
-                  //And compensate date
-                  currDate = currDate - s.TIMO * 1000;
-                  delete s.TIMO;
-                }
-
-                //Loop samples and replace them with timed samples
-                s[fourCC] = s[fourCC].map(value => {
-                  //If timing data avaiable
-                  if (currCts != null && sDuration[fourCC] != null) {
-                    let timedSample = { value };
-                    //Filter out if timeOut option, but keep cts if needed for merging times
-                    if (options.timeOut !== 'date' || options.groupTimes)
-                      timedSample.cts = currCts;
-                    if (options.timeOut !== 'cts')
-                      timedSample.date = new Date(currDate);
-                    //increment time and date for the next sample and compensate time offset
-                    currCts += sDuration[fourCC] - timoDur;
-                    currDate += dateSDur[fourCC] - timoDur;
-
-                    return timedSample;
-                    //Otherwise return value without timing data
-                  } else return { value };
-                });
-              } else {
-                //If no time required just store samples in value
-                s[fourCC] = s[fourCC].map(value => ({
-                  value
-                }));
+                delete s.STMP;
               }
+
+              //Divide duration of packet by samples in packet to get sample duration per fourCC type
+              if (!microDuration && duration != null) {
+                sDuration[fourCC] = duration / s[fourCC].length;
+              }
+              if (!microCts) currCts = cts;
+
+              //The same for duration of dates
+              if (!microDateDuration && dateDur != null) {
+                dateSDur[fourCC] = dateDur / s[fourCC].length;
+              }
+              //We know the time and date of the first sample
+              if (!microDate) currDate = date;
+
+              //Try to compensate delayed samples proportionally
+              let timoDur = 0;
+              if (s.TIMO) {
+                //Substract time offset, but don't go under 0
+                if (s.TIMO * 1000 > currCts) s.TIMO = currCts / 100;
+                currCts -= s.TIMO * 1000;
+                if (currCts < 0) currCts = 0;
+                if (d.STRM[ii + 1] && d.STRM[ii + 1].TIMO) {
+                  //Find difference to next TIMO
+                  const timoDiff = d.STRM[ii + 1].TIMO - s.TIMO;
+                  //And calculate how much we must compensate each sample (interpolate)
+                  timoDur = (100 * timoDiff) / s[fourCC].length;
+                }
+                //And compensate date
+                currDate = currDate - s.TIMO * 1000;
+                delete s.TIMO;
+              }
+
+              //Loop samples and replace them with timed samples
+              s[fourCC] = s[fourCC].map(value => {
+                //If timing data avaiable
+                if (currCts != null && sDuration[fourCC] != null) {
+                  let timedSample = { value };
+                  //Filter out if timeOut option, but keep cts if needed for merging times
+                  if (options.timeOut !== 'date' || options.groupTimes)
+                    timedSample.cts = currCts;
+                  if (options.timeOut !== 'cts')
+                    timedSample.date = new Date(currDate);
+                  //increment time and date for the next sample and compensate time offset
+                  currCts += sDuration[fourCC] - timoDur;
+                  currDate += dateSDur[fourCC] - timoDur;
+
+                  return timedSample;
+                  //Otherwise return value without timing data
+                } else return { value };
+              });
+            } else {
+              //If no time required just store samples in value
+              s[fourCC] = s[fourCC].map(value => ({
+                value
+              }));
             }
-          });
+          }
         });
       }
     } else throw new Error('Invalid data, no DEVC');

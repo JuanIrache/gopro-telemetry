@@ -1,5 +1,5 @@
 const reduceSamples = require('./utils/reduceSamples');
-const promisify = require('./utils/promisify');
+const breathe = require('./utils/breathe');
 
 function process2Vals(vals, prop, k) {
   //If no 2 valid values, assign the first. This covers nulls too
@@ -58,49 +58,45 @@ module.exports = async function (
   for (const key in result) {
     if (result[key].streams) {
       for (const k in result[key].streams) {
-        await promisify(async () => {
-          //Gather samples
-          const samples = result[key].streams[k].samples;
-          if (samples) {
-            let currentTime = 0;
-            let newSamples = [];
-            let reachedEnd = false;
-            let i = 0;
-            //Loop until the end of the array
-            while (!reachedEnd) {
-              await promisify(() => {
-                let group = [];
-                //Loop one time per each desired time chunk
-                while (samples[i].cts < currentTime + groupTimes) {
-                  //Gather all the samples within that chunk
-                  group.push(samples[i]);
-                  if (i + 1 >= samples.length) {
-                    //Until the end is reached
-                    reachedEnd = true;
-                    break;
-                    //Check the next sample
-                  } else i++;
-                  //One sample is just fine if disableMerging
-                  if (disableMerging) break;
-                }
-                //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
-                if (group.length > 1) newSamples.push(reduceSamples(group));
-                else if (i > 0 && i < samples.length && !disableInterpolation) {
-                  newSamples.push(
-                    interpolateSample(samples, i - 1, currentTime)
-                  );
-                } else if (group.length === 1) newSamples.push(group[0]);
-                //If cts was temporary, remove it
-                if (timeOut === 'date' && newSamples.length)
-                  delete newSamples[newSamples.length - 1].cts;
-                //Add time to analyse next chunk
-                currentTime += groupTimes;
-              });
+        await breathe();
+        //Gather samples
+        const samples = result[key].streams[k].samples;
+        if (samples) {
+          let currentTime = 0;
+          let newSamples = [];
+          let reachedEnd = false;
+          let i = 0;
+          //Loop until the end of the array
+          while (!reachedEnd) {
+            let group = [];
+            //Loop one time per each desired time chunk
+            while (samples[i].cts < currentTime + groupTimes) {
+              //Gather all the samples within that chunk
+              group.push(samples[i]);
+              if (i % 1000) await breathe();
+              if (i + 1 >= samples.length) {
+                //Until the end is reached
+                reachedEnd = true;
+                break;
+                //Check the next sample
+              } else i++;
+              //One sample is just fine if disableMerging
+              if (disableMerging) break;
             }
-            //Replace samples with merged/interpolated ones
-            result[key].streams[k].samples = newSamples;
+            //Decide wether to merge, copy or interpolate samples based on the amount found under the time chunk
+            if (group.length > 1) newSamples.push(reduceSamples(group));
+            else if (i > 0 && i < samples.length && !disableInterpolation) {
+              newSamples.push(interpolateSample(samples, i - 1, currentTime));
+            } else if (group.length === 1) newSamples.push(group[0]);
+            //If cts was temporary, remove it
+            if (timeOut === 'date' && newSamples.length)
+              delete newSamples[newSamples.length - 1].cts;
+            //Add time to analyse next chunk
+            currentTime += groupTimes;
           }
-        });
+          //Replace samples with merged/interpolated ones
+          result[key].streams[k].samples = newSamples;
+        }
       }
     }
   }
