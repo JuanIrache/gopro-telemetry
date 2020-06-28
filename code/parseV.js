@@ -36,7 +36,9 @@ function parseV(environment, slice, len, specifics) {
 
     //If debugging, print unexpected types
     if (options.debug && unknown.size)
-      setImmediate(() => console.log('unknown types:', [...unknown].join(',')));
+      setImmediate(() =>
+        console.warn('unknown types:', [...unknown].join(','))
+      );
     return res;
 
     //Otherwise, read a single value

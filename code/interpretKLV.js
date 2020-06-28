@@ -1,8 +1,10 @@
 const { names } = require('./data/keys');
 const rmrkToNameUnits = require('./utils/rmrkToNameUnits');
+const breathe = require('./utils/breathe');
 
 //Apply scale and matrix transformations to data
 async function interpretKLV(klv, options) {
+  await breathe();
   let result = JSON.parse(JSON.stringify(klv));
   if (result != null && result.interpretSamples) {
     const toInterpret = ['SCAL', 'altitudeFix', 'ORIN', 'ORIO', 'MTRX', 'TYPE'];

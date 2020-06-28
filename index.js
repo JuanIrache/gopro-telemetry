@@ -18,9 +18,12 @@ const toCsv = require('./code/presets/toCsv');
 const toMgjson = require('./code/presets/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const setSourceOffset = require('./code/setSourceOffset');
+const breathe = require('./code/utils/breathe');
 
 async function parseOne({ rawData, parsedData }, opts) {
   if (parsedData) return parsedData;
+
+  await breathe();
 
   //Parse input
   const parsed = await parseKLV(rawData, opts);
@@ -41,6 +44,8 @@ async function interpretOne(timing, parsed, opts, toMerge) {
   //Group it by device
   const grouped = await groupDevices(parsed);
 
+  await breathe();
+
   //Correct GPS height and filter out bad GPS data
   if (
     !opts.ellipsoid ||
@@ -54,18 +59,24 @@ async function interpretOne(timing, parsed, opts, toMerge) {
 
   let interpreted = {};
   //Apply scale and matrix transformations
-  for (const key in grouped)
+  for (const key in grouped) {
+    await breathe();
     interpreted[key] = await interpretKLV(grouped[key], opts);
+  }
 
   let timed = {};
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
+    await breathe();
     timed[key] = await timeKLV(interpreted[key], timing, opts, toMerge);
   }
 
   //Merge samples in sensor entries
   let merged = {};
-  for (const key in timed) merged[key] = await mergeStream(timed[key], opts);
+  for (const key in timed) {
+    await breathe();
+    merged[key] = await mergeStream(timed[key], opts);
+  }
 
   return merged;
 }
@@ -107,9 +118,14 @@ async function process(input, opts) {
       timing = JSON.parse(JSON.stringify(input.timing));
       timing.start = new Date(timing.start);
     }
+
+    await breathe();
+
     const parsed = await parseOne(input, opts);
 
     progress(opts, 0.2);
+
+    await breathe();
 
     //Return list of devices/streams only
     if (opts.deviceList) return deviceList(parsed);
@@ -117,6 +133,8 @@ async function process(input, opts) {
 
     //Return now if raw wanted
     if (opts.raw) return parsed;
+
+    await breathe();
 
     interpreted = await interpretOne(timing, parsed, opts);
     progress(opts, 0.4);
@@ -135,11 +153,14 @@ async function process(input, opts) {
     //Loop parse all files, with offsets
     const parsed = [];
     for (let i = 0; i < sortedInput.length; i++) {
+      await breathe();
       if (i > 0) setSourceOffset(timing[i - 1], timing[i]);
       const oneParsed = await parseOne(sortedInput[i], opts);
       parsed.push(oneParsed);
     }
     progress(opts, 0.2);
+
+    await breathe();
 
     //Return list of devices/streams only
     if (opts.deviceList) return parsed.map(p => deviceList(p));
@@ -152,10 +173,13 @@ async function process(input, opts) {
     const interpretedArr = [];
     for (let i = 0; i < parsed.length; i++) {
       const p = parsed[i];
+      await breathe();
       const interpreted = await interpretOne(timing[i], p, opts, true);
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);
+
+    await breathe();
 
     //Merge samples in interpreted obj
     interpreted = await mergeInterpretedSources(interpretedArr);
@@ -164,6 +188,8 @@ async function process(input, opts) {
     //Set single timing for rest of outer function
     timing = timing[0];
   }
+
+  await breathe();
 
   //Clean unused streams (namely GPS5 used for timing if cached raw data)
   if (opts.stream && opts.stream.length) {
@@ -186,10 +212,14 @@ async function process(input, opts) {
     else throw new Error('Frame rate is needed for your current options');
   }
 
+  await breathe();
+
   //Group samples by time if necessary
   if (opts.smooth) interpreted = await smoothSamples(interpreted, opts);
 
   progress(opts, 0.6);
+
+  await breathe();
 
   //Group samples by time if necessary
   if (opts.groupTimes) interpreted = await groupTimes(interpreted, opts);
@@ -199,6 +229,8 @@ async function process(input, opts) {
     interpreted['frames/second'] = 1 / timing.frameDuration;
 
   progress(opts, 0.9);
+
+  await breathe();
 
   //Process presets
   if (opts.preset === 'gpx') return await toGpx(interpreted, opts);

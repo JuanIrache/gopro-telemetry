@@ -96,7 +96,7 @@ gpmfExtract(file)
       console.log('Telemetry saved as JSON');
     });
   })
-  .catch(error => console.log(error));
+  .catch(error => console.error(error));
 ```
 
 **timing** object structure:

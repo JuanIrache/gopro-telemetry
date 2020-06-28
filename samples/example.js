@@ -22,7 +22,7 @@ async function toJSON(filename) {
     await writeFileAsync('./out.json', JSON.stringify(result));
     console.log('File saved');
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 

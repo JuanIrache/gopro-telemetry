@@ -1,4 +1,4 @@
-const promisify = require('../utils/promisify');
+const breathe = require('../utils/breathe');
 
 //Returns the GPS data as an object for geojson
 async function getGPGS5Data(data) {
@@ -10,46 +10,43 @@ async function getGPGS5Data(data) {
       properties.device = data[key]['device name'];
     if (data[key].streams) {
       for (const stream in data[key].streams) {
-        const promiseResult = await promisify(async () => {
-          //If we find a GPS5 stream, we won't look on any other DEVCS
+        await breathe();
+        //If we find a GPS5 stream, we won't look on any other DEVCS
+        if (
+          stream === 'GPS5' &&
+          data[key].streams.GPS5.samples &&
+          data[key].streams.GPS5.samples.length
+        ) {
+          //Save altitude offset
           if (
-            stream === 'GPS5' &&
-            data[key].streams.GPS5.samples &&
-            data[key].streams.GPS5.samples.length
+            data[key].streams.GPS5.samples[0].sticky &&
+            data[key].streams.GPS5.samples[0].sticky.geoidHeight
           ) {
-            //Save altitude offset
-            if (
-              data[key].streams.GPS5.samples[0].sticky &&
-              data[key].streams.GPS5.samples[0].sticky.geoidHeight
-            ) {
-              properties.geoidHeight =
-                data[key].streams.GPS5.samples[0].sticky.geoidHeight;
-            }
-            //Will save utc and cts
-            properties.AbsoluteUtcMicroSec = [];
-            properties.RelativeMicroSec = [];
-            //Loop all the samples
-            for (let i = 0; i < data[key].streams.GPS5.samples.length; i++) {
-              await promisify(() => {
-                const s = data[key].streams.GPS5.samples[i];
-                //Check that at least we have the valid values
-                if (s.value && s.value.length > 1) {
-                  coordinates[i] = [s.value[1], s.value[0]];
-                  //Set elevation if present
-                  if (s.value.length > 1) coordinates[i].push(s.value[2]);
-                  //Set time if present
-                  if (s.date != null) {
-                    if (typeof s.date != 'object') s.date = new Date(s.date);
-                    properties.AbsoluteUtcMicroSec[i] = s.date.getTime();
-                  }
-                  if (s.cts != null) properties.RelativeMicroSec[i] = s.cts;
-                }
-              });
-            }
-            return { coordinates, properties };
+            properties.geoidHeight =
+              data[key].streams.GPS5.samples[0].sticky.geoidHeight;
           }
-        });
-        if (promiseResult) return promiseResult;
+          //Will save utc and cts
+          properties.AbsoluteUtcMicroSec = [];
+          properties.RelativeMicroSec = [];
+          //Loop all the samples
+          for (let i = 0; i < data[key].streams.GPS5.samples.length; i++) {
+            if (i % 1000 === 0) await breathe();
+            const s = data[key].streams.GPS5.samples[i];
+            //Check that at least we have the valid values
+            if (s.value && s.value.length > 1) {
+              coordinates[i] = [s.value[1], s.value[0]];
+              //Set elevation if present
+              if (s.value.length > 1) coordinates[i].push(s.value[2]);
+              //Set time if present
+              if (s.date != null) {
+                if (typeof s.date != 'object') s.date = new Date(s.date);
+                properties.AbsoluteUtcMicroSec[i] = s.date.getTime();
+              }
+              if (s.cts != null) properties.RelativeMicroSec[i] = s.cts;
+            }
+          }
+          return { coordinates, properties };
+        }
       }
     }
   }
