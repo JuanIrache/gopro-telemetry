@@ -34,7 +34,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
     stickies[d['device name']] = stickies[d['device name']] || {};
     for (let i = 0; i < (d.STRM || []).filter(e => !!e).length; i++) {
       await breathe();
-      const s = d.STRM[i];
+      const s = d.STRM[i] || {};
       //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
       if (
         (!mp4header || mp4ValidSamples.includes(s.interpretSamples)) &&
