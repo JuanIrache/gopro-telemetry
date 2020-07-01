@@ -26,7 +26,7 @@ module.exports = async function (
   //Loop through packets of samples if correction or filtering needed
   //If GPX, we need height compensation either way
   if (!ellipsoid || geoidHeight || GPS5Fix != null || GPS5Precision != null) {
-    for (const d of result.DEVC) {
+    for (const d of result.DEVC || []) {
       const length = result.DEVC.length;
       await breathe();
       //First loop to find a suitable value

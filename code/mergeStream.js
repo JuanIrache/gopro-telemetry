@@ -28,13 +28,13 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
   //Remember stickies per device and stream, to avoid looping every time
   let stickies = {};
 
-  for (const d of klv.DEVC) {
+  for (const d of klv.DEVC || []) {
     await breathe();
     //Initialise stickies per device and stream if not done yet
     stickies[d['device name']] = stickies[d['device name']] || {};
-    for (let i = 0; i < d.STRM.length; i++) {
-      // await breathe();
-      let s = d.STRM[i] || {};
+    for (let i = 0; i < (d.STRM || []).filter(e => !!e).length; i++) {
+      await breathe();
+      const s = d.STRM[i] || {};
       //We will store the main samples of the nest. Except for STNM, which looks to be an error with the data
       if (
         (!mp4header || mp4ValidSamples.includes(s.interpretSamples)) &&
@@ -73,7 +73,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
           if (repeatSticky) {
             for (let i = 0; i < samples.length; i++) {
               if (i % 1000 === 0) await breathe();
-              samples[i] = { ...samples[i], ...sticky };
+              samples[i] = { ...(samples[i] || {}), ...sticky };
             }
           }
           //If have both samples and stickies
@@ -102,13 +102,13 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
             for (let i = 0; i < samples.length; i++) {
               if (i % 1000 === 0) await breathe();
               //If no available description, use numbers
-              if (Array.isArray(samples[i].value))
-                samples[i].value.forEach(
-                  (v, i) => (samples[i][headers[i] || `(${i})`] = v)
-                );
-              else if (headers[0]) samples[i][headers[0]] = samples[i].value;
+              const ss = samples[i] || {};
+              if (Array.isArray(ss.value)) {
+                ss.value.forEach((v, i) => (ss[headers[i] || `(${i})`] = v));
+              } else if (headers[0]) ss[headers[0]] = ss.value;
               //Delete value key if we solved the situation
-              if (headers.length) delete samples[i].value;
+              if (headers.length) delete ss.value;
+              samples[i] = ss;
             }
             //Delete names and units, not needed any more
             delete description.units;
@@ -155,7 +155,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
               //Grab the id of each substream, save it for the description, and save the second value as the only value
               for (let i = 0; i < samples.length; i++) {
                 if (i % 1000 === 0) await breathe();
-                const ss = samples[i];
+                const ss = samples[i] || {};
                 //Loop inner samples
                 const newSample = { ...ss, value: [] };
                 (ss.value || []).forEach((v, x) => {
@@ -190,7 +190,7 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
 
               for (let i = 0; i < samples.length; i++) {
                 if (i % 1000 === 0) await breathe();
-                const ss = samples[i];
+                const ss = samples[i] || {};
                 //Loop inner samples
                 (ss.value || []).forEach(v => {
                   if (v != null && Array.isArray(v)) {
