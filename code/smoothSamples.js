@@ -15,7 +15,6 @@ module.exports = async function (klv, { smooth, repeatSticky }) {
         //Loop until the end of the array
         if (samples) {
           for (let i = 0; i < samples.length; i++) {
-            if (i % 1000 === 0) await breathe();
             const ins = Math.max(0, i - smooth);
             const out = Math.min(i + smooth + 1, samples.length);
             let newSample = reduceSamples(samples.slice(ins, out));

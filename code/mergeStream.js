@@ -72,7 +72,6 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
           //If repeatSticky, add the sticky values to every sample
           if (repeatSticky) {
             for (let i = 0; i < samples.length; i++) {
-              if (i % 1000 === 0) await breathe();
               samples[i] = { ...(samples[i] || {}), ...sticky };
             }
           }
@@ -100,7 +99,6 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
             let headers = deduceHeaders(description);
             //Add the descriptions and values to samples
             for (let i = 0; i < samples.length; i++) {
-              if (i % 1000 === 0) await breathe();
               //If no available description, use numbers
               const ss = samples[i] || {};
               if (Array.isArray(ss.value)) {
@@ -154,7 +152,6 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
               const newSamples = [];
               //Grab the id of each substream, save it for the description, and save the second value as the only value
               for (let i = 0; i < samples.length; i++) {
-                if (i % 1000 === 0) await breathe();
                 const ss = samples[i] || {};
                 //Loop inner samples
                 const newSample = { ...ss, value: [] };
@@ -189,7 +186,6 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                 );
 
               for (let i = 0; i < samples.length; i++) {
-                if (i % 1000 === 0) await breathe();
                 const ss = samples[i] || {};
                 //Loop inner samples
                 (ss.value || []).forEach(v => {

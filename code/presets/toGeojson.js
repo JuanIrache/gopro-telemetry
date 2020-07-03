@@ -30,7 +30,6 @@ async function getGPGS5Data(data) {
           properties.RelativeMicroSec = [];
           //Loop all the samples
           for (let i = 0; i < data[key].streams.GPS5.samples.length; i++) {
-            if (i % 1000 === 0) await breathe();
             const s = data[key].streams.GPS5.samples[i];
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {

@@ -278,7 +278,6 @@ async function convertSamples(data) {
 
             //Loop all the samples
             for (let i = 0; i < data[key].streams[stream].samples.length; i++) {
-              if (i % 1000 === 0) await breathe();
               const s = data[key].streams[stream].samples[i];
               const setMaxMinPadNum = function (val, pattern, range) {
                 //Update mins and maxes
@@ -350,7 +349,6 @@ async function convertSamples(data) {
             }
 
             for (let i = 0; i < sampleSet.samples.length; i++) {
-              if (i % 1000 === 0) await breathe();
               const s = sampleSet.samples[i];
               if (type === 'numberString') {
                 //Apply max padding to every sample

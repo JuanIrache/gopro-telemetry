@@ -73,7 +73,6 @@ module.exports = async function (
             while (samples[i].cts < currentTime + groupTimes) {
               //Gather all the samples within that chunk
               group.push(samples[i]);
-              if (i % 1000 === 0) await breathe();
               if (i + 1 >= samples.length) {
                 //Until the end is reached
                 reachedEnd = true;
