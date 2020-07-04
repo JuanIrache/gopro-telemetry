@@ -96,6 +96,7 @@ async function getACCLData(data) {
     if (data[key]['device name'] != null) device = data[key]['device name'];
     if (data[key].streams) {
       for (const stream in data[key].streams) {
+        await breathe();
         //If we find a GPS5 stream, we won't look on any other DEVCS
         if (stream === 'ACCL' && data[key].streams.ACCL.samples) {
           let name;

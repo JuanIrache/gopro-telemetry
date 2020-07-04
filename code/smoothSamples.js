@@ -9,6 +9,7 @@ module.exports = async function (klv, { smooth, repeatSticky }) {
   for (const key in result) {
     if (result[key].streams) {
       for (const k in result[key].streams) {
+        await breathe();
         //Gather samples
         const samples = result[key].streams[k].samples;
         let newSamples = [];
