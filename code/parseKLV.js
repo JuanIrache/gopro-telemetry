@@ -60,7 +60,7 @@ async function parseKLV(
     let length = 0;
     let ks;
     try {
-      await breathe();
+      if (start % 20000 === 0) await breathe();
       try {
         //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
         ks = keyAndStructParser.parse(data.slice(start)).result;
