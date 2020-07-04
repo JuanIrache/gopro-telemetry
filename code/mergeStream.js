@@ -29,7 +29,6 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
   let stickies = {};
 
   for (const d of klv.DEVC || []) {
-    await breathe();
     //Initialise stickies per device and stream if not done yet
     stickies[d['device name']] = stickies[d['device name']] || {};
     for (let i = 0; i < (d.STRM || []).filter(e => !!e).length; i++) {

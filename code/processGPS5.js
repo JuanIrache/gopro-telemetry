@@ -28,9 +28,9 @@ module.exports = async function (
   if (!ellipsoid || geoidHeight || GPS5Fix != null || GPS5Precision != null) {
     for (const d of result.DEVC || []) {
       const length = result.DEVC.length;
-      await breathe();
       //First loop to find a suitable value
       for (let i = (d.STRM || []).length - 1; i >= 0; i--) {
+        await breathe();
         //Mark for deletion streams that do not pass the test, but keep them for possible timing
         if (d.STRM[i].GPS5 && !approveStream(d.STRM[i]))
           d.STRM[i].toDelete = true;
