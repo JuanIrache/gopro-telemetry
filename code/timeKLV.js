@@ -222,7 +222,8 @@ async function timeKLV(klv, timing, options, toMerge) {
           interpretSamples: 'dateStream',
           dateStream: ['0']
         };
-        if (options.dateStream) d.STRM.push(dummyStream);
+
+        if (d.STRM && options.dateStream) d.STRM.push(dummyStream);
 
         //Loop streams if present
         (d.STRM || []).forEach((s, ii) => {

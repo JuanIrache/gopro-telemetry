@@ -86,6 +86,7 @@ function progress(options, amount) {
 }
 
 async function process(input, opts) {
+  await breathe();
   //Prepare presets
   if (presetsOpts[opts.preset]) {
     opts = {

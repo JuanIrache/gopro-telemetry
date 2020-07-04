@@ -3,7 +3,11 @@ const rmrkToNameUnits = require('./utils/rmrkToNameUnits');
 
 //Apply scale and matrix transformations to data
 async function interpretKLV(klv, options) {
-  let result = JSON.parse(JSON.stringify(klv));
+  let result;
+  try {
+    result = JSON.parse(JSON.stringify(klv));
+  } catch (e) {}
+
   if (result != null && result.interpretSamples) {
     const toInterpret = ['SCAL', 'altitudeFix', 'ORIN', 'ORIO', 'MTRX', 'TYPE'];
     const someMatch = function (a1, a2) {
