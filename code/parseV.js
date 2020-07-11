@@ -1,10 +1,22 @@
 //Main data accessing function. Reads the V in KLV
 
 //Binary-parser does not support 64bits. Use @gmod/binary-parser
-const Parser = require('@gmod/binary-parser').Parser;
-const { types } = require('./data/keys');
+const Parser = require("@gmod/binary-parser").Parser;
+const { types } = require("./data/keys");
 //Will store unknown types
 let unknown = new Set();
+
+const valueParsers = {};
+
+function getValueParserForType(type, opts) {
+  const key = `${type}-${JSON.stringify(opts)}`;
+  if (!valueParsers.hasOwnProperty(key)) {
+    valueParsers[key] = new Parser()
+      .endianess("big")
+      [types[type].func]("value", opts);
+  }
+  return valueParsers[key];
+}
 
 //Refactor for performance/memory?
 function parseV(environment, slice, len, specifics) {
@@ -29,7 +41,7 @@ function parseV(environment, slice, len, specifics) {
           parseV(environment, slice + (i * ks.size) / ax, len / ax, {
             ax: 1,
             type: innerType,
-            complexType
+            complexType,
           })
         );
     }
@@ -37,7 +49,7 @@ function parseV(environment, slice, len, specifics) {
     //If debugging, print unexpected types
     if (options.debug && unknown.size)
       setImmediate(() =>
-        console.warn('unknown types:', [...unknown].join(','))
+        console.warn("unknown types:", [...unknown].join(","))
       );
     return res;
 
@@ -48,15 +60,13 @@ function parseV(environment, slice, len, specifics) {
     if (types[type].opt)
       for (const key in types[type].opt) opts[key] = types[type].opt[key];
     //We pick the necessary function based on data format (stored in types)
-    let valParser = new Parser()
-      .endianess('big')
-      [types[type].func]('value', opts);
+    let valParser = getValueParserForType(type, opts);
     const parsed = valParser.parse(data.slice(slice)).result;
 
     return parsed.value;
 
     //Data is complex but did not find axes
-  } else throw new Error('Complex type ? with only one axis');
+  } else throw new Error("Complex type ? with only one axis");
 }
 
 module.exports = parseV;
