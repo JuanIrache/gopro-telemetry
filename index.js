@@ -136,7 +136,7 @@ async function process(input, opts) {
 
     await breathe();
 
-    interpreted = await interpretOne(timing, parsed, opts);
+    interpreted = await interpretOne({ timing, parsed, opts });
     progress(opts, 0.4);
   } else {
     if (input.some(i => !i.timing))

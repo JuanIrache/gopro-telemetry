@@ -212,8 +212,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
         //Choose initial date in case it's necessary
         const dInitialDate = (() => {
           if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
-          else if (mp4Times.length && mp4Times[0] != null)
-            return mp4Times[0].date;
+          if (mp4Times.length && mp4Times[0] != null) return mp4Times[0].date;
           return 0;
         })();
 
