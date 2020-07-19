@@ -185,6 +185,7 @@ async function process(input, opts) {
       if (i === 0) {
         interpreted = await interpretOne(timing[i], p, opts, true);
       } else {
+        // Preserve initial date for GPS times. Helps with Time Warp
         const dev = Object.keys(interpretedArr[0])[0];
         let initialDate;
         if (
