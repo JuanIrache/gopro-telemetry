@@ -40,7 +40,7 @@ async function parseOne({ rawData, parsedData }, opts) {
   return parsed;
 }
 
-async function interpretOne(timing, parsed, opts, toMerge) {
+async function interpretOne(timing, parsed, opts, toMerge, initialDate) {
   //Group it by device
   const grouped = await groupDevices(parsed);
 
@@ -68,7 +68,13 @@ async function interpretOne(timing, parsed, opts, toMerge) {
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
     await breathe();
-    timed[key] = await timeKLV(interpreted[key], timing, opts, toMerge);
+    timed[key] = await timeKLV(
+      interpreted[key],
+      timing,
+      opts,
+      toMerge,
+      initialDate
+    );
   }
 
   //Merge samples in sensor entries
@@ -175,7 +181,28 @@ async function process(input, opts) {
     for (let i = 0; i < parsed.length; i++) {
       const p = parsed[i];
       await breathe();
-      const interpreted = await interpretOne(timing[i], p, opts, true);
+      let interpreted;
+      if (i === 0) {
+        interpreted = await interpretOne(timing[i], p, opts, true);
+      } else {
+        const dev = Object.keys(interpretedArr[0])[0];
+        let initialDate;
+        if (
+          dev &&
+          interpretedArr[0][dev].streams &&
+          interpretedArr[0][dev].streams
+        ) {
+          const streams = Object.keys(interpretedArr[0][dev].streams);
+          for (const stream of streams) {
+            const samples = interpretedArr[0][dev].streams[stream].samples;
+            if (samples && samples.length) {
+              initialDate = samples[0].date;
+              break;
+            }
+          }
+        }
+        interpreted = await interpretOne(timing[i], p, opts, true, initialDate);
+      }
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);

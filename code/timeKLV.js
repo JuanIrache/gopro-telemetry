@@ -27,11 +27,10 @@ function toDate(d) {
 }
 
 //Create list of GPS dates, times and duration for each packet of samples
-async function fillGPSTime(klv, options) {
+async function fillGPSTime(klv, options, initialDate) {
   let res = [];
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'MP4' || options.mp4header) return res;
-  let initialDate;
   let missingDates = [];
   klv.DEVC.forEach((d, i) => {
     //Object with partial result
@@ -174,14 +173,14 @@ async function fillMP4Time(klv, timing, options) {
 }
 
 //Assign time data to each sample
-async function timeKLV(klv, timing, options, toMerge) {
+async function timeKLV(klv, timing, options, toMerge, initialDate) {
   //Copy the klv data
   let result = JSON.parse(JSON.stringify(klv));
   try {
     //If valid data
     if (result.DEVC && result.DEVC.length) {
       //Gather and deduce both types of timing info
-      const gpsTimes = await fillGPSTime(result, options);
+      const gpsTimes = await fillGPSTime(result, options, initialDate);
       const mp4Times = await fillMP4Time(result, timing, options);
 
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
