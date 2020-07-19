@@ -197,11 +197,7 @@ async function process(input, opts) {
         }
       }
 
-      const timeMeta = {
-        initialDate,
-        offset,
-        toMerge: true
-      };
+      const timeMeta = { initialDate, offset };
       interpreted = await interpretOne({
         timing: timing[i],
         parsed: p,

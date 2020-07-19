@@ -179,7 +179,7 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 
 //Assign time data to each sample
 async function timeKLV(klv, timing, options, timeMeta = {}) {
-  const { toMerge, initialDate } = timeMeta;
+  const { initialDate, offset } = timeMeta;
   //Copy the klv data
   let result = JSON.parse(JSON.stringify(klv));
   try {
@@ -250,7 +250,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                 // Arbitrarily use 10 seconds to identify a video that is not the first
                 if (
                   !options.removeGaps &&
-                  !(s.STMP / 1000 > 1000 * 10 && !toMerge)
+                  !(s.STMP / 1000 > 1000 * 10 && !offset)
                 ) {
                   currCts = s.STMP / 1000;
                   if (options.timeIn === 'MP4') {
