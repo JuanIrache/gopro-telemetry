@@ -120,7 +120,8 @@ async function fillGPSTime(klv, options, initialDate) {
 }
 
 //Create date, time, duration list based on mp4 date and timing data
-async function fillMP4Time(klv, timing, options) {
+async function fillMP4Time(klv, timing, options, timeMeta) {
+  let { offset, initialDate } = timeMeta;
   let res = [];
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'GPS' || options.mp4header) return res;
@@ -135,7 +136,7 @@ async function fillMP4Time(klv, timing, options) {
 
   //Set the initial date, the only one provided by mp4
   if (typeof timing.start != 'object') timing.start = new Date(timing.start);
-  const initialDate = timing.start.getTime();
+  if (!initialDate) initialDate = timing.start.getTime();
   klv.DEVC.forEach((d, i) => {
     //Will contain the timing data about the packet
     let partialRes = {};
@@ -148,8 +149,12 @@ async function fillMP4Time(klv, timing, options) {
       //Don't assume previous duration if last pack of samples. Could be shorter
       if (i + 1 < klv.DEVC.length) partialRes.duration = res[i - 1].duration;
     }
+
+    // Add offset if merging clips
+    if (offset) partialRes.cts += offset;
+
     //Deduce the date by adding the starting time to the initial date, and push
-    partialRes.date = initialDate + partialRes.cts - (timing.offset || 0);
+    partialRes.date = initialDate + partialRes.cts;
     res.push(partialRes);
     //Delete GPSU
     if (d.STRM && d.STRM.length) {
@@ -173,7 +178,8 @@ async function fillMP4Time(klv, timing, options) {
 }
 
 //Assign time data to each sample
-async function timeKLV(klv, timing, options, toMerge, initialDate) {
+async function timeKLV(klv, timing, options, timeMeta = {}) {
+  const { toMerge, initialDate } = timeMeta;
   //Copy the klv data
   let result = JSON.parse(JSON.stringify(klv));
   try {
@@ -181,15 +187,11 @@ async function timeKLV(klv, timing, options, toMerge, initialDate) {
     if (result.DEVC && result.DEVC.length) {
       //Gather and deduce both types of timing info
       const gpsTimes = await fillGPSTime(result, options, initialDate);
-      const mp4Times = await fillMP4Time(result, timing, options);
+      const mp4Times = await fillMP4Time(result, timing, options, timeMeta);
 
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
       let dateSDur = {};
-
-      //If file is a second chunk of a long video, timestamps will be off
-      let foundTimeStamps = false;
-      let timeStampOffset = 0;
 
       //Loop through packets of samples
       for (let i = 0; i < result.DEVC.length; i++) {
@@ -208,7 +210,7 @@ async function timeKLV(klv, timing, options, toMerge, initialDate) {
           return { date: null, duration: null };
         })();
         //Choose initial date in case it's necessary
-        const initialDate = (() => {
+        const dInitialDate = (() => {
           if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
           else if (mp4Times.length && mp4Times[0] != null)
             return mp4Times[0].date;
@@ -245,43 +247,40 @@ async function timeKLV(klv, timing, options, toMerge, initialDate) {
               let microDate = false;
               let microDateDuration = false;
               if (s.STMP != null) {
-                // Arbitrary, if first timestamp higher than 10 seconds, consider split video chunk
-                if (!foundTimeStamps && s.STMP / 1000 > 1000 * 10 && !toMerge) {
-                  timeStampOffset = s.STMP;
-                }
-
-                foundTimeStamps = true;
-                //Make sure we don't end up with negative time stamps
-                if (s.STMP < timeStampOffset) timeStampOffset = s.STMP;
-
-                currCts = (s.STMP - timeStampOffset) / 1000;
-                if (options.timeIn === 'MP4') {
-                  //Use timeStamps for date if MP4 timing is selected
-                  currDate = initialDate + currCts;
-                  microDate = true;
-                }
-                microCts = true;
-                //Look for next sample of same fourCC
-                if (result.DEVC[i + 1]) {
-                  //If next DEVC entry
-                  (result.DEVC[i + 1].STRM || []).forEach(ss => {
-                    //Look in each stream
-                    if (ss.interpretSamples === fourCC) {
-                      //Found matchin sample
-                      if (ss.STMP) {
-                        //Has timestamp? Measure duration of all samples and divide by number of samples
-                        sDuration[fourCC] =
-                          ((ss.STMP - timeStampOffset) / 1000 - currCts) /
-                          s[fourCC].length;
-                        microDuration = true;
-                        if (options.timeIn === 'MP4') {
-                          //Use timeStamps for date if MP4 timing is selected
-                          dateSDur[fourCC] = sDuration[fourCC];
-                          microDateDuration = true;
+                // Only use timestamps if not removing gaps and not extracting an isolated video that is not the first one
+                // Arbitrarily use 10 seconds to identify a video that is not the first
+                if (
+                  !options.removeGaps &&
+                  !(s.STMP / 1000 > 1000 * 10 && !toMerge)
+                ) {
+                  currCts = s.STMP / 1000;
+                  if (options.timeIn === 'MP4') {
+                    //Use timeStamps for date if MP4 timing is selected
+                    currDate = dInitialDate + currCts;
+                    microDate = true;
+                  }
+                  microCts = true;
+                  //Look for next sample of same fourCC
+                  if (result.DEVC[i + 1]) {
+                    //If next DEVC entry
+                    (result.DEVC[i + 1].STRM || []).forEach(ss => {
+                      //Look in each stream
+                      if (ss.interpretSamples === fourCC) {
+                        //Found matchin sample
+                        if (ss.STMP) {
+                          //Has timestamp? Measure duration of all samples and divide by number of samples
+                          sDuration[fourCC] =
+                            (ss.STMP / 1000 - currCts) / s[fourCC].length;
+                          microDuration = true;
+                          if (options.timeIn === 'MP4') {
+                            //Use timeStamps for date if MP4 timing is selected
+                            dateSDur[fourCC] = sDuration[fourCC];
+                            microDateDuration = true;
+                          }
                         }
                       }
-                    }
-                  });
+                    });
+                  }
                 }
                 delete s.STMP;
               }
