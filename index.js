@@ -160,8 +160,7 @@ async function process(input, opts) {
     //Loop parse all files, with offsets
     const parsed = [];
     for (let i = 0; i < sortedInput.length; i++) {
-      await breathe();
-      if (i > 0) setSourceOffset(timing[i - 1], timing[i]);
+      if (i > 0) await setSourceOffset(timing[i - 1], timing[i]);
       const oneParsed = await parseOne(sortedInput[i], opts);
       parsed.push(oneParsed);
     }
