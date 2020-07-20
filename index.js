@@ -17,8 +17,9 @@ const toGeojson = require('./code/presets/toGeojson');
 const toCsv = require('./code/presets/toCsv');
 const toMgjson = require('./code/presets/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
-const setSourceOffset = require('./code/setSourceOffset');
 const breathe = require('./code/utils/breathe');
+const getInitialDate = require('./code/utils/getInitialDate');
+const getOffset = require('./code/utils/getOffset');
 
 async function parseOne({ rawData, parsedData }, opts) {
   if (parsedData) return parsedData;
@@ -40,7 +41,7 @@ async function parseOne({ rawData, parsedData }, opts) {
   return parsed;
 }
 
-async function interpretOne(timing, parsed, opts, toMerge, initialDate) {
+async function interpretOne({ timing, parsed, opts, timeMeta }) {
   //Group it by device
   const grouped = await groupDevices(parsed);
 
@@ -68,13 +69,7 @@ async function interpretOne(timing, parsed, opts, toMerge, initialDate) {
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
     await breathe();
-    timed[key] = await timeKLV(
-      interpreted[key],
-      timing,
-      opts,
-      toMerge,
-      initialDate
-    );
+    timed[key] = await timeKLV(interpreted[key], timing, opts, timeMeta);
   }
 
   //Merge samples in sensor entries
@@ -143,7 +138,7 @@ async function process(input, opts) {
 
     await breathe();
 
-    interpreted = await interpretOne(timing, parsed, opts);
+    interpreted = await interpretOne({ timing, parsed, opts });
     progress(opts, 0.4);
   } else {
     if (input.some(i => !i.timing))
@@ -160,7 +155,6 @@ async function process(input, opts) {
     //Loop parse all files, with offsets
     const parsed = [];
     for (let i = 0; i < sortedInput.length; i++) {
-      if (i > 0) await setSourceOffset(timing[i - 1], timing[i]);
       const oneParsed = await parseOne(sortedInput[i], opts);
       parsed.push(oneParsed);
     }
@@ -177,31 +171,25 @@ async function process(input, opts) {
 
     //Interpret all
     const interpretedArr = [];
+    let initialDate;
+
     for (let i = 0; i < parsed.length; i++) {
       const p = parsed[i];
       await breathe();
       let interpreted;
-      if (i === 0) {
-        interpreted = await interpretOne(timing[i], p, opts, true);
-      } else {
-        const dev = Object.keys(interpretedArr[0])[0];
-        let initialDate;
-        if (
-          dev &&
-          interpretedArr[0][dev].streams &&
-          interpretedArr[0][dev].streams
-        ) {
-          const streams = Object.keys(interpretedArr[0][dev].streams);
-          for (const stream of streams) {
-            const samples = interpretedArr[0][dev].streams[stream].samples;
-            if (samples && samples.length) {
-              initialDate = samples[0].date;
-              break;
-            }
-          }
-        }
-        interpreted = await interpretOne(timing[i], p, opts, true, initialDate);
+      let offset = 0;
+      if (i > 0) {
+        initialDate = getInitialDate({ interpretedArr, initialDate });
+        offset = getOffset({ interpretedArr, i, opts, timing });
       }
+
+      const timeMeta = { initialDate, offset };
+      interpreted = await interpretOne({
+        timing: timing[i],
+        parsed: p,
+        opts,
+        timeMeta
+      });
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);
