@@ -235,7 +235,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - Implement highlight tags? https://github.com/gopro/gpmf-parser/issues/21
 - Round values to fewer decimals optionally?
 
-
 ## Acknowledgements/credits
 
 - [Juan Irache](https://github.com/JuanIrache) - Main developer
