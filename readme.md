@@ -57,6 +57,7 @@ The options must be an object. The following keys are supported.
 - **timeIn** (string) By default the code uses MP4 time (local, based on device) for _cts_ and GPS time (UTC) for _date_. Specify one (**MP4** or **GPS**) in order to ignore the other.
 - **mp4header** (boolean) The GPMF atom from the header of the mp4 contains data (highlights, video settings) in a slightly different format. This flag will avoid making some of the assumptions we make for the rest of the data, like timing strategies.
 - **groupTimes** (number/string) Group samples by units of time (milliseconds). For example, if you want one sample per second, pass it 1000. It also accepts the string **frames** to match the output to the video frame rate. This can drastically reduce the output size. By default, it will interpolate new samples if a time slot is empty.
+- **removeGaps** (boolean) Will attempt to leave no empty spaces, in terms of _cts_ times, between non-consecutive data sources. Disabled when using _GPS_ time exclusively.
 - **disableInterpolation** (boolean) Will allow _groupTimes_ to work slightly faster by skipping time slots where there are no samples.
 - **disableMerging** (boolean) Will allow _groupTimes_ to work slightly faster by selecting one sample per time slot instead of merging them all.
 - **smooth** (number) Uses the adjacent samples os a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process.
@@ -103,6 +104,7 @@ gpmfExtract(file)
 
 ```
 { frameDuration: 0.03336666666666667,
+  videoDuration: 480,
   start: 2017-04-17T19:27:57.000Z,//Date object
   samples:
    [ { cts: 0, duration: 1001 },//Starting point and duration in milliseconds
@@ -219,6 +221,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
 - Test rmrkToNameUnits
+- Test different approaches to consecutive file timing, including removeGaps
 
 ## Maybe To-Do
 
