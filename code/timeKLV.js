@@ -141,17 +141,16 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
     //Will contain the timing data about the packet
     let partialRes = {};
     //Copy cts and duration from mp4 if present
-    if (timing.samples[i] != null)
+    if (timing.samples[i] != null) {
       partialRes = JSON.parse(JSON.stringify(timing.samples[i]));
-    else {
+      // Add offset if merging clips
+      if (offset) partialRes.cts += offset;
+    } else {
       //Deduce it from previous sample
       partialRes.cts = res[i - 1].cts + res[i - 1].duration;
       //Don't assume previous duration if last pack of samples. Could be shorter
       if (i + 1 < klv.DEVC.length) partialRes.duration = res[i - 1].duration;
     }
-
-    // Add offset if merging clips
-    if (offset) partialRes.cts += offset;
 
     //Deduce the date by adding the starting time to the initial date, and push
     partialRes.date = initialDate + partialRes.cts;
