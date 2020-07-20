@@ -192,7 +192,7 @@ async function process(input, opts) {
 
         if (opts.removeGaps) offset = prevDuration;
         else {
-          let dateDiff = timing[0].start - timing[i].start;
+          let dateDiff = timing[i].start - timing[0].start;
           offset = Math.max(dateDiff, prevDuration);
         }
       }
@@ -204,7 +204,7 @@ async function process(input, opts) {
         opts,
         timeMeta
       });
-      prevDuration += timing[i].videoDuration;
+      prevDuration += timing[i].videoDuration || 0;
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);
