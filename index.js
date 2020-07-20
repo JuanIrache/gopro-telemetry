@@ -18,6 +18,8 @@ const toCsv = require('./code/presets/toCsv');
 const toMgjson = require('./code/presets/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const breathe = require('./code/utils/breathe');
+const getInitialDate = require('./code/utils/getInitialDate');
+const getOffset = require('./code/utils/getOffset');
 
 async function parseOne({ rawData, parsedData }, opts) {
   if (parsedData) return parsedData;
@@ -169,7 +171,6 @@ async function process(input, opts) {
 
     //Interpret all
     const interpretedArr = [];
-    let prevDuration = 0;
     let initialDate;
 
     for (let i = 0; i < parsed.length; i++) {
@@ -178,41 +179,8 @@ async function process(input, opts) {
       let interpreted;
       let offset = 0;
       if (i > 0) {
-        // Preserve initial date for GPS times. Helps with Time Warp
-        let dev = Object.keys(interpretedArr[0])[0];
-        if (!initialDate && dev && interpretedArr[0][dev].streams) {
-          const streams = Object.keys(interpretedArr[0][dev].streams);
-          for (const stream of streams) {
-            const samples = interpretedArr[0][dev].streams[stream].samples;
-            if (samples && samples.length) {
-              initialDate = samples[0].date;
-              break;
-            }
-          }
-        }
-
-        // Check time of last sample, in case videoDurations are not consistent with timing (TimeWarp)
-        let reachedTime = 0;
-        dev = Object.keys(interpretedArr[i - 1])[0];
-        if (dev && interpretedArr[i - 1][dev].streams) {
-          const streams = Object.keys(interpretedArr[i - 1][dev].streams);
-          for (const stream of streams) {
-            const samples = interpretedArr[i - 1][dev].streams[stream].samples;
-            if (samples && samples.length) {
-              const thisCts = samples[samples.length - 1].cts;
-              // Add one to avoid overlapping
-              reachedTime = Math.max(thisCts + 1, reachedTime);
-            }
-          }
-        }
-
-        prevDuration = Math.max(reachedTime, prevDuration);
-
-        if (opts.removeGaps) offset = prevDuration;
-        else {
-          const dateDiff = timing[i].start - timing[0].start;
-          offset = Math.max(dateDiff, prevDuration);
-        }
+        initialDate = getInitialDate({ interpretedArr, initialDate });
+        offset = getOffset({ interpretedArr, i, opts, timing });
       }
 
       const timeMeta = { initialDate, offset };
@@ -222,7 +190,6 @@ async function process(input, opts) {
         opts,
         timeMeta
       });
-      prevDuration += 1000 * timing[i].videoDuration || 0;
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);
