@@ -192,7 +192,7 @@ async function process(input, opts) {
 
         if (opts.removeGaps) offset = prevDuration;
         else {
-          let dateDiff = timing[i].start - timing[0].start;
+          const dateDiff = timing[i].start - timing[0].start;
           offset = Math.max(dateDiff, prevDuration);
         }
       }
