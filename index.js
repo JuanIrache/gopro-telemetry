@@ -171,6 +171,7 @@ async function process(input, opts) {
     const interpretedArr = [];
     let prevDuration = 0;
     let initialDate;
+
     for (let i = 0; i < parsed.length; i++) {
       const p = parsed[i];
       await breathe();
