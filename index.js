@@ -204,7 +204,7 @@ async function process(input, opts) {
         opts,
         timeMeta
       });
-      prevDuration += timing[i].videoDuration || 0;
+      prevDuration += 1000 * timing[i].videoDuration || 0;
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);
