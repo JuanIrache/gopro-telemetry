@@ -190,6 +190,23 @@ async function process(input, opts) {
           }
         }
 
+        // Check time of last sample, in case videoDurations are not consistent with timing (TimeWarp)
+        let reachedTime = 0;
+        dev = Object.keys(interpretedArr[i - 1])[0];
+        if (dev && interpretedArr[i - 1][dev].streams) {
+          const streams = Object.keys(interpretedArr[i - 1][dev].streams);
+          for (const stream of streams) {
+            const samples = interpretedArr[i - 1][dev].streams[stream].samples;
+            if (samples && samples.length) {
+              const thisCts = samples[samples.length - 1].cts;
+              // Add one to avoid overlapping
+              reachedTime = Math.max(thisCts + 1, reachedTime);
+            }
+          }
+        }
+
+        prevDuration = Math.max(reachedTime, prevDuration);
+
         if (opts.removeGaps) offset = prevDuration;
         else {
           const dateDiff = timing[i].start - timing[0].start;
