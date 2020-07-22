@@ -9,20 +9,19 @@ module.exports = async interpretedArr => {
         interpreted[device] = interpretedArr[i][device];
       } else {
         for (const stream in interpretedArr[i][device].streams) {
-          await breathe();
-          if (!interpreted[device].streams[stream]) {
-            interpreted[device].streams[stream] =
-              interpretedArr[i][device].streams[stream];
-          } else if (
-            interpretedArr[i][device].streams[stream].samples &&
-            interpretedArr[i][device].streams[stream].samples.length
-          ) {
-            if (!interpreted[device].streams[stream].samples) {
-              interpreted[device].streams[stream].samples = [];
+          if (interpretedArr[i][device].streams[stream]) {
+            await breathe();
+            if (!interpreted[device].streams[stream]) {
+              interpreted[device].streams[stream] =
+                interpretedArr[i][device].streams[stream];
+            } else {
+              if (!interpreted[device].streams[stream].samples) {
+                interpreted[device].streams[stream].samples = [];
+              }
+              interpreted[device].streams[stream].samples.push(
+                ...interpretedArr[i][device].streams[stream].samples
+              );
             }
-            interpreted[device].streams[stream].samples.push(
-              ...interpretedArr[i][device].streams[stream].samples
-            );
           }
         }
       }
