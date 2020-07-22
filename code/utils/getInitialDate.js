@@ -6,7 +6,7 @@ module.exports = ({ interpretedArr, initialDate }) => {
     for (const stream of streams) {
       const samples = interpretedArr[0][dev].streams[stream].samples;
       if (samples && samples.length) {
-        return samples[0].date;
+        return samples[0].date.getTime();
       }
     }
   }

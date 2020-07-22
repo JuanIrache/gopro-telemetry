@@ -296,7 +296,7 @@ async function convertSamples(data) {
 
               //Back to data samples. Check that at least we have the valid values
               if (s.value != null) {
-                let sample = { time: s.date };
+                let sample = { time: new Date(s.cts) };
                 if (type === 'numberString') {
                   //Extract the last lonely value of a fragmented array
                   let singleVal = s.value;
