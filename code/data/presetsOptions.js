@@ -47,8 +47,7 @@ module.exports = {
     preferred: {
       groupTimes: 'frames',
       disableInterpolation: true,
-      disableMerging: false,
-      timeIn: 'MP4'
+      disableMerging: false
     }
   }
 };
