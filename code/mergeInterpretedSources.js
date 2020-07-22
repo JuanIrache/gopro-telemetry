@@ -13,7 +13,10 @@ module.exports = async interpretedArr => {
           if (!interpreted[device].streams[stream]) {
             interpreted[device].streams[stream] =
               interpretedArr[i][device].streams[stream];
-          } else {
+          } else if (
+            interpretedArr[i][device].streams[stream].samples &&
+            interpretedArr[i][device].streams[stream].samples.length
+          ) {
             if (!interpreted[device].streams[stream].samples) {
               interpreted[device].streams[stream].samples = [];
             }
