@@ -31,7 +31,6 @@ async function getGPGS5Data(data) {
               if (s.sticky) sticky = { ...sticky, ...s.sticky };
               let time = '';
               let ele = '';
-              let speed = '';
               let geoidHeight = '';
               //Use sticky info
               if (sticky.geoidHeight != null)
@@ -46,7 +45,9 @@ async function getGPGS5Data(data) {
                 if (typeof s.date != 'object') s.date = new Date(s.date);
                 try {
                   time = `
-                <time>${s.date.toISOString()}</time>`;
+                <time>${s.date
+                  .toISOString()
+                  .replace(/\.(\d{3})Z$/, 'Z')}</time>`;
                 } catch (error) {
                   time = `
                 <time>${s.date}</time>`;
@@ -56,18 +57,10 @@ async function getGPGS5Data(data) {
                   );
                 }
               }
-              //Set speed if present, in Garmin format: https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd
-              if (s.value.length > 4)
-                speed = `
-                <extensions>
-                  <gpxtpx:TrackPointExtension>
-                    <gpxtpx:speed>${s.value[4]}</gpxtpx:speed>
-                  </gpxtpx:TrackPointExtension>
-                </extensions>`;
               //Create sample string
               const partial = `
             <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
-                ${(ele + time + geoidHeight + speed).trim()}
+                ${(ele + time + geoidHeight).trim()}
             </trkpt>`;
               //Add it to samples
               inner += `${partial}`;
@@ -169,7 +162,6 @@ module.exports = async function (data, { name, stream }) {
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1"
-    xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v2"
     xmlns:gpxacc="http://www.garmin.com/xmlschemas/AccelerationExtension/v1"
     version="1.1"
     creator="https://github.com/juanirache/gopro-telemetry">
