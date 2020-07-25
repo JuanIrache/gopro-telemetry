@@ -147,13 +147,19 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
       if (offset) partialRes.cts += offset;
     } else {
       //Deduce it from previous sample
-      partialRes.cts = res[i - 1].cts + res[i - 1].duration;
+      partialRes.cts = res[i - 1].cts + (res[i - 1].duration || 0);
       //Don't assume previous duration if last pack of samples. Could be shorter
-      if (i + 1 < klv.DEVC.length) partialRes.duration = res[i - 1].duration;
+      if (i + 1 < klv.DEVC.length) {
+        if (res[i - 1].duration) partialRes.duration = res[i - 1].duration;
+        else if (i > 1 && res[i - 2].duration) {
+          partialRes.duration = res[i - 2].duration;
+        }
+      }
     }
 
     //Deduce the date by adding the starting time to the initial date, and push
     partialRes.date = initialDate + partialRes.cts;
+
     res.push(partialRes);
     //Delete GPSU
     if (d.STRM && d.STRM.length) {
