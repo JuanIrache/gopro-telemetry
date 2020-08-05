@@ -3,7 +3,7 @@ const breathe = require('./utils/breathe');
 
 //Groups DEVC entries by device
 async function groupDevices(klv) {
-  result = {};
+  const result = {};
   for (const d of klv.DEVC || []) {
     await breathe();
     //Delete TICK and potentially other unused keys
