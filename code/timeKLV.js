@@ -335,8 +335,9 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                   //Filter out if timeOut option, but keep cts if needed for merging times
                   if (options.timeOut !== 'date' || options.groupTimes)
                     timedSample.cts = currCts;
-                  if (options.timeOut !== 'cts')
+                  if (options.timeOut !== 'cts') {
                     timedSample.date = new Date(currDate);
+                  }
                   //increment time and date for the next sample and compensate time offset
                   currCts += sDuration[fourCC] - timoDur;
                   currDate += dateSDur[fourCC] - timoDur;
