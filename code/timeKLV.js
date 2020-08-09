@@ -93,9 +93,16 @@ async function fillGPSTime(klv, options, initialDate) {
         }
       }
 
-      if (!foundNext && res[i - 2] && res[i - 2].duration) {
-        //If no date but previous packets have one, deduce from them
-        res[i - 1].duration = res[i - 2].duration;
+      if (!foundNext) {
+        //If no date but previous packets have one, deduce from them. 1Hz as fallback
+        let lastDuration = 1000;
+        for (let j = i - 2; j >= 0; j--) {
+          if (res[j] && res[j].duration) {
+            lastDuration = res[j].duration;
+            break;
+          }
+        }
+        res[i - 1].duration = lastDuration;
       }
       if (res[i - 1].duration != null) {
         // Deduce date and starting time form previous date and duration
