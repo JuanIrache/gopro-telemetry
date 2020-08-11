@@ -147,15 +147,11 @@ async function process(input, opts) {
       );
     timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
-    //Sort by in time
-    const sortedInput = input
-      .concat()
-      .sort((a, b) => a.timing.start.getTime() - b.timing.start.getTime());
 
     //Loop parse all files, with offsets
     const parsed = [];
-    for (let i = 0; i < sortedInput.length; i++) {
-      const oneParsed = await parseOne(sortedInput[i], opts);
+    for (let i = 0; i < input.length; i++) {
+      const oneParsed = await parseOne(input[i], opts);
       parsed.push(oneParsed);
     }
     progress(opts, 0.2);
