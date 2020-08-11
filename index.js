@@ -20,6 +20,7 @@ const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const breathe = require('./code/utils/breathe');
 const getInitialDate = require('./code/utils/getInitialDate');
 const getOffset = require('./code/utils/getOffset');
+const findFirstTimes = require('./code/utils/findFirstTimes');
 
 async function parseOne({ rawData, parsedData }, opts) {
   if (parsedData) return parsedData;
@@ -145,6 +146,23 @@ async function process(input, opts) {
       throw new Error(
         'per-source timing is necessary in order to merge sources'
       );
+
+    if (
+      input.every(
+        i => i.timing.start.getTime() === input[0].timing.start.getTime()
+      )
+    ) {
+      // Some firmwares produce consecutive files with the same creation date.
+      // Try to use GPS time or timestamps to solve this
+      input.sort((a, b) => {
+        const foundA = findFirstTimes(a.rawData);
+        const foundB = findFirstTimes(b.rawData);
+        if (foundA.GPSU && foundB.GPSU) return foundA.GPSU - foundB.GPSU;
+        if (foundA.STMP && foundB.STMP) return foundA.STMP - foundB.STMP;
+        return 0;
+      });
+    }
+
     timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
 
