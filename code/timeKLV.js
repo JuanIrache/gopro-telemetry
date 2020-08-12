@@ -222,11 +222,13 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
           return { date: null, duration: null };
         })();
         //Choose initial date in case it's necessary
-        const dInitialDate = (() => {
-          if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
-          if (mp4Times.length && mp4Times[0] != null) return mp4Times[0].date;
-          return 0;
-        })();
+        const dInitialDate =
+          initialDate ||
+          (() => {
+            if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
+            if (mp4Times.length && mp4Times[0] != null) return mp4Times[0].date;
+            return 0;
+          })();
 
         //Create empty stream if needed for timing purposes
         const dummyStream = {
