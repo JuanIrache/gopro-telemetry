@@ -184,7 +184,7 @@ async function process(input, opts) {
 
     //Interpret all
     const interpretedArr = [];
-    let initialDate;
+    let gpsDate, mp4Date;
 
     for (let i = 0; i < parsed.length; i++) {
       const p = parsed[i];
@@ -195,7 +195,7 @@ async function process(input, opts) {
         offset = getOffset({ interpretedArr, i, opts, timing });
       }
 
-      const timeMeta = { initialDate, offset };
+      const timeMeta = { gpsDate, mp4Date, offset };
 
       interpreted = await interpretOne({
         timing: timing[i],
@@ -204,8 +204,11 @@ async function process(input, opts) {
         timeMeta
       });
 
-      if (!initialDate && timeMeta.initialDate) {
-        initialDate = timeMeta.initialDate;
+      if (!gpsDate && timeMeta.gpsDate) {
+        gpsDate = timeMeta.gpsDate;
+      }
+      if (!mp4Date && timeMeta.mp4Date) {
+        mp4Date = timeMeta.mp4Date;
       }
 
       interpretedArr.push(interpreted);

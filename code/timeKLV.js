@@ -27,7 +27,8 @@ function toDate(d) {
 }
 
 //Create list of GPS dates, times and duration for each packet of samples
-async function fillGPSTime(klv, options, initialDate) {
+async function fillGPSTime(klv, options, timeMeta) {
+  let { gpsDate } = timeMeta;
   let res = [];
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'MP4' || options.mp4header) return res;
@@ -55,17 +56,21 @@ async function fillGPSTime(klv, options, initialDate) {
     }
 
     if (date != null) {
-      //Set date for first packet
-      if (initialDate == null) initialDate = date;
-      partialRes = { date };
-      // Assign duration for previous pack. The last one will lack it
-      if (res.length && res[res.length - 1] && res[res.length - 1].date)
-        res[res.length - 1].duration =
-          partialRes.date - res[res.length - 1].date;
+      if (gpsDate == null) {
+        gpsDate = date;
+        // Save initial date for future use
+        timeMeta.gpsDate = gpsDate;
+      }
     }
+    partialRes = { date };
+    // Assign duration for previous pack. The last one will lack it
+    if (res.length && res[res.length - 1] && res[res.length - 1].date) {
+      res[res.length - 1].duration = partialRes.date - res[res.length - 1].date;
+    }
+
     if (partialRes) {
       //Deduce starting time from date and push result
-      partialRes.cts = partialRes.date - initialDate;
+      partialRes.cts = partialRes.date - gpsDate;
       res.push(partialRes);
     } else {
       res.push(null);
@@ -107,7 +112,7 @@ async function fillGPSTime(klv, options, initialDate) {
       if (res[i - 1].duration != null) {
         // Deduce date and starting time form previous date and duration
         res[i] = { date: res[i - 1].date + res[i - 1].duration };
-        res[i].cts = res[i].date - initialDate;
+        res[i].cts = res[i].date - gpsDate;
         missingDurations.push(i);
       }
     }
@@ -128,7 +133,7 @@ async function fillGPSTime(klv, options, initialDate) {
 
 //Create date, time, duration list based on mp4 date and timing data
 async function fillMP4Time(klv, timing, options, timeMeta) {
-  let { offset, initialDate } = timeMeta;
+  let { offset, mp4Date } = timeMeta;
   let res = [];
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'GPS' || options.mp4header) return res;
@@ -144,9 +149,9 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
   //Set the initial date, the only one provided by mp4
   if (typeof timing.start != 'object') timing.start = new Date(timing.start);
 
-  if (!initialDate) {
-    initialDate = timing.start.getTime();
-    timeMeta.initialDate = initialDate;
+  if (!mp4Date) {
+    mp4Date = timing.start.getTime();
+    timeMeta.mp4Date = mp4Date;
   }
   klv.DEVC.forEach((d, i) => {
     //Will contain the timing data about the packet
@@ -169,7 +174,7 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
     }
 
     //Deduce the date by adding the starting time to the initial date, and push
-    partialRes.date = initialDate + partialRes.cts;
+    partialRes.date = mp4Date + partialRes.cts;
 
     res.push(partialRes);
     //Delete GPSU
@@ -195,14 +200,14 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 
 //Assign time data to each sample
 async function timeKLV(klv, timing, options, timeMeta = {}) {
-  const { initialDate, offset } = timeMeta;
+  const { offset } = timeMeta;
   //Copy the klv data
   let result = JSON.parse(JSON.stringify(klv));
   try {
     //If valid data
     if (result.DEVC && result.DEVC.length) {
       //Gather and deduce both types of timing info
-      const gpsTimes = await fillGPSTime(result, options, initialDate);
+      const gpsTimes = await fillGPSTime(result, options, timeMeta);
       const mp4Times = await fillMP4Time(result, timing, options, timeMeta);
 
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
@@ -226,13 +231,11 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
           return { date: null, duration: null };
         })();
         //Choose initial date in case it's necessary
-        const dInitialDate =
-          initialDate ||
-          (() => {
-            if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
-            if (mp4Times.length && mp4Times[0] != null) return mp4Times[0].date;
-            return 0;
-          })();
+        const dInitialDate = (() => {
+          if (gpsTimes.length && timeMeta.gpsDate) return timeMeta.gpsDate;
+          if (mp4Times.length && timeMeta.mp4Date) return timeMeta.mp4Date;
+          return 0;
+        })();
 
         //Create empty stream if needed for timing purposes
         const dummyStream = {
