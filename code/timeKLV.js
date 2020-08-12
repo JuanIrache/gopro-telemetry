@@ -143,7 +143,11 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 
   //Set the initial date, the only one provided by mp4
   if (typeof timing.start != 'object') timing.start = new Date(timing.start);
-  if (!initialDate) initialDate = timing.start.getTime();
+
+  if (!initialDate) {
+    initialDate = timing.start.getTime();
+    timeMeta.initialDate = initialDate;
+  }
   klv.DEVC.forEach((d, i) => {
     //Will contain the timing data about the packet
     let partialRes = {};
@@ -222,11 +226,13 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
           return { date: null, duration: null };
         })();
         //Choose initial date in case it's necessary
-        const dInitialDate = (() => {
-          if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
-          if (mp4Times.length && mp4Times[0] != null) return mp4Times[0].date;
-          return 0;
-        })();
+        const dInitialDate =
+          initialDate ||
+          (() => {
+            if (gpsTimes.length && gpsTimes[0] != null) return gpsTimes[0].date;
+            if (mp4Times.length && mp4Times[0] != null) return mp4Times[0].date;
+            return 0;
+          })();
 
         //Create empty stream if needed for timing purposes
         const dummyStream = {
@@ -323,7 +329,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                   timoDur = (100 * timoDiff) / s[fourCC].length;
                 }
                 //And compensate date
-                currDate = currDate - s.TIMO * 1000;
+                currDate -= s.TIMO * 1000;
                 delete s.TIMO;
               }
 
