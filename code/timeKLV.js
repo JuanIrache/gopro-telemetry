@@ -143,7 +143,11 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 
   //Set the initial date, the only one provided by mp4
   if (typeof timing.start != 'object') timing.start = new Date(timing.start);
-  if (!initialDate) initialDate = timing.start.getTime();
+
+  if (!initialDate) {
+    initialDate = timing.start.getTime();
+    timeMeta.initialDate = initialDate;
+  }
   klv.DEVC.forEach((d, i) => {
     //Will contain the timing data about the packet
     let partialRes = {};

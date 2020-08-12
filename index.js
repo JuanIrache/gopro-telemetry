@@ -18,7 +18,6 @@ const toCsv = require('./code/presets/toCsv');
 const toMgjson = require('./code/presets/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
 const breathe = require('./code/utils/breathe');
-const getInitialDate = require('./code/utils/getInitialDate');
 const getOffset = require('./code/utils/getOffset');
 const findFirstTimes = require('./code/utils/findFirstTimes');
 
@@ -193,17 +192,22 @@ async function process(input, opts) {
       let interpreted;
       let offset = 0;
       if (i > 0) {
-        initialDate = getInitialDate({ interpretedArr, initialDate });
         offset = getOffset({ interpretedArr, i, opts, timing });
       }
 
       const timeMeta = { initialDate, offset };
+
       interpreted = await interpretOne({
         timing: timing[i],
         parsed: p,
         opts,
         timeMeta
       });
+
+      if (!initialDate && timeMeta.initialDate) {
+        initialDate = timeMeta.initialDate;
+      }
+
       interpretedArr.push(interpreted);
     }
     progress(opts, 0.3);
