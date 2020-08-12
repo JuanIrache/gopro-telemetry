@@ -325,7 +325,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                   timoDur = (100 * timoDiff) / s[fourCC].length;
                 }
                 //And compensate date
-                currDate = currDate - s.TIMO * 1000;
+                currDate -= s.TIMO * 1000;
                 delete s.TIMO;
               }
 
