@@ -82,6 +82,19 @@ async function getGPGS5Data(data) {
           <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
               ${(ele + time + fix + hdop + geoidHeight + cmt).trim()}
           </trkpt>`;
+              if (i === 0 && s.cts > 0) {
+                // If first sample missing, fake it for better sync
+                const firstDate = new Date(
+                  s.date.getTime() - s.cts
+                ).toISOString();
+                const firstTime = `
+            <time>${firstDate}</time>`;
+                const fakeFirst = `
+            <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
+                ${(ele + firstTime + fix + hdop + geoidHeight + cmt).trim()}
+            </trkpt>`;
+                inner += `${fakeFirst}`;
+              }
               //Add it to samples
               inner += `${partial}`;
             }

@@ -62,6 +62,19 @@ async function getGPGS5Data(data) {
             <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
                 ${(ele + time + geoidHeight).trim()}
             </trkpt>`;
+              if (i === 0 && s.cts > 0) {
+                // If first sample missing, fake it for better sync
+                const firstDate = new Date(s.date.getTime() - s.cts)
+                  .toISOString()
+                  .replace(/\.(\d{3})Z$/, 'Z');
+                const firstTime = `
+                <time>${firstDate}</time>`;
+                const fakeFirst = `
+                <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
+                    ${(ele + firstTime + geoidHeight).trim()}
+                </trkpt>`;
+                inner += `${fakeFirst}`;
+              }
               //Add it to samples
               inner += `${partial}`;
             }
@@ -136,6 +149,24 @@ async function getACCLData(data) {
               <trkpt lat="0" lon="0">
                   ${(time + acceleration).trim()}
               </trkpt>`;
+              if (i === 0 && s.cts > 0) {
+                // If first sample missing, fake it for better sync
+                const firstDate = new Date(s.date.getTime() - s.cts);
+                const firstTime = `
+                <time>${firstDate}</time>`;
+                const firstAccel = `
+                <extensions>
+                  <gpxacc:AccelerationExtension>
+                    <gpxacc:accel offset="0" x="0" y="0" z="0"/>
+                    <gpxacc:accel offset="0" x="0" y="0" z="0"/>
+                  </gpxacc:AccelerationExtension>
+                </extensions>`;
+                const fakeFirst = `
+                <trkpt lat="0" lon="0">
+                  ${(firstTime + firstAccel).trim()}
+              </trkpt>`;
+                inner += `${fakeFirst}`;
+              }
               //Add it to samples
               inner += `${partial}`;
             }
