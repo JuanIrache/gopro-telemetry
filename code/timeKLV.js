@@ -134,6 +134,7 @@ async function fillGPSTime(klv, options, timeMeta) {
 //Create date, time, duration list based on mp4 date and timing data
 async function fillMP4Time(klv, timing, options, timeMeta) {
   let { offset, mp4Date } = timeMeta;
+  if (!offset) offset = 0;
   let res = [];
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'GPS' || options.mp4header) return res;
@@ -200,7 +201,8 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 
 //Assign time data to each sample
 async function timeKLV(klv, timing, options, timeMeta = {}) {
-  const { offset } = timeMeta;
+  let { offset } = timeMeta;
+  if (!offset) offset = 0;
   //Copy the klv data
   let result = JSON.parse(JSON.stringify(klv));
   try {
@@ -246,6 +248,9 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
 
         if (d.STRM && options.dateStream) d.STRM.push(dummyStream);
 
+        // Only use STMP when clearly one file or consecutive files
+        let skipSTMP = false;
+
         //Loop streams if present
         (d.STRM || []).forEach((s, ii) => {
           //If group of samples found
@@ -261,18 +266,29 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
               let currCts;
               let currDate;
 
+              if (ii === 0) {
+                // Evaluate convenience of STMP on first sample
+                // Only use timestamps if not removing gap
+                if (options.removeGaps) skipSTMP = true;
+                // If no mp4Times, don't bother
+                else if (!mp4Times.length) skipSTMP = true;
+                // Arbitrarily, anything outside 2 seconds from the current offset should not use STMP either
+                else if (s.STMP / 1000 > mp4Times[i].cts + 1000 * 2) {
+                  skipSTMP = true;
+                }
+                // (It's either a non-initial isolated file or a file not directly consecutive in the series)
+                else if (s.STMP / 1000 < mp4Times[i].cts - 1000 * 2) {
+                  skipSTMP = true;
+                }
+              }
+
               //Use sDuration and cts from microsecond timestamps if available
               let microCts = false;
               let microDuration = false;
               let microDate = false;
               let microDateDuration = false;
               if (s.STMP != null) {
-                // Only use timestamps if not removing gaps and not extracting an isolated video that is not the first one
-                // Arbitrarily use 10 seconds to identify a video that is not the first
-                if (
-                  !options.removeGaps &&
-                  !(s.STMP / 1000 > 1000 * 10 && !offset)
-                ) {
+                if (!skipSTMP) {
                   currCts = s.STMP / 1000;
                   if (options.timeIn === 'MP4') {
                     //Use timeStamps for date if MP4 timing is selected
