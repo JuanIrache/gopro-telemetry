@@ -134,6 +134,7 @@ async function fillGPSTime(klv, options, timeMeta) {
 //Create date, time, duration list based on mp4 date and timing data
 async function fillMP4Time(klv, timing, options, timeMeta) {
   let { offset, mp4Date } = timeMeta;
+  if (!offset) offset = 0;
   let res = [];
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'GPS' || options.mp4header) return res;
