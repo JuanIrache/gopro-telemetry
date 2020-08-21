@@ -18,9 +18,9 @@ module.exports = async interpretedArr => {
               if (!interpreted[device].streams[stream].samples) {
                 interpreted[device].streams[stream].samples = [];
               }
-              interpreted[device].streams[stream].samples.push(
-                ...interpretedArr[i][device].streams[stream].samples
-              );
+              interpretedArr[i][device].streams[stream].samples.forEach(s => {
+                interpreted[device].streams[stream].samples.push(s);
+              });
             }
           }
         }
