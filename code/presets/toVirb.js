@@ -51,13 +51,15 @@ async function getGPGS5Data(data) {
                 } catch (error) {
                   time = `
                 <time>${s.date}</time>`;
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Virb',
-                      error.message || error,
-                      s.date
-                    )
-                  );
+                  if (i === 0) {
+                    setImmediate(() =>
+                      console.error(
+                        'Error creating Virb',
+                        error.message || error,
+                        s.date
+                      )
+                    );
+                  }
                 }
               }
               //Create sample string
@@ -144,13 +146,15 @@ async function getACCLData(data) {
                 } catch (error) {
                   time = `
                   <time>${s.date}</time>`;
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Virb 3',
-                      error.message || error,
-                      s.date
-                    )
-                  );
+                  if (i === 0) {
+                    setImmediate(() =>
+                      console.error(
+                        'Error creating Virb 3',
+                        error.message || error,
+                        s.date
+                      )
+                    );
+                  }
                 }
               }
 

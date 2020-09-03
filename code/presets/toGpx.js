@@ -71,13 +71,16 @@ async function getGPGS5Data(data) {
                 } catch (error) {
                   time = `
               <time>${s.date}</time>`;
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Gpx',
-                      error.message || error,
-                      s.date
-                    )
-                  );
+                  if (i === 0) {
+                    // Report only once
+                    setImmediate(() =>
+                      console.error(
+                        'Error creating Gpx',
+                        error.message || error,
+                        s.date
+                      )
+                    );
+                  }
                 }
               }
               //Create sample string

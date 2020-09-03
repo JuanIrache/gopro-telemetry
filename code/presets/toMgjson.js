@@ -327,20 +327,20 @@ async function convertSamples(data) {
                   //If dateStream, save date as string instead of dummy value
                   if (stream === 'dateStream') {
                     if (typeof s.date != 'object') s.date = new Date(s.date);
-                    try {
+                    if (!isNaN(s.date)) {
                       s.value = s.date.toISOString();
-                    } catch (error) {
-                      s.value = s.date;
-                      setImmediate(() =>
-                        console.error(
-                          'Error creating Mgjson',
-                          error.message || error,
-                          s.date
-                        )
-                      );
+                    } else if (typeof s.date === 'string') {
+                      s.value = new Date(s.date).toISOString();
+                    } else {
+                      s.value = 'undefined';
+                      // only report once
+                      if (i === 0) {
+                        setImmediate(() =>
+                          console.error('Error creating Mgjson date', s)
+                        );
+                      }
                     }
                   }
-                  if (!s.value) s.value = 'undefined';
                   sample.value = {
                     length: s.value.length.toString(),
                     str: s.value
