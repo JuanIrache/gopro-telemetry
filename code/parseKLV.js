@@ -15,12 +15,14 @@ function findLastCC(data, start, end) {
       if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
       //But don't process it, go to next
       length = ks.size * ks.repeat;
-    } catch (error) {}
+    } catch (error) {
+      setImmediate(() => console.error(error));
+    }
     const reached = start + 8 + (length >= 0 ? length : 0);
     //Align to 32 bits
     while (start < reached) start += 4;
   }
-  return ks.fourCC;
+  if (ks) return ks.fourCC;
 }
 
 //is it better to slice the data when recursing? Or just pass indices? we have to slice anyway when parsing
