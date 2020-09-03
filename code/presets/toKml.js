@@ -66,13 +66,16 @@ async function getGPGS5Data(data) {
                             <TimeStamp>
                                 <when>${s.date}</when>
                             </TimeStamp>`;
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Kml',
-                      error.message || error,
-                      s.date
-                    )
-                  );
+                  if (i === 0) {
+                    // Report once
+                    setImmediate(() =>
+                      console.error(
+                        'Error creating Kml',
+                        error.message || error,
+                        s.date
+                      )
+                    );
+                  }
                 }
               }
               //Prepare coordinates
