@@ -59,20 +59,22 @@ async function createCSV(data) {
               let row = [];
               //Add time
               if (s.cts != null) row.push(s.cts);
-              if (s.date != null && typeof s.date != 'object')
-                s.date = new Date(s.date);
               if (s.date != null) {
+                if (typeof s.date != 'object') s.date = new Date(s.date);
                 try {
                   row.push(s.date.toISOString());
                 } catch (error) {
                   row.push(s.date);
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Csv',
-                      error.message || error,
-                      s.date
-                    )
-                  );
+                  if (i === 0) {
+                    //Only report error once
+                    setImmediate(() =>
+                      console.error(
+                        'Error creating Csv',
+                        error.message || error,
+                        s.date
+                      )
+                    );
+                  }
                 }
               }
               //Add all values
