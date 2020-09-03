@@ -340,6 +340,7 @@ async function convertSamples(data) {
                       );
                     }
                   }
+                  if (!s.value) s.value = 'undefined';
                   sample.value = {
                     length: s.value.length.toString(),
                     str: s.value
