@@ -331,9 +331,12 @@ async function convertSamples(data) {
                       s.value = s.date.toISOString();
                     } catch (error) {
                       s.value = s.date;
-                      setImmediate(
-                        () => console.error(error.message || error),
-                        s.date
+                      setImmediate(() =>
+                        console.error(
+                          'Error creating Mgjson',
+                          error.message || error,
+                          s.date
+                        )
                       );
                     }
                   }

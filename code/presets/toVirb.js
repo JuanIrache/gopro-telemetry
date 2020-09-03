@@ -51,9 +51,12 @@ async function getGPGS5Data(data) {
                 } catch (error) {
                   time = `
                 <time>${s.date}</time>`;
-                  setImmediate(
-                    () => console.error(error.message || error),
-                    s.date
+                  setImmediate(() =>
+                    console.error(
+                      'Error creating Virb',
+                      error.message || error,
+                      s.date
+                    )
                   );
                 }
               }
@@ -64,9 +67,24 @@ async function getGPGS5Data(data) {
             </trkpt>`;
               if (i === 0 && s.cts > 0) {
                 // If first sample missing, fake it for better sync
-                const firstDate = new Date(s.date.getTime() - s.cts)
-                  .toISOString()
-                  .replace(/\.(\d{3})Z$/, 'Z');
+                let firstDate;
+                try {
+                  firstDate = new Date(s.date.getTime() - s.cts)
+                    .toISOString()
+                    .replace(/\.(\d{3})Z$/, 'Z');
+                } catch (error) {
+                  firstDate = new Date(s.date - s.cts)
+                    .toISOString()
+                    .replace(/\.(\d{3})Z$/, 'Z');
+                  setImmediate(() =>
+                    console.error(
+                      'Error creating Virb 2',
+                      error.message || error,
+                      s.date,
+                      s.cts
+                    )
+                  );
+                }
                 const firstTime = `
                 <time>${firstDate}</time>`;
                 const fakeFirst = `
@@ -126,9 +144,12 @@ async function getACCLData(data) {
                 } catch (error) {
                   time = `
                   <time>${s.date}</time>`;
-                  setImmediate(
-                    () => console.error(error.message || error),
-                    s.date
+                  setImmediate(() =>
+                    console.error(
+                      'Error creating Virb 3',
+                      error.message || error,
+                      s.date
+                    )
                   );
                 }
               }
@@ -151,7 +172,20 @@ async function getACCLData(data) {
               </trkpt>`;
               if (i === 0 && s.cts > 0) {
                 // If first sample missing, fake it for better sync
-                const firstDate = new Date(s.date.getTime() - s.cts);
+                let firstDate;
+                try {
+                  firstDate = new Date(s.date.getTime() - s.cts).toISOString();
+                } catch (error) {
+                  firstDate = new Date(s.date - s.cts).toISOString();
+                  setImmediate(() =>
+                    console.error(
+                      'Error creating Virb 3',
+                      error.message || error,
+                      s.date,
+                      s.cts
+                    )
+                  );
+                }
                 const firstTime = `
                 <time>${firstDate}</time>`;
                 const firstAccel = `
