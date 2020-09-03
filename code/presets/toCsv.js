@@ -66,9 +66,12 @@ async function createCSV(data) {
                   row.push(s.date.toISOString());
                 } catch (error) {
                   row.push(s.date);
-                  setImmediate(
-                    () => console.error(error.message || error),
-                    s.date
+                  setImmediate(() =>
+                    console.error(
+                      'Error creating Csv',
+                      error.message || error,
+                      s.date
+                    )
                   );
                 }
               }
