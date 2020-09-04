@@ -17,6 +17,7 @@ const toGeojson = require('./code/presets/toGeojson');
 const toCsv = require('./code/presets/toCsv');
 const toMgjson = require('./code/presets/toMgjson');
 const mergeInterpretedSources = require('./code/mergeInterpretedSources');
+const filterBadValues = require('./code/filterBadValues');
 const breathe = require('./code/utils/breathe');
 const getOffset = require('./code/utils/getOffset');
 const findFirstTimes = require('./code/utils/findFirstTimes');
@@ -263,6 +264,12 @@ async function process(input, opts) {
   //Add framerate to top level
   if (timing && timing.frameDuration != null)
     interpreted['frames/second'] = 1 / timing.frameDuration;
+
+  progress(opts, 0.8);
+
+  await breathe();
+
+  interpreted = filterBadValues(interpreted);
 
   progress(opts, 0.9);
 
