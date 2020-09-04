@@ -326,19 +326,21 @@ async function convertSamples(data) {
                   //Save anything else as (padded)string
                   //If dateStream, save date as string instead of dummy value
                   if (stream === 'dateStream') {
-                    if (typeof s.date != 'object') s.date = new Date(s.date);
-                    if (!isNaN(s.date)) {
-                      s.value = s.date.toISOString();
-                    } else if (typeof s.date === 'string') {
-                      s.value = new Date(s.date).toISOString();
+                    if (s.date != null) {
+                      if (typeof s.date != 'object') s.date = new Date(s.date);
+                      if (!isNaN(s.date)) {
+                        s.value = s.date.toISOString();
+                      } else {
+                        s.value = new Date(s.date).toISOString();
+                      }
                     } else {
-                      s.value = 'undefined';
                       // only report once
                       if (i === 0) {
                         setImmediate(() =>
                           console.error('Error creating Mgjson date', s)
                         );
                       }
+                      s.value = 'undefined';
                     }
                   }
                   sample.value = {
