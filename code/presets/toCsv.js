@@ -60,11 +60,12 @@ async function createCSV(data) {
               //Add time
               if (s.cts != null) row.push(s.cts);
               if (s.date != null) {
-                if (typeof s.date != 'object') s.date = new Date(s.date);
+                let processedDate = s.date;
+                if (typeof s.date != 'object') processedDate = new Date(s.date);
                 try {
-                  row.push(s.date.toISOString());
+                  row.push(processedDate.toISOString());
                 } catch (error) {
-                  row.push(s.date);
+                  row.push(processedDate);
                   if (i === 0) {
                     //Only report error once
                     setImmediate(() =>
@@ -76,6 +77,7 @@ async function createCSV(data) {
                     );
                   }
                 }
+                s.date = processedDate;
               }
               //Add all values
               s.value.forEach(v => {
