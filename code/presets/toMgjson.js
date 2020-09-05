@@ -333,15 +333,7 @@ async function convertSamples(data) {
                       } else {
                         s.value = new Date(s.date).toISOString();
                       }
-                    } else {
-                      // only report once
-                      if (i === 0) {
-                        setImmediate(() =>
-                          console.error('Error creating Mgjson date', s)
-                        );
-                      }
-                      s.value = 'undefined';
-                    }
+                    } else s.value = 'undefined';
                   }
                   sample.value = {
                     length: s.value.length.toString(),
