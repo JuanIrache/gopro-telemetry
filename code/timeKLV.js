@@ -33,6 +33,7 @@ async function fillGPSTime(klv, options, timeMeta) {
   //Ignore if timeIn selects the other time input
   if (options.timeIn === 'MP4' || options.mp4header) return res;
   let missingDates = [];
+
   klv.DEVC.forEach((d, i) => {
     //Object with partial result
     let partialRes;
@@ -61,11 +62,12 @@ async function fillGPSTime(klv, options, timeMeta) {
         // Save initial date for future use
         timeMeta.gpsDate = gpsDate;
       }
-    }
-    partialRes = { date };
-    // Assign duration for previous pack. The last one will lack it
-    if (res.length && res[res.length - 1] && res[res.length - 1].date) {
-      res[res.length - 1].duration = partialRes.date - res[res.length - 1].date;
+      partialRes = { date };
+      // Assign duration for previous pack. The last one will lack it
+      if (res.length && res[res.length - 1] && res[res.length - 1].date) {
+        res[res.length - 1].duration =
+          partialRes.date - res[res.length - 1].date;
+      }
     }
 
     if (partialRes) {
