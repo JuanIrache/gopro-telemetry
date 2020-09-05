@@ -48,18 +48,9 @@ async function getGPGS5Data(data) {
                 <time>${s.date
                   .toISOString()
                   .replace(/\.(\d{3})Z$/, 'Z')}</time>`;
-                } catch (error) {
+                } catch (e) {
                   time = `
                 <time>${s.date}</time>`;
-                  if (i === 0) {
-                    setImmediate(() =>
-                      console.error(
-                        'Error creating Virb',
-                        error.message || error,
-                        s.date
-                      )
-                    );
-                  }
                 }
               }
               //Create sample string
@@ -74,18 +65,10 @@ async function getGPGS5Data(data) {
                   firstDate = new Date(s.date.getTime() - s.cts)
                     .toISOString()
                     .replace(/\.(\d{3})Z$/, 'Z');
-                } catch (error) {
+                } catch (e) {
                   firstDate = new Date(s.date - s.cts)
                     .toISOString()
                     .replace(/\.(\d{3})Z$/, 'Z');
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Virb 2',
-                      error.message || error,
-                      s.date,
-                      s.cts
-                    )
-                  );
                 }
                 const firstTime = `
                 <time>${firstDate}</time>`;
@@ -143,18 +126,9 @@ async function getACCLData(data) {
                 try {
                   time = `
                   <time>${s.date.toISOString()}</time>`;
-                } catch (error) {
+                } catch (e) {
                   time = `
                   <time>${s.date}</time>`;
-                  if (i === 0) {
-                    setImmediate(() =>
-                      console.error(
-                        'Error creating Virb 3',
-                        error.message || error,
-                        s.date
-                      )
-                    );
-                  }
                 }
               }
 
@@ -179,16 +153,8 @@ async function getACCLData(data) {
                 let firstDate;
                 try {
                   firstDate = new Date(s.date.getTime() - s.cts).toISOString();
-                } catch (error) {
+                } catch (e) {
                   firstDate = new Date(s.date - s.cts).toISOString();
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Virb 3',
-                      error.message || error,
-                      s.date,
-                      s.cts
-                    )
-                  );
                 }
                 const firstTime = `
                 <time>${firstDate}</time>`;

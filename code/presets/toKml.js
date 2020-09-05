@@ -61,21 +61,11 @@ async function getGPGS5Data(data) {
                             <TimeStamp>
                                 <when>${s.date.toISOString()}</when>
                             </TimeStamp>`;
-                } catch (error) {
+                } catch (e) {
                   time = `
                             <TimeStamp>
                                 <when>${s.date}</when>
                             </TimeStamp>`;
-                  if (i === 0) {
-                    // Report once
-                    setImmediate(() =>
-                      console.error(
-                        'Error creating Kml',
-                        error.message || error,
-                        s.date
-                      )
-                    );
-                  }
                 }
               }
               //Prepare coordinates

@@ -71,16 +71,6 @@ async function getGPGS5Data(data) {
                 } catch (error) {
                   time = `
               <time>${s.date}</time>`;
-                  if (i === 0) {
-                    // Report only once
-                    setImmediate(() =>
-                      console.error(
-                        'Error creating Gpx',
-                        error.message || error,
-                        s.date
-                      )
-                    );
-                  }
                 }
               }
               //Create sample string
@@ -93,16 +83,7 @@ async function getGPGS5Data(data) {
                 let firstDate;
                 try {
                   firstDate = new Date(s.date.getTime() - s.cts).toISOString();
-                } catch (error) {
-                  setImmediate(() =>
-                    console.error(
-                      'Error creating Gpx 2',
-                      error.message || error,
-                      s.date,
-                      s.cts
-                    )
-                  );
-                }
+                } catch (e) {}
                 const firstTime = `
             <time>${firstDate}</time>`;
                 const fakeFirst = `

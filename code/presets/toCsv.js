@@ -64,18 +64,8 @@ async function createCSV(data) {
                 if (typeof s.date != 'object') processedDate = new Date(s.date);
                 try {
                   row.push(processedDate.toISOString());
-                } catch (error) {
+                } catch (e) {
                   row.push(processedDate);
-                  if (i === 0) {
-                    //Only report error once
-                    setImmediate(() =>
-                      console.error(
-                        'Error creating Csv',
-                        error.message || error,
-                        s.date
-                      )
-                    );
-                  }
                 }
                 s.date = processedDate;
               }
