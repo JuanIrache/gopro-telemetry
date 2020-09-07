@@ -90,8 +90,8 @@ async function parseKLV(
           if (length === 0) partialResult.push(undefined);
           //Log unknown types for future implementation
           else if (!types[ks.type]) unknown.add(ks.type);
-          //Recursive call to parse nested data
-          else if (types[ks.type].nested) {
+          //Recursive call to parse nested data, only if data is long enough to contain them
+          else if (types[ks.type].nested && data.length >= start + 8 + length) {
             const parsed = await parseKLV(
               data,
               options,
