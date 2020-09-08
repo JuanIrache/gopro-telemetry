@@ -29,7 +29,7 @@ module.exports = async function (
     for (const d of result.DEVC || []) {
       const length = result.DEVC.length;
       //First loop to find a suitable value
-      for (let i = (d.STRM || []).length - 1; i >= 0; i--) {
+      for (let i = ((d || {}).STRM || []).length - 1; i >= 0; i--) {
         await breathe();
         //Mark for deletion streams that do not pass the test, but keep them for possible timing
         if (d.STRM[i].GPS5 && !approveStream(d.STRM[i]))
@@ -77,7 +77,7 @@ module.exports = async function (
   if (correction.value != null) {
     //Loop streams to make the height adjustments
     (result.DEVC || []).forEach(d => {
-      (d.STRM || []).forEach(s => {
+      ((d || {}).STRM || []).forEach(s => {
         //Find GPS data
         if (s.GPS5) {
           if (!ellipsoid) s.altitudeFix = correction.value;
