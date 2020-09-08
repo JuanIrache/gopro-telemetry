@@ -39,7 +39,7 @@ async function fillGPSTime(klv, options, timeMeta) {
     let partialRes;
     let date;
     //Loop strams if present
-    if (d.STRM && d.STRM.length) {
+    if (d != null && d.STRM && d.STRM.length) {
       for (const key in d.STRM) {
         //Find the GPSU date in the GPS5 stream
         if (d.STRM[key].GPSU != null) {
@@ -181,7 +181,7 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 
     res.push(partialRes);
     //Delete GPSU
-    if (d.STRM && d.STRM.length) {
+    if (d != null && d.STRM && d.STRM.length) {
       for (const key in d.STRM) {
         //Find the GPSU date in the GPS5 stream
         if (d.STRM[key].GPSU != null) {
