@@ -1,5 +1,11 @@
 const breathe = require('../utils/breathe');
 
+const fixes = {
+  0: 'none',
+  2: '2d',
+  3: '3d'
+};
+
 //Returns the GPS data as a string
 async function getGPGS5Data(data) {
   let frameRate;
@@ -39,7 +45,7 @@ async function getGPGS5Data(data) {
               for (const key in sticky) {
                 if (key === 'fix')
                   fix = `
-              <fix>${sticky[key]}</fix>`;
+              <fix>${fixes[sticky[key]] || 'none'}</fix>`;
                 else if (key === 'precision')
                   hdop = `
               <hdop>${sticky[key]}</hdop>`;
