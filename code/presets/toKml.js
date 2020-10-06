@@ -110,7 +110,7 @@ module.exports = async function (data, { name }) {
   const converted = await getGPGS5Data(data);
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://earth.google.com/kml/2.0">
+<kml xmlns="http://www.opengis.net/kml/2.2">
     <Document>
         <name>${name}</name>
         <description>${converted.description}</description>

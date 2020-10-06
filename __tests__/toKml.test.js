@@ -19,10 +19,10 @@ describe('Test KML', () => {
   test(`toKml should start with xml-kml format`, () => {
     expect(result.slice(0, 196)).toBe(
       `<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://earth.google.com/kml/2.0">
+<kml xmlns="http://www.opengis.net/kml/2.2">
     <Document>
         <name>undefined</name>
-        <description>Camera. 30 fps. GPS (Lat., Long., Alt., 2D s`
+        <description>Camera. 30 fps. GPS (Lat., Long., Alt., 2D sp`
     );
   });
 });
