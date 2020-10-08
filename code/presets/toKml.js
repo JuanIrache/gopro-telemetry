@@ -80,8 +80,8 @@ async function getGPGS5Data(data) {
               const partial = `
                         <Placemark>
                             ${cmt.trim()}
-                            ${altitudeMode.trim()}
                             <Point>
+                                ${altitudeMode.trim()}
                                 <coordinates>${coords.join(',')}</coordinates>
                             </Point>
                             ${time.trim()}
