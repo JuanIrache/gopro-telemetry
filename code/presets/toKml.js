@@ -50,22 +50,20 @@ async function getGPGS5Data(data) {
               //Create comment string
               if (partialSticky.length)
                 cmt = `
-                            <description>${partialSticky.join(
-                              '; '
-                            )}</description>`;
+            <description>${partialSticky.join('; ')}</description>`;
               //Set time if present
               if (s.date != null) {
                 if (typeof s.date != 'object') s.date = new Date(s.date);
                 try {
                   time = `
-                            <TimeStamp>
-                                <when>${s.date.toISOString()}</when>
-                            </TimeStamp>`;
+            <TimeStamp>
+                <when>${s.date.toISOString()}</when>
+            </TimeStamp>`;
                 } catch (e) {
                   time = `
-                            <TimeStamp>
-                                <when>${s.date}</when>
-                            </TimeStamp>`;
+            <TimeStamp>
+                <when>${s.date}</when>
+            </TimeStamp>`;
                 }
               }
               //Prepare coordinates
@@ -74,18 +72,18 @@ async function getGPGS5Data(data) {
               if (s.value.length > 2) {
                 coords.push(s.value[2]);
                 altitudeMode = `
-                            <altitudeMode>absolute</altitudeMode>`;
+            <altitudeMode>absolute</altitudeMode>`;
               }
               //Create sample string
               const partial = `
-                        <Placemark>
-                            ${cmt.trim()}
-                            <Point>
-                                ${altitudeMode.trim()}
-                                <coordinates>${coords.join(',')}</coordinates>
-                            </Point>
-                            ${time.trim()}
-                        </Placemark>`;
+        <Placemark>
+            ${cmt.trim()}
+            <Point>
+                ${altitudeMode.trim()}
+                <coordinates>${coords.join(',')}</coordinates>
+            </Point>
+            ${time.trim()}
+        </Placemark>`;
               //Add it to samples
               inner += `${partial}`;
             }
@@ -110,9 +108,13 @@ module.exports = async function (data, { name }) {
   const converted = await getGPGS5Data(data);
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
     <Document>
         <name>${name}</name>
+        <atom:author>
+            <atom:name>gopro-telemetry by Juan Irache</atom:name>
+        </atom:author>
+        <atom:link href="https://github.com/JuanIrache/gopro-telemetry"/>
         <description>${converted.description}</description>
         ${converted.inner.trim()}
     </Document>
