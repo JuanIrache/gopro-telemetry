@@ -2,7 +2,7 @@
 
 Parses telemetry from the GPMF track in GoPro cameras (Hero5 and later).
 
-Created for the [GoPro Telemetry Extractor](https://goprotelemetryextractor.com/free).
+Created for [Telemetry Overlay](https://goprotelemetryextractor.com/telemetry-overlay-gps-video-sensors) and the [Telemetry Extractor for GoPro](https://goprotelemetryextractor.com/free).
 
 Here's a [gallery with cool uses of the GoPro telemetry](https://goprotelemetryextractor.com/gallery).
 
