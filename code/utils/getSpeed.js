@@ -22,6 +22,7 @@ module.exports = (from, to) => {
   if (!from) return 0;
   const t1 = from.date / 1000;
   const t2 = to.date / 1000;
+  if (!from.value || !to.value) return null;
   const [lat1, lon1, ele1] = from.value;
   const [lat2, lon2, ele2] = to.value;
 
