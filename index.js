@@ -9,6 +9,7 @@ const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
 const processGPS5 = require('./code/processGPS5');
+const filterWrongSpeed = require('./code/filterWrongSpeed');
 const presetsOpts = require('./code/data/presetsOptions');
 const toGpx = require('./code/presets/toGpx');
 const toVirb = require('./code/presets/toVirb');
@@ -77,6 +78,17 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
   for (const key in timed) {
     await breathe();
     merged[key] = await mergeStream(timed[key], opts);
+  }
+
+  if (opts.WrongSpeed != null) {
+    for (const key in merged) {
+      if (merged[key].streams.GPS5) {
+        merged[key].streams.GPS5.samples = filterWrongSpeed(
+          merged[key].streams.GPS5.samples,
+          opts.WrongSpeed
+        );
+      }
+    }
   }
 
   return merged;
