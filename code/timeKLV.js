@@ -206,7 +206,12 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
   let { offset } = timeMeta;
   if (!offset) offset = 0;
   //Copy the klv data
-  let result = JSON.parse(JSON.stringify(klv));
+  let result;
+  try {
+    result = JSON.parse(JSON.stringify(klv));
+  } catch (error) {
+    result = klv;
+  }
   try {
     //If valid data
     if (result.DEVC && result.DEVC.length) {

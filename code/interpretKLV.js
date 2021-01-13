@@ -6,7 +6,9 @@ async function interpretKLV(klv, options) {
   let result;
   try {
     result = JSON.parse(JSON.stringify(klv));
-  } catch (e) {}
+  } catch (e) {
+    result = klv;
+  }
 
   if (result != null && result.interpretSamples) {
     const toInterpret = ['SCAL', 'altitudeFix', 'ORIN', 'ORIO', 'MTRX', 'TYPE'];

@@ -20,7 +20,12 @@ module.exports = async function (
   };
 
   //Copy the klv data
-  let result = JSON.parse(JSON.stringify(klv));
+  let result;
+  try {
+    result = JSON.parse(JSON.stringify(klv));
+  } catch (error) {
+    result = klv;
+  }
   //Store best correction value
   let correction = {};
   //Loop through packets of samples if correction or filtering needed
