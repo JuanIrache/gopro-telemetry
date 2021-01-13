@@ -15,7 +15,12 @@ function process2Vals(vals, prop, k) {
     );
     //If object (or more likely array) interpolate the sample properties recursively
   } else if (typeof vals[0] === 'object') {
-    let result = JSON.parse(JSON.stringify(vals[0]));
+    let result;
+    try {
+      result = JSON.parse(JSON.stringify(vals[0]));
+    } catch (error) {
+      result = vals[0];
+    }
     for (const key in result)
       result[key] = process2Vals([vals[0][key], vals[1][key]], prop);
     return result;
@@ -53,7 +58,12 @@ module.exports = async function (
   { groupTimes, timeOut, disableInterpolation, disableMerging }
 ) {
   //Copy input
-  let result = JSON.parse(JSON.stringify(klv));
+  let result;
+  try {
+    result = JSON.parse(JSON.stringify(klv));
+  } catch (error) {
+    result = klv;
+  }
   //Loop devices and streams
   for (const key in result) {
     if (result[key].streams) {

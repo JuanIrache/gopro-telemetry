@@ -4,7 +4,12 @@ const breathe = require('./utils/breathe');
 //Smoothens contrast between samples by averaging the specified number of them
 module.exports = async function (klv, { smooth, repeatSticky }) {
   //Copy input
-  let result = JSON.parse(JSON.stringify(klv));
+  let result;
+  try {
+    result = JSON.parse(JSON.stringify(klv));
+  } catch (error) {
+    result = klv;
+  }
   //Loop devices and streams
   for (const key in result) {
     if (result[key].streams) {
