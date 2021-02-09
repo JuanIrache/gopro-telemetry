@@ -11,13 +11,15 @@ module.exports = (samples, maxSpeed) => {
       const speed = getSpeed(lastSample, sample);
       if (speed != null && speed < destination.speed) {
         destination = { track: i, speed };
+        break;
       }
     }
-    if (destination.track == null) tracks.push([sample]);
-    else tracks[destination.track].push(sample);
+    if (destination.track == null) {
+      // prevent infinite tracks
+      if (tracks.length < 15) tracks.push([sample]);
+    } else tracks[destination.track].push(sample);
+    // Give priority to the longest one
+    tracks.sort((a, b) => b.length - a.length);
   }
-  return tracks.reduce(
-    (best, track) => (track.length > best.length ? track : best),
-    []
-  );
+  return tracks[0] || [];
 };
