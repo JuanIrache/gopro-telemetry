@@ -120,6 +120,29 @@ async function fillGPSTime(klv, options, timeMeta) {
     }
   });
 
+  // Fill initial, non fixed dates
+  let lastMissing = -1;
+  while (res[lastMissing + 1] == null && lastMissing < res.length)
+    lastMissing++;
+  if (lastMissing >= 0 && res.length > lastMissing + 2) {
+    const avgDuration =
+      (res.slice(-1)[0].date - res[lastMissing + 1].date) /
+      (res.length - (lastMissing + 1));
+    while (lastMissing >= 0) {
+      const nextGood = res[lastMissing + 1];
+      res[lastMissing] = {
+        date: nextGood.date - avgDuration,
+        cts: nextGood.cts - avgDuration,
+        duration: avgDuration
+      };
+      lastMissing--;
+    }
+  }
+
+  // Fix negative CTS
+  if (res[0] && res[0].cts < 0)
+    res = res.map(r => ({ ...r, cts: r.cts - res[0].cts }));
+
   //Fill missing durations
   missingDurations.forEach(i => {
     if (res[i + 1] && res[i + 1].date)
