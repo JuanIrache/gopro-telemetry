@@ -16,7 +16,7 @@ async function toJSON(filename) {
         repeatSticky: true,
         repeatHeaders: true,
         GPS5Fix: 2,
-        GPSPrecision: 500
+        GPS5Precision: 500
       }
     );
     await writeFileAsync('./out.json', JSON.stringify(result));
