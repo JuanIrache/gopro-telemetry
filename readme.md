@@ -221,6 +221,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - Review CSV conversion (when only 1 sticky value, it does not print)
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
+- GroupTimes higher than 1000 and disableMerging seem not to work (produces large files)
 - Test rmrkToNameUnits
 - Test different approaches to consecutive file timing, including removeGaps
 - Test for WrongSpeed filter
