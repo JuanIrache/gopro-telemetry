@@ -217,6 +217,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## To-Do
 
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
+- removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
 - Add way to compensate for timewarp timing weirdness, either manually or automatically
 - Find out why Virb edit does not read recorded speed in their own extensions format. [Details here](https://forums.garmin.com/apps-software/mac-windows-software/f/virb-edit-windows/223058/virb-edit-not-reading-trackpointextension-speed)
