@@ -160,11 +160,15 @@ async function parseKLV(
           } else unknown.add(ks.type);
 
           //Try to define unknown data based on documentation
-          if (ks.fourCC === lastCC && generateStructArr(ks.fourCC)) {
+          if (
+            ks.fourCC === lastCC &&
+            generateStructArr(ks.fourCC, partialResult)
+          ) {
             //Create the string for inside the parenthesis, and remove nulls
-            let extraDescription = generateStructArr(ks.fourCC).filter(
-              v => v != null
-            );
+            let extraDescription = generateStructArr(
+              ks.fourCC,
+              partialResult
+            ).filter(v => v != null);
             let newValueArr = [];
             //Loop partial results
             partialResult.forEach((p, i) => {
@@ -172,7 +176,7 @@ async function parseKLV(
               let descCandidate = [];
               let newP = [];
               //Loop the keys in the description
-              generateStructArr(ks.fourCC).forEach((e, ii) => {
+              generateStructArr(ks.fourCC, partialResult).forEach((e, ii) => {
                 //For nested arrays
                 if (Array.isArray(p) && e != null) {
                   //Push label and value if not null (in order to get rid of unused data)

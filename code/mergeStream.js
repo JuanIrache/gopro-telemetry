@@ -143,13 +143,23 @@ async function mergeStreams(klv, options) {
                 let newSamples = {};
                 //Dummy id key if none is found
                 let idKey = 'id';
-                let parts;
+                let idPos = 0;
+                let idParts, firstIdParts;
                 if (description.name) {
                   //Remove ID from description if present
-                  parts = description.name.match(/\((\w+),?(.*)\)$/i);
-                  if (parts) {
-                    //Save id key for later
-                    idKey = idKeysTranslation(parts[1]);
+                  idParts = description.name.match(/(\(.*)\b(ID)\b,?(.*\))$/);
+                  if (idParts) {
+                    idPos = idParts[0]
+                      .replace(/\((.*)\)$/, '$1')
+                      .split(',')
+                      .indexOf('ID');
+                    idKey = 'ID';
+                  } else {
+                    firstIdParts = description.name.match(/\((\w+),?(.*)\)$/i);
+                    if (firstIdParts) {
+                      //Save id key for later
+                      idKey = idKeysTranslation(firstIdParts[1]);
+                    }
                   }
                 }
 
@@ -165,20 +175,24 @@ async function mergeStreams(klv, options) {
                     (ss.value || []).forEach((v, x) => {
                       if (v != null && Array.isArray(v)) {
                         headers[x] = idValuesTranslation(v[0], idKey);
-                        newSample.value.push(v[1]);
+                        newSample.value.push(v[idPos === 1 ? 0 : 1]);
                       }
                     });
 
                     newSamples.push(newSample);
                   }
 
-                  if (parts) {
+                  if (firstIdParts || idParts) {
                     //Add previously known units to description
                     description.name = description.name.replace(
                       /\((\w+),?(.*)\)$/i,
                       ` | ${idKey}`
                     );
-                    description.units = parts[2].split(',').map(p => p.trim());
+                    if (firstIdParts) {
+                      description.units = firstIdParts[2]
+                        .split(',')
+                        .map(p => p.trim());
+                    }
                   }
                   //Add new keys
                   description.name += ` (${headers.join(',')})`;
@@ -186,18 +200,24 @@ async function mergeStreams(klv, options) {
                   await completeSample({ samples: newSamples, description });
                 } else {
                   //Split stream in substreams
-                  if (parts)
+                  if (idParts) {
+                    description.name = description.name.replace(
+                      idParts[0],
+                      idParts[1] + idParts[3]
+                    );
+                  } else if (firstIdParts) {
                     description.name = description.name.replace(
                       /\((\w+),?(.*)\)$/i,
-                      `(${parts[2]})`
+                      `(${firstIdParts[2]})`
                     );
+                  }
 
                   for (let i = 0; i < samples.length; i++) {
                     const ss = samples[i] || {};
                     //Loop inner samples
                     (ss.value || []).forEach(v => {
                       if (v != null && Array.isArray(v)) {
-                        let id = v[0];
+                        let id = v[idPos];
                         //Assign first value as ID if not done
                         if (!newSamples[id]) newSamples[id] = [];
 
@@ -208,7 +228,10 @@ async function mergeStreams(klv, options) {
                         });
 
                         //And copy the rest
-                        thisSample.value = v.slice(1);
+                        thisSample.value = [
+                          ...v.slice(0, idPos),
+                          ...v.slice(idPos + 1)
+                        ];
                         //And simplify single values
                         if (
                           Array.isArray(thisSample.value) &&
