@@ -56,7 +56,7 @@ const stickyTranslations = {
 const forcedStruct = {
   FACE: [
     'ID,x,y,w,h', // HERO6
-    'ID,x,y,w,h,unused[17],smile', // HERO7
+    'ID,x,y,w,h,null,null,unknown,null,null,null,null,null,null,null,null,null,null,null,null,null,null,smile', // HERO7
     'ID,x,y,w,h,confidence %,smile %', // HERO8
     'ver,confidence %,ID,x,y,w,h,smile %, blink %' // HERO10
   ]
@@ -79,13 +79,9 @@ function generateStructArr(key, partial) {
   if (!str) return null;
   let resultingArr = [];
   str.split(',').forEach(w => {
-    if (/.+\[\d+\]$/.test(w)) {
-      for (let i = 0; i < w.match(/(.+)\[(\d+)\]$/)[2]; i++)
-        resultingArr.push(w.match(/(.+)\[(\d+)\]$/)[1]);
-    } else resultingArr.push(w);
+    resultingArr.push(w);
   });
-  // Should we really ignore this value? Need HERO7 samples to test
-  resultingArr = resultingArr.map(v => (v === 'unused' ? null : v));
+  resultingArr = resultingArr.map(v => (v === 'null' ? null : v));
   return resultingArr;
 }
 
