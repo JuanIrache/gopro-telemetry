@@ -192,6 +192,7 @@ async function parseKLV(
             });
 
             if (newValueArr.length) partialResult[0] = newValueArr;
+
             if (extraDescription.length) {
               const extraDescString = extraDescription.join(',');
               if (!/\(.+\)$/.test(result.STNM)) {

@@ -259,11 +259,11 @@ async function mergeStreams(klv, options) {
                       desc = newResults.description;
                     }
                     //Add samples to stream entry
-                    if (result.streams[fourCC + key])
+                    if (result.streams[fourCC + key]) {
                       result.streams[fourCC + key].samples.push(
                         ...newSamples[key]
                       );
-                    else {
+                    } else {
                       if (
                         Array.isArray(options.stream) &&
                         options.stream.includes(fourCC)
