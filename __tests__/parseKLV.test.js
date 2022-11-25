@@ -148,7 +148,7 @@ describe('Testing with hero7 file', () => {
     expect(result.DEVC[0].STRM[7].UNIF[8]).toBe(0.572265625);
   });
   test(`hero7 should have detailed face data (FACE)`, () => {
-    expect(result.DEVC[3].STRM[3].FACE[0][0][5]).toBe(68);
+    expect(result.DEVC[3].STRM[3].FACE[0][0][5]).toBe(99);
   });
   test(`hero7 should have GPS precision data (GPSP)`, () => {
     expect(result.DEVC[8].STRM[2].GPSP).toBe(143);
