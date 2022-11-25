@@ -54,7 +54,12 @@ const stickyTranslations = {
 //Some metadata is not described internally, but the format can be deduced from documentation:
 //https://github.com/gopro/gpmf-parser#hero7-black-adds-removes-changes-otherwise-supports-all-hero6-metadata
 const forcedStruct = {
-  FACE: 'ID,x,y,w,h,unused[17],smile'
+  FACE: [
+    'ID,x,y,w,h', // HERO6
+    'ID,x,y,w,h,null,null,unknown,null,null,null,null,null,null,null,null,null,null,null,null,null,null,smile', // HERO7
+    'ID,x,y,w,h,confidence %,smile %', // HERO8
+    'ver,confidence %,ID,x,y,w,h,smile %, blink %' // HERO10
+  ]
 };
 
 //mgjson output splits arrays in groups of 3 values, we can change that here,
@@ -64,17 +69,19 @@ const mgjsonMaxArrs = {
 };
 
 //Interpret the previous string as an array
-function generateStructArr(key) {
-  const str = forcedStruct[key];
+function generateStructArr(key, partial) {
+  const example = partial.find(arr => Array.isArray(arr) && arr.length);
+  if (!example) return;
+  const length = example.length;
+  const strings = forcedStruct[key];
+  if (!strings) return;
+  const str = strings.find(str => str.split(',').length === length);
   if (!str) return null;
   let resultingArr = [];
   str.split(',').forEach(w => {
-    if (/.+\[\d+\]$/.test(w)) {
-      for (let i = 0; i < w.match(/(.+)\[(\d+)\]$/)[2]; i++)
-        resultingArr.push(w.match(/(.+)\[(\d+)\]$/)[1]);
-    } else resultingArr.push(w);
+    resultingArr.push(w);
   });
-  resultingArr = resultingArr.map(v => (v === 'unused' ? null : v));
+  resultingArr = resultingArr.map(v => (v === 'null' ? null : v));
   return resultingArr;
 }
 
