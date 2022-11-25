@@ -21,7 +21,8 @@ function deepEqual(a, b) {
 }
 
 //Merges all samples of every device under the same key
-async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
+async function mergeStreams(klv, options) {
+  const { repeatHeaders, repeatSticky, mp4header } = options;
   //Will return a list of streams for a device
   let result = { streams: {} };
 
@@ -239,11 +240,18 @@ async function mergeStreams(klv, { repeatHeaders, repeatSticky, mp4header }) {
                       result.streams[fourCC + key].samples.push(
                         ...newSamples[key]
                       );
-                    else
+                    else {
+                      if (
+                        Array.isArray(options.stream) &&
+                        options.stream.includes(fourCC)
+                      ) {
+                        options.stream.push(fourCC + key);
+                      }
                       result.streams[fourCC + key] = {
                         samples: newSamples[key],
                         ...desc
                       };
+                    }
                   }
                 }
               } else await completeSample({ samples, description });
