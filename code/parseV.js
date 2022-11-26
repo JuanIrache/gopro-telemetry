@@ -37,9 +37,12 @@ function parseV(environment, slice, len, specifics) {
       if (!types[innerType]) {
         unknown.add(type);
         res.push(null);
-      } else if (types[innerType].size) {
+      } else {
         const from = slice + sliceProgress;
-        const axLen = types[innerType].size;
+        const axLen =
+          types[innerType].size ||
+          (types[innerType].opt || {}).length ||
+          len / ax;
         sliceProgress += axLen;
         res.push(
           parseV(environment, from, axLen, {
