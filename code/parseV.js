@@ -1,8 +1,8 @@
 //Main data accessing function. Reads the V in KLV
 
 //Binary-parser does not support 64bits. Use @gmod/binary-parser
-const Parser = require("@gmod/binary-parser").Parser;
-const { types } = require("./data/keys");
+const Parser = require('@gmod/binary-parser').Parser;
+const { types } = require('./data/keys');
 //Will store unknown types
 let unknown = new Set();
 
@@ -12,8 +12,8 @@ function getValueParserForType(type, opts) {
   const key = `${type}-${JSON.stringify(opts)}`;
   if (!valueParsers.hasOwnProperty(key)) {
     valueParsers[key] = new Parser()
-      .endianess("big")
-      [types[type].func]("value", opts);
+      .endianess('big')
+      [types[type].func]('value', opts);
   }
   return valueParsers[key];
 }
@@ -28,6 +28,7 @@ function parseV(environment, slice, len, specifics) {
     //Will return array of values
     let res = [];
 
+    let sliceProgress = 0;
     for (let i = 0; i < ax; i++) {
       let innerType = type;
       //Pick type from previously read data if needed
@@ -36,20 +37,24 @@ function parseV(environment, slice, len, specifics) {
       if (!types[innerType]) {
         unknown.add(type);
         res.push(null);
-      } else
+      } else if (types[innerType].size) {
+        const from = slice + sliceProgress;
+        const axLen = types[innerType].size;
+        sliceProgress += axLen;
         res.push(
-          parseV(environment, slice + (i * ks.size) / ax, len / ax, {
+          parseV(environment, from, axLen, {
             ax: 1,
             type: innerType,
-            complexType,
+            complexType
           })
         );
+      }
     }
 
     //If debugging, print unexpected types
     if (options.debug && unknown.size)
       setImmediate(() =>
-        console.warn("unknown types:", [...unknown].join(","))
+        console.warn('unknown types:', [...unknown].join(','))
       );
     return res;
 
@@ -66,7 +71,7 @@ function parseV(environment, slice, len, specifics) {
     return parsed.value;
 
     //Data is complex but did not find axes
-  } else throw new Error("Complex type ? with only one axis");
+  } else throw new Error('Complex type ? with only one axis');
 }
 
 module.exports = parseV;
