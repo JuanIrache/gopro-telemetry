@@ -53,7 +53,7 @@ async function parseKLV(
     parent === 'STRM' &&
     options.stream &&
     !options.stream.includes(lastCC) &&
-    (lastCC !== 'GPS5' ||
+    ((lastCC !== 'GPS5' && lastCC !== 'GPS9') ||
       (options.timeIn === 'MP4' && !options.raw) ||
       options.streamList ||
       options.deviceList)
