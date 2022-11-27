@@ -90,6 +90,12 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
           opts.WrongSpeed
         );
       }
+      if (merged[key].streams.GPS9) {
+        merged[key].streams.GPS9.samples = filterWrongSpeed(
+          merged[key].streams.GPS9.samples,
+          opts.WrongSpeed
+        );
+      }
     }
   }
 
