@@ -225,6 +225,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Potentially loop through samples in processGPS5 approveStream to find usable samples instead of discarding entire STRM
   - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
+  - Review pending todos/GPS9 comments
   - Update docs
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file

@@ -178,6 +178,7 @@ async function process(input, opts) {
       input.sort((a, b) => {
         const foundA = findFirstTimes(a.rawData);
         const foundB = findFirstTimes(b.rawData);
+        // Review file for GPS9 changes (todo, use GPS9 timestamps too)
         if (foundA.GPSU && foundB.GPSU) return foundA.GPSU - foundB.GPSU;
         if (foundA.STMP && foundB.STMP) return foundA.STMP - foundB.STMP;
         return 0;
