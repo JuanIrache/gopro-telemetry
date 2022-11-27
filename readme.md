@@ -220,6 +220,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Use for GPS timing
   - Stream option GPS picks the best available GPS source (9 or 5)
   - Option to disable/enable new GPS9 features?
+  - Rename old options (GPS5Precision,GPS5Fix...) but support them by translating the old keys
   - Pick in presets
   - Add sample and tests
   - Update docs
