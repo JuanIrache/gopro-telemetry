@@ -216,6 +216,13 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
+- Use GPS9 stream if available, instead of GPS5
+  - Use for GPS timing
+  - Stream option GPS picks the best available GPS source (9 or 5)
+  - Option to disable/enable new GPS9 features?
+  - Pick in presets
+  - Add sample and tests
+  - Update docs
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
