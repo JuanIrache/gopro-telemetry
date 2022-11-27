@@ -1,5 +1,3 @@
-// Review file for GPS9 changes
-
 const parseKLV = require('./code/parseKLV');
 const groupDevices = require('./code/groupDevices');
 const deviceList = require('./code/deviceList');
@@ -251,7 +249,7 @@ async function process(input, opts) {
 
   await breathe();
 
-  //Clean unused streams (namely GPS5 used for timing if cached raw data)
+  //Clean unused streams (namely GPS5 & GPS9 used for timing if cached raw data)
   if (opts.stream && opts.stream.length) {
     for (const dev in interpreted) {
       for (const stream in interpreted[dev].streams) {

@@ -48,7 +48,7 @@ async function parseKLV(
   //Remember last key for interpreting data later
   result.interpretSamples = lastCC;
 
-  //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if lists or timein is MP4
+  //Check if the lastCC is to be filtered out by options, but keep GPS5/GPS9 for timing if lists or timein is MP4
   if (
     parent === 'STRM' &&
     options.stream &&
