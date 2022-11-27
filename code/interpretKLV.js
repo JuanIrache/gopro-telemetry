@@ -60,11 +60,12 @@ async function interpretKLV(klv, options) {
           //Fix altitude
           if (
             result.hasOwnProperty('altitudeFix') &&
-            result.GPS5 &&
+            (result.GPS5 || result.GPS9) &&
             s &&
             s.length > 2
-          )
+          ) {
             s[2] = s[2] - result.altitudeFix;
+          }
 
           if (result.hasOwnProperty('ORIN') && result.hasOwnProperty('ORIO')) {
             //Transform with this if no matrix present, otherwise will transform with matrix later
