@@ -8,7 +8,7 @@ const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
-const processGPS5 = require('./code/processGPS5');
+const processGPS = require('./code/processGPS');
 const filterWrongSpeed = require('./code/filterWrongSpeed');
 const presetsOpts = require('./code/data/presetsOptions');
 const toGpx = require('./code/presets/toGpx');
@@ -56,7 +56,7 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
     opts.GPSFix != null
   ) {
     for (const key in grouped)
-      grouped[key] = await processGPS5(grouped[key], opts);
+      grouped[key] = await processGPS(grouped[key], opts);
   }
 
   let interpreted = {};

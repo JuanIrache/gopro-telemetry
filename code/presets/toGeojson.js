@@ -3,7 +3,7 @@
 const breathe = require('../utils/breathe');
 
 //Returns the GPS data as an object for geojson
-async function getGPGS5Data(data) {
+async function getGPSData(data) {
   let properties = {};
   let coordinates = [];
   for (const key in data) {
@@ -56,7 +56,7 @@ async function getGPGS5Data(data) {
 
 //Converts the processed data to geojson
 module.exports = async function (data, { name }) {
-  const converted = await getGPGS5Data(data);
+  const converted = await getGPSData(data);
   let result = {
     type: 'Feature',
     geometry: {
