@@ -10,13 +10,13 @@ module.exports = async function (
 ) {
   //Set conditions to filter out GPS5 by precision and type of fix
   const approveStream = s => {
+    const fix = s.GPS5 ? s.GPSF : ((s.GPS9 || [])[0] || [])[8];
+    const precision = s.GPS5 ? s.GPSP : 100 * ((s.GPS9 || [])[0] || [])[7];
     if (GPS5Fix != null) {
-      if (s.GPSF == null) return false;
-      if (s.GPSF < GPS5Fix) return false;
+      if (fix == null || fix < GPS5Fix) return false;
     }
     if (GPS5Precision != null) {
-      if (s.GPSP == null) return false;
-      if (s.GPSP > GPS5Precision) return false;
+      if (precision == null || precision > GPS5Precision) return false;
     }
     return true;
   };
@@ -35,25 +35,36 @@ module.exports = async function (
   if (!ellipsoid || geoidHeight || GPS5Fix != null || GPS5Precision != null) {
     for (const d of result.DEVC || []) {
       const length = result.DEVC.length;
+      // Only look for correction data if not found in this DEVC (on GPS5 instead of GPS9) but keep looking on other DEVCs
+      let foundCorrection;
       //First loop to find a suitable value
       for (let i = ((d || {}).STRM || []).length - 1; i >= 0; i--) {
         await breathe();
         //Mark for deletion streams that do not pass the test, but keep them for possible timing
-        if (d.STRM[i].GPS5 && !approveStream(d.STRM[i]))
+        if ((d.STRM[i].GPS5 || d.STRM[i].GPS9) && !approveStream(d.STRM[i])) {
           d.STRM[i].toDelete = true;
-        else if (
+        } else if (
+          !foundCorrection &&
           //If altitude is mean sea level, no need to process it further
           //Otherwise check if all needed info is available
           d.STRM[i].GPSA !== 'MSLV' &&
           (!ellipsoid || geoidHeight) &&
-          d.STRM[i].GPSF != null &&
-          d.STRM[i].GPSP != null &&
-          d.STRM[i].GPS5 &&
-          d.STRM[i].GPS5[0] != null
+          (d.STRM[i].GPS5 || d.STRM[i].GPS9) &&
+          (d.STRM[i].GPS5 || d.STRM[i].GPS9)[0] != null
         ) {
           // Analyse quality of GPS data, and how centered in the dataset time it is
-          const fixQuality = d.STRM[i].GPSF / 3;
-          const precision = (9999 - d.STRM[i].GPSP) / 9999;
+          let fixQuality, precision;
+          if (
+            d.STRM[i].GPS5 &&
+            d.STRM[i].GPSF != null &&
+            d.STRM[i].GPSP != null
+          ) {
+            fixQuality = d.STRM[i].GPSF / 3;
+            precision = (9999 - d.STRM[i].GPSP) / 9999;
+          } else if (d.STRM[i].GPS9) {
+            fixQuality = d.STRM[i].GPS9[0][8] / 3;
+            precision = (9999 - 100 * d.STRM[i].GPS9[0][7]) / 9999;
+          } else continue;
           const centered =
             (length / 2 - Math.abs(length / 2 - i)) / (length / 2);
           //Arbitrary weight for each factor
@@ -70,6 +81,7 @@ module.exports = async function (
               d.STRM[i].GPS5[0][0] / scaling[0],
               d.STRM[i].GPS5[0][1] / scaling[1]
             ];
+            foundCorrection = true;
           }
         }
       }
@@ -86,7 +98,7 @@ module.exports = async function (
     (result.DEVC || []).forEach(d => {
       ((d || {}).STRM || []).forEach(s => {
         //Find GPS data
-        if (s.GPS5) {
+        if (s.GPS5 || s.GPS9) {
           if (!ellipsoid) s.altitudeFix = correction.value;
           else s.geoidHeight = correction.value;
         }
