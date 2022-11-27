@@ -6,17 +6,17 @@ const breathe = require('./utils/breathe');
 //Adapts WGS84 ellipsoid heights in GPS data to EGM96 geoid (closer to mean sea level) and filters out bad gps data
 module.exports = async function (
   klv,
-  { ellipsoid, GPS5Precision, GPS5Fix, geoidHeight }
+  { ellipsoid, GPSPrecision, GPSFix, geoidHeight }
 ) {
   //Set conditions to filter out GPS5 by precision and type of fix
   const approveStream = s => {
     const fix = s.GPS5 ? s.GPSF : ((s.GPS9 || [])[0] || [])[8];
     const precision = s.GPS5 ? s.GPSP : 100 * ((s.GPS9 || [])[0] || [])[7];
-    if (GPS5Fix != null) {
-      if (fix == null || fix < GPS5Fix) return false;
+    if (GPSFix != null) {
+      if (fix == null || fix < GPSFix) return false;
     }
-    if (GPS5Precision != null) {
-      if (precision == null || precision > GPS5Precision) return false;
+    if (GPSPrecision != null) {
+      if (precision == null || precision > GPSPrecision) return false;
     }
     return true;
   };
@@ -32,7 +32,7 @@ module.exports = async function (
   let correction = {};
   //Loop through packets of samples if correction or filtering needed
   //If GPX, we need height compensation either way
-  if (!ellipsoid || geoidHeight || GPS5Fix != null || GPS5Precision != null) {
+  if (!ellipsoid || geoidHeight || GPSFix != null || GPSPrecision != null) {
     for (const d of result.DEVC || []) {
       const length = result.DEVC.length;
       // Only look for correction data if not found in this DEVC (on GPS5 instead of GPS9) but keep looking on other DEVCs

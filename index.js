@@ -54,8 +54,8 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
   if (
     !opts.ellipsoid ||
     opts.geoidHeight ||
-    opts.GPS5Precision != null ||
-    opts.GPS5Fix != null
+    opts.GPSPrecision != null ||
+    opts.GPSFix != null
   ) {
     for (const key in grouped)
       grouped[key] = await processGPS5(grouped[key], opts);
@@ -126,6 +126,10 @@ async function process(input, opts) {
   //Create filter arrays if user didn't
   if (opts.device && !Array.isArray(opts.device)) opts.device = [opts.device];
   if (opts.stream && !Array.isArray(opts.stream)) opts.stream = [opts.stream];
+  if (opts.GPSFix == null && opts.GPS5Fix != null) opts.GPSFix = opts.GPS5Fix;
+  if (opts.GPSPrecision == null && opts.GPS5Precision != null) {
+    opts.GPSPrecision = opts.GPS5Precision;
+  }
 
   let interpreted;
   let timing;

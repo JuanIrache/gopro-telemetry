@@ -7,7 +7,7 @@ describe('Test GPS5', () => {
   beforeAll(async () => {
     const file = readFileSync(`${__dirname}/../samples/partials/grouped.json`);
 
-    result = await processGPS5(JSON.parse(file)['1'], { GPS5Precision: 500 });
+    result = await processGPS5(JSON.parse(file)['1'], { GPSPrecision: 500 });
   });
 
   test(`processGPS5 should filter out bad precision data`, () => {

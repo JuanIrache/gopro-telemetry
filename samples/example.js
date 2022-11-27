@@ -15,8 +15,8 @@ async function toJSON(filename) {
         stream: 'GPS5',
         repeatSticky: true,
         repeatHeaders: true,
-        GPS5Fix: 2,
-        GPS5Precision: 500
+        GPSFix: 2,
+        GPSPrecision: 500
       }
     );
     await writeFileAsync('./out.json', JSON.stringify(result));
