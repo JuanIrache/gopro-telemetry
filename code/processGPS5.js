@@ -86,11 +86,12 @@ module.exports = async function (
         }
       }
     }
-    if (correction.source)
+    if (correction.source) {
       correction.value = egm96.meanSeaLevel(
         correction.source[0],
         correction.source[1]
       );
+    }
   }
 
   if (correction.value != null) {
