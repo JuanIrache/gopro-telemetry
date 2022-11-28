@@ -49,7 +49,7 @@ module.exports = data => {
     ) {
       STMP = readInt64BEasFloat(data, i + 8);
     }
-    if (GPS9Time != null && GPSU != null && STMP != null) break;
+    if (GPS9Time != null && STMP != null) break;
   }
   return { GPSU, STMP, GPS9Time };
 };
