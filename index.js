@@ -42,7 +42,7 @@ async function parseOne({ rawData, parsedData }, opts) {
   return parsed;
 }
 
-async function interpretOne({ timing, parsed, opts, timeMeta }) {
+async function interpretOne({ timing, parsed, opts, timeMeta, gpsSource }) {
   //Group it by device
   const grouped = await groupDevices(parsed);
 
@@ -132,12 +132,12 @@ async function process(input, opts) {
   // Find available GPS type and store first times for potential sorting
   if (!Array.isArray(input)) input = [input];
   const firstTimes = input.map(i => findFirstTimes(i.rawData));
+  let bestGPSsource;
+  if (firstTimes.every(t => t.GPS9Time)) bestGPSsource = 'GPS9';
+  else if (firstTimes.every(t => t.GPSU)) bestGPSsource = 'GPS5';
+  else if (firstTimes.some(t => t.GPS9Time)) bestGPSsource = 'GPS9';
+  else bestGPSsource = 'GPS5';
   if ((opts.stream || []).includes('GPS')) {
-    let bestGPSsource;
-    if (firstTimes.every(t => t.GPS9Time)) bestGPSsource = 'GPS9';
-    else if (firstTimes.every(t => t.GPSU)) bestGPSsource = 'GPS5';
-    else if (firstTimes.some(t => t.GPS9Time)) bestGPSsource = 'GPS9';
-    else bestGPSsource = 'GPS5';
     opts.stream = opts.stream.map(s => (s === 'GPS' ? bestGPSsource : s));
   }
 
@@ -172,7 +172,12 @@ async function process(input, opts) {
 
     await breathe();
 
-    interpreted = await interpretOne({ timing, parsed, opts });
+    interpreted = await interpretOne({
+      timing,
+      parsed,
+      opts,
+      gpsSource: bestGPSsource
+    });
     progress(opts, 0.4);
   } else {
     if (input.some(i => !i.timing))
@@ -235,12 +240,18 @@ async function process(input, opts) {
       }
 
       const timeMeta = { gpsDate, mp4Date, offset };
+      const gpsSource = firstTimes[i][bestGPSsource]
+        ? bestGPSsource
+        : firstTimes[i].GPS9
+        ? 'GPS9'
+        : 'GPS5';
 
       interpreted = await interpretOne({
         timing: timing[i],
         parsed: p,
         opts,
-        timeMeta
+        timeMeta,
+        gpsSource
       });
 
       if (!gpsDate && timeMeta.gpsDate) {
