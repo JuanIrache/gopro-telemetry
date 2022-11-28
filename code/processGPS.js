@@ -28,14 +28,14 @@ module.exports = async function (
     result = klv;
   }
   //Store best correction value
-  let correction = {};
+  const corrections = {};
   //Loop through packets of samples if correction or filtering needed
   //If GPX, we need height compensation either way
   if (!ellipsoid || geoidHeight || GPSFix != null || GPSPrecision != null) {
     for (const d of result.DEVC || []) {
       const length = result.DEVC.length;
       // Only look for correction data if not found in this DEVC (on GPS5 instead of GPS9) but keep looking on other DEVCs
-      let foundCorrection;
+      const foundCorrections = {};
       //First loop to find a suitable value
       for (let i = ((d || {}).STRM || []).length - 1; i >= 0; i--) {
         await breathe();
@@ -43,70 +43,81 @@ module.exports = async function (
         if (d.STRM[i][gpsTimeSrc] && !approveStream(d.STRM[i])) {
           d.STRM[i].toDelete = true;
         } else if (
-          !foundCorrection &&
+          (!foundCorrections.GPS5 || foundCorrections.GPS9) &&
           //If altitude is mean sea level, no need to process it further
           //Otherwise check if all needed info is available
           d.STRM[i].GPSA !== 'MSLV' &&
-          (!ellipsoid || geoidHeight) &&
-          // Do keep GPS5 and GPS9 here, as we want to correct both, if present
-          // Todo, but maybe not if use stream option is otherwise?
-          (d.STRM[i].GPS5 || d.STRM[i].GPS9) &&
-          (d.STRM[i].GPS5 || d.STRM[i].GPS9)[0] != null
+          (!ellipsoid || geoidHeight)
         ) {
-          // Analyse quality of GPS data, and how centered in the dataset time it is
-          let fixQuality, precision;
-          if (
-            d.STRM[i].GPS5 &&
-            d.STRM[i].GPSF != null &&
-            d.STRM[i].GPSP != null
-          ) {
-            fixQuality = d.STRM[i].GPSF / 3;
-            precision = (9999 - d.STRM[i].GPSP) / 9999;
-          } else if (d.STRM[i].GPS9) {
-            fixQuality = d.STRM[i].GPS9[0][8] / 3;
-            precision = (9999 - 100 * d.STRM[i].GPS9[0][7]) / 9999;
-          } else continue;
-          const centered =
-            (length / 2 - Math.abs(length / 2 - i)) / (length / 2);
-          //Arbitrary weight for each factor
-          const rating = fixQuality * 10 + precision * 20 + centered;
-          //Pick the best quality correction data
-          if (correction.rating == null || rating > correction.rating) {
-            //Use latitude and longitude to find the altitude offset in this location
-            correction.rating = rating;
-            const scaling =
-              d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1
-                ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]]
-                : [1, 1];
-            const GPS = d.STRM[i].GPS5 || d.STRM[i].GPS9;
-            correction.source = [
-              GPS[0][0] / scaling[0],
-              GPS[0][1] / scaling[1]
-            ];
-            foundCorrection = true;
+          const gpsKey = ['GPS5', 'GPS9'].find(
+            k => d.STRM[i][k] && d.STRM[i][k][0] != null
+          );
+          if (gpsKey && !foundCorrections[gpsKey]) {
+            // Do keep GPS5 and GPS9 here, as we want to correct both, if present
+            // Todo, but maybe not if use stream option is otherwise?
+            // Analyse quality of GPS data, and how centered in the dataset time it is
+            let fixQuality, precision;
+            if (
+              gpsKey === 'GPS5' &&
+              d.STRM[i].GPSF != null &&
+              d.STRM[i].GPSP != null
+            ) {
+              fixQuality = d.STRM[i].GPSF / 3;
+              precision = (9999 - d.STRM[i].GPSP) / 9999;
+            } else if (gpsKey === 'GPS9') {
+              fixQuality = d.STRM[i].GPS9[0][8] / 3;
+              precision = (9999 - 100 * d.STRM[i].GPS9[0][7]) / 9999;
+            } else continue;
+            corrections[gpsKey] = corrections[gpsKey] || {};
+            // Give some value to the fact a value is coming from the centre of the data
+            const centered =
+              (length / 2 - Math.abs(length / 2 - i)) / (length / 2);
+            //Arbitrary weight for each factor
+            const rating = fixQuality * 10 + precision * 20 + centered;
+            //Pick the best quality correction data
+            if (
+              corrections[gpsKey].rating == null ||
+              rating > corrections[gpsKey].rating
+            ) {
+              //Use latitude and longitude to find the altitude offset in this location
+              corrections[gpsKey].rating = rating;
+              const scaling =
+                d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1
+                  ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]]
+                  : [1, 1];
+              corrections[gpsKey].source = [
+                d.STRM[i][gpsKey][0][0] / scaling[0],
+                d.STRM[i][gpsKey][0][1] / scaling[1]
+              ];
+              foundCorrections[gpsKey] = true;
+            }
           }
         }
       }
     }
-    if (correction.source) {
-      correction.value = egm96.meanSeaLevel(
-        correction.source[0],
-        correction.source[1]
-      );
+    for (const k in corrections) {
+      if (corrections[k].source) {
+        corrections[k].value = egm96.meanSeaLevel(
+          corrections[k].source[0],
+          corrections[k].source[1]
+        );
+      }
     }
   }
 
-  if (correction.value != null) {
-    //Loop streams to make the height adjustments
-    (result.DEVC || []).forEach(d => {
-      ((d || {}).STRM || []).forEach(s => {
-        //Find GPS data
-        if (s.GPS5 || s.GPS9) {
-          if (!ellipsoid) s.altitudeFix = correction.value;
-          else s.geoidHeight = correction.value;
+  //Loop streams to make the height adjustments
+  (result.DEVC || []).forEach(d => {
+    ((d || {}).STRM || []).forEach(s => {
+      for (const k in corrections) {
+        if (corrections[k].value != null) {
+          //Find GPS data
+          if (s[k]) {
+            if (!ellipsoid) s.altitudeFix = corrections[k].value;
+            else s.geoidHeight = corrections[k].value;
+          }
         }
-      });
+      }
     });
-  }
+  });
   return result;
 };
