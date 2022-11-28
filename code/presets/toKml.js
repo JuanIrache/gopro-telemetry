@@ -1,11 +1,5 @@
 const breathe = require('../utils/breathe');
 
-//Change some terms to more human readable
-const translations = {
-  precision: 'GPS Accuracy',
-  fix: 'GPS Fix'
-};
-
 //Returns the GPS data as a string
 async function getGPSData(data) {
   let frameRate;
@@ -45,12 +39,17 @@ async function getGPSData(data) {
               let altitudeMode = '';
               //Create comments for sample
               for (const key in sticky) {
-                if (['precision', 'fix'].includes(key) && stream === 'GPS9') {
-                  continue;
+                if (key === 'precision') {
+                  if (stream === 'GPS5') {
+                    commentParts.push(`GPS DOP: ${sticky[key] / 100}`);
+                  }
+                } else if (key === 'fix') {
+                  if (stream === 'GPS5') {
+                    commentParts.push(`GPS Fix: ${sticky[key]}`);
+                  }
+                } else {
+                  commentParts.push(`${key}: ${sticky[key]}`);
                 }
-                commentParts.push(
-                  `${translations[key] || key}: ${sticky[key]}`
-                );
               }
               if (stream === 'GPS9') {
                 if (s.value.length > 7) {
