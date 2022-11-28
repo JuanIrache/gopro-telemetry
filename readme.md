@@ -49,7 +49,7 @@ The options must be an object. The following keys are supported.
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**.
 - **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**.
 - **device** (array of numbers) Filters the results by device id.
-- **stream** (array of strings) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data).
+- **stream** (array of strings) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). By passing _GPS_, the code will attempt to select the best stream available for GPS data (_GPS5_ in old cameras, _GPS9_ in new ones)
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling, no filtering. It does add some custom keys (like **interpretSamples**) that will help with successive interpretation passes of the data. **Disables the following options**.
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size.
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be returned under their keys, based on the available name and units. This might increase the output size.
@@ -222,7 +222,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Option to disable/enable new GPS9 features?
   - Pick in presets
   - Potentially loop through samples in processGPS approveStream to find usable samples instead of discarding entire STRM
-  - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
+  - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
   - Review pending todos/GPS9 comments
   - Update docs

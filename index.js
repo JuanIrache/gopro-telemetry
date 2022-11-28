@@ -129,14 +129,26 @@ async function process(input, opts) {
     opts.GPSPrecision = opts.GPS5Precision;
   }
 
+  // Find available GPS type and store first times for potential sorting
+  if (!Array.isArray(input)) input = [input];
+  const firstTimes = input.map(i => findFirstTimes(i.rawData));
+  if ((opts.stream || []).includes('GPS')) {
+    let bestGPSsource;
+    if (firstTimes.every(t => t.GPS9Time)) bestGPSsource = 'GPS9';
+    else if (firstTimes.every(t => t.GPSU)) bestGPSsource = 'GPS5';
+    else if (firstTimes.some(t => t.GPS9Time)) bestGPSsource = 'GPS9';
+    else bestGPSsource = 'GPS5';
+    opts.stream = opts.stream.map(s => (s === 'GPS' ? bestGPSsource : s));
+  }
+
   let interpreted;
   let timing;
 
   // Provide approximate progress updates
   progress(opts, 0.01);
 
-  //Check if input is array of sources
-  if (Array.isArray(input) && input.length === 1) input = input[0];
+  // Treat single or multiple inputs differently
+  if (input.length === 1) input = input[0];
   if (!Array.isArray(input)) {
     if (input.timing) {
       timing = JSON.parse(JSON.stringify(input.timing));
@@ -176,8 +188,8 @@ async function process(input, opts) {
       // Some firmwares produce consecutive files with the same creation date.
       // Try to use GPS time or timestamps to solve this
       input.sort((a, b) => {
-        const foundA = findFirstTimes(a.rawData);
-        const foundB = findFirstTimes(b.rawData);
+        const foundA = firstTimes[input.indexOf(a)];
+        const foundB = firstTimes[input.indexOf(b)];
         if (foundA.GPS9Time && foundB.GPS9Time) {
           return foundA.GPS9Time - foundB.GPS9Time;
         }
