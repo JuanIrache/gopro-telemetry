@@ -224,7 +224,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
   - Review pending todos/GPS9 comments
-- GPX sticky hdop should be divided by 100, right?
 - KML rename GPS Accuracy to DOP and divide?
 - Review GPX indent
 - Remove GPX speed comments? Optionally include

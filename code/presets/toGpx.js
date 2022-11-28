@@ -56,7 +56,7 @@ async function getGPGS5Data(data) {
                 } else if (key === 'precision') {
                   if (stream === 'GPS5') {
                     hdop = `
-              <hdop>${sticky[key]}</hdop>`;
+              <hdop>${sticky[key] / 100}</hdop>`;
                   }
                 } else if (key === 'geoidHeight') {
                   geoidHeight = `
