@@ -218,12 +218,16 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 - Use GPS9 stream if available, instead of GPS5
   - Use for GPS timing (replace GPSU where possible)
+  - Review if date key in GPS9 output matches the recorded day and time
   - Option to disable/enable new GPS9 features?
-  - Pick in presets
   - Potentially loop through samples in processGPS approveStream to find usable samples instead of discarding entire STRM
   - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
   - Review pending todos/GPS9 comments
+- GPX sticky hdop should be divided by 100, right?
+- KML rename GPS Accuracy to DOP and divide?
+- Review GPX indent
+- Remove GPX speed comments? Optionally include
 - Remove quotes in CSV?
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
