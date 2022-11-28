@@ -78,9 +78,10 @@ module.exports = async function (
               d.STRM[i].SCAL && d.STRM[i].SCAL.length > 1
                 ? [d.STRM[i].SCAL[0], d.STRM[i].SCAL[1]]
                 : [1, 1];
+            const GPS = d.STRM[i].GPS5 || d.STRM[i].GPS9;
             correction.source = [
-              d.STRM[i].GPS5[0][0] / scaling[0],
-              d.STRM[i].GPS5[0][1] / scaling[1]
+              GPS[0][0] / scaling[0],
+              GPS[0][1] / scaling[1]
             ];
             foundCorrection = true;
           }
