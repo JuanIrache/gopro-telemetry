@@ -14,7 +14,7 @@ module.exports = data => {
   let STMP;
 
   // loop for an arbitrarily short amount of times, otherwise give up search
-  for (let i = 0; i < 100000 && i + 4 < data.length; i += 4) {
+  for (let i = 0; i < 100000 && i + 4 < (data || []).length; i += 4) {
     //Find potential fourCCs, letter by letter to discard quicker
     if (
       'G' === atob(data.slice(i + 0, i + 1)) &&
