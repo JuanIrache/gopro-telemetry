@@ -218,19 +218,17 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 - Use GPS9 stream if available, instead of GPS5
   - Use for GPS timing (replace GPSU where possible)
-  - Stream option GPS picks the best available GPS source (9 or 5)
   - Option to disable/enable new GPS9 features?
   - Pick in presets
   - Potentially loop through samples in processGPS approveStream to find usable samples instead of discarding entire STRM
   - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
   - Review pending todos/GPS9 comments
-  - Update docs
+- Remove quotes in CSV?
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
 - Add way to compensate for timewarp timing weirdness, either manually or automatically
-- Find out why Virb edit does not read recorded speed in their own extensions format. [Details here](https://forums.garmin.com/apps-software/mac-windows-software/f/virb-edit-windows/223058/virb-edit-not-reading-trackpointextension-speed)
 - Review CSV conversion (when only 1 sticky value, it does not print)
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
