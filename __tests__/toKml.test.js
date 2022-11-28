@@ -9,7 +9,7 @@ describe('Test KML', () => {
       `${__dirname}/../samples/partials/mergedGps.json`
     );
 
-    result = await toKml(JSON.parse(file), {});
+    result = await toKml(JSON.parse(file), { comment: true });
   });
 
   test(`toKml should return a long string`, () => {

@@ -70,6 +70,7 @@ The options must be an object. The following keys are supported.
 - **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See details below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
 - **progress** (function) Function to execute when progress (between 0 and 1) is made in the extraction process. Not proportional.
+- **comment** (boolean) Add comments to formats like GPX or KML with fields they do not strictly support, like recorded speed.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
 
@@ -224,7 +225,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
   - Review pending todos/GPS9 comments
-- Remove GPX speed comments? Optionally include
 - Remove quotes in CSV?
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file

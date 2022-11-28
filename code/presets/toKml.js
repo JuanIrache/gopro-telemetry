@@ -1,7 +1,7 @@
 const breathe = require('../utils/breathe');
 
 //Returns the GPS data as a string
-async function getGPSData(data) {
+async function getGPSData(data, comment) {
   let frameRate;
   let device;
   let inner = '';
@@ -38,37 +38,39 @@ async function getGPSData(data) {
               let time = '';
               let altitudeMode = '';
               //Create comments for sample
-              for (const key in sticky) {
-                if (key === 'precision') {
-                  if (stream === 'GPS5') {
-                    commentParts.push(`GPS DOP: ${sticky[key] / 100}`);
+              if (comment) {
+                for (const key in sticky) {
+                  if (key === 'precision') {
+                    if (stream === 'GPS5') {
+                      commentParts.push(`GPS DOP: ${sticky[key] / 100}`);
+                    }
+                  } else if (key === 'fix') {
+                    if (stream === 'GPS5') {
+                      commentParts.push(`GPS Fix: ${sticky[key]}`);
+                    }
+                  } else {
+                    commentParts.push(`${key}: ${sticky[key]}`);
                   }
-                } else if (key === 'fix') {
-                  if (stream === 'GPS5') {
-                    commentParts.push(`GPS Fix: ${sticky[key]}`);
+                }
+                if (stream === 'GPS9') {
+                  if (s.value.length > 7) {
+                    commentParts.push(`GPS DOP: ${s.value[7]}`);
                   }
-                } else {
-                  commentParts.push(`${key}: ${sticky[key]}`);
+                  if (s.value.length > 8) {
+                    commentParts.push(`GPS Fix: ${s.value[8]}`);
+                  }
                 }
-              }
-              if (stream === 'GPS9') {
-                if (s.value.length > 7) {
-                  commentParts.push(`GPS DOP: ${s.value[7]}`);
+                if (s.value.length > 3) {
+                  commentParts.push(`2D Speed: ${s.value[3]}`);
                 }
-                if (s.value.length > 8) {
-                  commentParts.push(`GPS Fix: ${s.value[8]}`);
+                if (s.value.length > 4) {
+                  commentParts.push(`3D Speed: ${s.value[4]}`);
                 }
-              }
-              if (s.value.length > 3) {
-                commentParts.push(`2D Speed: ${s.value[3]}`);
-              }
-              if (s.value.length > 4) {
-                commentParts.push(`3D Speed: ${s.value[4]}`);
-              }
-              //Create comment string
-              if (commentParts.length) {
-                cmt = `
+                //Create comment string
+                if (commentParts.length) {
+                  cmt = `
             <description>${commentParts.join('; ')}</description>`;
+                }
               }
               //Set time if present
               if (s.date != null) {
@@ -123,8 +125,8 @@ async function getGPSData(data) {
 }
 
 //Converts the processed data to KML
-module.exports = async function (data, { name }) {
-  const converted = await getGPSData(data);
+module.exports = async function (data, { name, comment }) {
+  const converted = await getGPSData(data, comment);
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">

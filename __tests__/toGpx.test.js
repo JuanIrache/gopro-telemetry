@@ -9,7 +9,7 @@ describe('Test GPX', () => {
       `${__dirname}/../samples/partials/mergedGps.json`
     );
 
-    result = await toGpx(JSON.parse(file), {});
+    result = await toGpx(JSON.parse(file), { comment: true });
   });
 
   test(`toGpx should return a long string`, () => {

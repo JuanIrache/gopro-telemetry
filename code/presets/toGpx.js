@@ -7,7 +7,7 @@ const fixes = {
 };
 
 //Returns the GPS data as a string
-async function getGPGS5Data(data) {
+async function getGPGS5Data(data, comment) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -61,7 +61,9 @@ async function getGPGS5Data(data) {
                 } else if (key === 'geoidHeight') {
                   geoidHeight = `
               <geoidheight>${sticky[key]}</geoidheight>`;
-                } else commentParts.push(`${key}: ${sticky[key]}`);
+                } else if (comment) {
+                  commentParts.push(`${key}: ${sticky[key]}`);
+                }
               }
               if (stream === 'GPS9') {
                 if (s.value.length > 7) {
@@ -73,18 +75,20 @@ async function getGPGS5Data(data) {
               <fix>${s.value[8]}</fix>`;
                 }
               }
-              //Could potentially add other values to cmt
-              if (s.value.length > 3) {
-                commentParts.push(`2dSpeed: ${s.value[3]}`);
-              }
-              //Speeds as comment
-              if (s.value.length > 4) {
-                commentParts.push(`3dSpeed: ${s.value[4]}`);
-              }
-              //Create comment string
-              if (commentParts.length) {
-                cmt = `
+              if (comment) {
+                //Could potentially add other values to cmt
+                if (s.value.length > 3) {
+                  commentParts.push(`2dSpeed: ${s.value[3]}`);
+                }
+                //Speeds as comment
+                if (s.value.length > 4) {
+                  commentParts.push(`3dSpeed: ${s.value[4]}`);
+                }
+                //Create comment string
+                if (commentParts.length) {
+                  cmt = `
               <cmt>${commentParts.join('; ')}</cmt>`;
+                }
               }
               //Set elevation if present
               if (s.value.length > 1) {
@@ -138,8 +142,8 @@ async function getGPGS5Data(data) {
 }
 
 //Converts the processed data to GPX
-module.exports = async function (data, { name }) {
-  const converted = await getGPGS5Data(data);
+module.exports = async function (data, { name, comment }) {
+  const converted = await getGPGS5Data(data, comment);
   if (!converted) return undefined;
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
