@@ -167,6 +167,13 @@ Depending on the camera, model, settings and accessories, these are some of the 
 - Hue
 - Image uniformity
 - Scene classifier
+- Camera Orientation
+- Image Orientation
+- Gravity Vector (useful for Pitch, Roll and Yaw)
+- Audio levels
+- Wind detection
+- Mic wet detection
+- And more
 
 This project is possible thanks to the [gpmf-parser documentation](https://github.com/gopro/gpmf-parser), open sourced by GoPro.
 
