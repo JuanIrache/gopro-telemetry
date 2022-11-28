@@ -228,8 +228,8 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Use for GPS timing (replace GPSU where possible)
   - Review if date key in GPS9 output matches the recorded day and time
   - Option to disable/enable new GPS9 features? Probably not
-  - Potentially loop through samples in processGPS approveStream to find usable samples instead of discarding entire STRM
-  - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
+  - Potentially loop through samples in processGPS approveStream to find usable samples instead of discarding entire STRM, also when evaluating best sample via fixQuality, precision? (that's probably too slow)
+  - Make sure we are not checking altitude correction twice if we are discarding one of the GPS streams. Actually, separate them if we are not discarding one, as otherwise we are applying the corrections of one to the other
   - Add sample and tests
   - Review pending todos/GPS9 comments
 - Review CSV header exports when they might include commas (WIND?)
