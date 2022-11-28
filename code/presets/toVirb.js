@@ -1,9 +1,7 @@
-// Review file for GPS9 changes
-
 const breathe = require('../utils/breathe');
 
 //Returns the GPS data as a string
-async function getGPGS5Data(data) {
+async function getGPSData(data) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -14,19 +12,22 @@ async function getGPGS5Data(data) {
     if (data[key].streams) {
       for (const stream in data[key].streams) {
         await breathe();
-        //If we find a GPS5 stream, we won't look on any other DEVCS
-        if (stream === 'GPS5' && data[key].streams.GPS5.samples) {
+        //If we find a GPS stream, we won't look on any other DEVCS
+        if (
+          (stream === 'GPS5' || stream === 'GPS9') &&
+          data[key].streams[stream].samples
+        ) {
           let name;
-          if (data[key].streams.GPS5.name != null)
-            name = data[key].streams.GPS5.name;
+          if (data[key].streams[stream].name != null)
+            name = data[key].streams[stream].name;
           let units;
-          if (data[key].streams.GPS5.units != null)
-            units = `[${data[key].streams.GPS5.units.toString()}]`;
+          if (data[key].streams[stream].units != null)
+            units = `[${data[key].streams[stream].units.toString()}]`;
           let sticky = {};
           //Loop all the samples
 
-          for (let i = 0; i < data[key].streams.GPS5.samples.length; i++) {
-            const s = data[key].streams.GPS5.samples[i];
+          for (let i = 0; i < data[key].streams[stream].samples.length; i++) {
+            const s = data[key].streams[stream].samples[i];
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {
               //Update and remember sticky data
@@ -75,9 +76,9 @@ async function getGPGS5Data(data) {
                 const firstTime = `
                 <time>${firstDate}</time>`;
                 const fakeFirst = `
-                <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
+            <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
                     ${(ele + firstTime + geoidHeight).trim()}
-                </trkpt>`;
+            </trkpt>`;
                 inner += `${fakeFirst}`;
               }
               //Add it to samples
@@ -108,7 +109,7 @@ async function getACCLData(data) {
     if (data[key].streams) {
       for (const stream in data[key].streams) {
         await breathe();
-        //If we find a GPS5 stream, we won't look on any other DEVCS
+        //If we find a ACCL stream, we won't look on any other DEVCS
         if (stream === 'ACCL' && data[key].streams.ACCL.samples) {
           let name;
           if (data[key].streams.ACCL.name != null)
@@ -192,8 +193,9 @@ async function getACCLData(data) {
 //Converts the processed data to GPX
 module.exports = async function (data, { name, stream }) {
   let converted;
-  if (stream[0] === 'GPS5') converted = await getGPGS5Data(data);
-  else if (stream[0] === 'ACCL') converted = await getACCLData(data);
+  if (stream[0] === 'GPS5' || stream[0] === 'GPS9') {
+    converted = await getGPSData(data);
+  } else if (stream[0] === 'ACCL') converted = await getACCLData(data);
   else return undefined;
   if (!converted) return undefined;
   let string = `\
