@@ -50,9 +50,7 @@ async function createCSV(data) {
                 firstRow.push(...Object.keys(sticky));
                 //Escape commas and add first row
                 rows.push(
-                  firstRow
-                    .map(e => `"${e.toString().replace(/"/g, '""')}"`)
-                    .join(',')
+                  firstRow.map(e => e.toString().replace(/,/g, '\\,')).join(',')
                 );
               }
 
@@ -78,7 +76,7 @@ async function createCSV(data) {
               for (const key in sticky) row.push(sticky[key]);
               //Add line to rows
               rows.push(
-                row.map(e => `"${e.toString().replace(/"/g, '""')}"`).join(',')
+                row.map(e => e.toString().replace(/,/g, '\\,')).join(',')
               );
             }
           }

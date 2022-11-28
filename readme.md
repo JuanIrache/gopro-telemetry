@@ -225,7 +225,8 @@ Please make your changes to the **dev** branch, so that automated tests can be r
   - Review performance against old code, keeping both GPS5 and GPS9 for timing could slow things down on cameras that have both? Maybe store preferred timing stream initially, per source with (bestGPSsource) and then only keep that one for parseKLV etc? (not sure if possible in the order we read things)
   - Add sample and tests
   - Review pending todos/GPS9 comments
-- Remove quotes in CSV?
+- Review CSV header exports when they might include commas (WIND?)
+
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
