@@ -4,7 +4,8 @@ const breathe = require('./utils/breathe');
 //Adapts WGS84 ellipsoid heights in GPS data to EGM96 geoid (closer to mean sea level) and filters out bad gps data
 module.exports = async function (
   klv,
-  { ellipsoid, GPSPrecision, GPSFix, geoidHeight }
+  { ellipsoid, GPSPrecision, GPSFix, geoidHeight },
+  gpsTimeSrc
 ) {
   //Set conditions to filter out GPS5 by precision and type of fix
   const approveStream = s => {
@@ -39,7 +40,7 @@ module.exports = async function (
       for (let i = ((d || {}).STRM || []).length - 1; i >= 0; i--) {
         await breathe();
         //Mark for deletion streams that do not pass the test, but keep them for possible timing
-        if ((d.STRM[i].GPS5 || d.STRM[i].GPS9) && !approveStream(d.STRM[i])) {
+        if (d.STRM[i][gpsTimeSrc] && !approveStream(d.STRM[i])) {
           d.STRM[i].toDelete = true;
         } else if (
           !foundCorrection &&
@@ -47,6 +48,8 @@ module.exports = async function (
           //Otherwise check if all needed info is available
           d.STRM[i].GPSA !== 'MSLV' &&
           (!ellipsoid || geoidHeight) &&
+          // Do keep GPS5 and GPS9 here, as we want to correct both, if present
+          // Todo, but maybe not if use stream option is otherwise?
           (d.STRM[i].GPS5 || d.STRM[i].GPS9) &&
           (d.STRM[i].GPS5 || d.STRM[i].GPS9)[0] != null
         ) {

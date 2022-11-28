@@ -22,13 +22,13 @@ const breathe = require('./code/utils/breathe');
 const getOffset = require('./code/utils/getOffset');
 const findFirstTimes = require('./code/utils/findFirstTimes');
 
-async function parseOne({ rawData, parsedData }, opts) {
+async function parseOne({ rawData, parsedData }, opts, gpsTimeSrc) {
   if (parsedData) return parsedData;
 
   await breathe();
 
   //Parse input
-  const parsed = await parseKLV(rawData, opts);
+  const parsed = await parseKLV(rawData, opts, { gpsTimeSrc });
   if (!parsed.DEVC) {
     const error = new Error(
       'Invalid GPMF data. Root object must contain DEVC key'
@@ -42,7 +42,7 @@ async function parseOne({ rawData, parsedData }, opts) {
   return parsed;
 }
 
-async function interpretOne({ timing, parsed, opts, timeMeta, gpsSource }) {
+async function interpretOne({ timing, parsed, opts, timeMeta, gpsTimeSrc }) {
   //Group it by device
   const grouped = await groupDevices(parsed);
 
@@ -56,7 +56,7 @@ async function interpretOne({ timing, parsed, opts, timeMeta, gpsSource }) {
     opts.GPSFix != null
   ) {
     for (const key in grouped)
-      grouped[key] = await processGPS(grouped[key], opts);
+      grouped[key] = await processGPS(grouped[key], opts, gpsTimeSrc);
   }
 
   let interpreted = {};
@@ -70,7 +70,12 @@ async function interpretOne({ timing, parsed, opts, timeMeta, gpsSource }) {
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
     await breathe();
-    timed[key] = await timeKLV(interpreted[key], timing, opts, timeMeta);
+    timed[key] = await timeKLV(interpreted[key], {
+      timing,
+      opts,
+      timeMeta,
+      gpsTimeSrc
+    });
   }
 
   //Merge samples in sensor entries
@@ -132,13 +137,13 @@ async function process(input, opts) {
   // Find available GPS type and store first times for potential sorting
   if (!Array.isArray(input)) input = [input];
   const firstTimes = input.map(i => findFirstTimes(i.rawData));
-  let bestGPSsource;
-  if (firstTimes.every(t => t.GPS9Time)) bestGPSsource = 'GPS9';
-  else if (firstTimes.every(t => t.GPSU)) bestGPSsource = 'GPS5';
-  else if (firstTimes.some(t => t.GPS9Time)) bestGPSsource = 'GPS9';
-  else bestGPSsource = 'GPS5';
+  let bestGPSTimeSrc;
+  if (firstTimes.every(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
+  else if (firstTimes.every(t => t.GPSU)) bestGPSTimeSrc = 'GPS5';
+  else if (firstTimes.some(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
+  else bestGPSTimeSrc = 'GPS5';
   if ((opts.stream || []).includes('GPS')) {
-    opts.stream = opts.stream.map(s => (s === 'GPS' ? bestGPSsource : s));
+    opts.stream = opts.stream.map(s => (s === 'GPS' ? bestGPSTimeSrc : s));
   }
 
   let interpreted;
@@ -157,7 +162,8 @@ async function process(input, opts) {
 
     await breathe();
 
-    const parsed = await parseOne(input, opts);
+    const gpsTimeSrc = bestGPSTimeSrc;
+    const parsed = await parseOne(input, opts, gpsTimeSrc);
 
     progress(opts, 0.2);
 
@@ -172,12 +178,7 @@ async function process(input, opts) {
 
     await breathe();
 
-    interpreted = await interpretOne({
-      timing,
-      parsed,
-      opts,
-      gpsSource: bestGPSsource
-    });
+    interpreted = await interpretOne({ timing, parsed, opts, gpsTimeSrc });
     progress(opts, 0.4);
   } else {
     if (input.some(i => !i.timing))
@@ -209,10 +210,17 @@ async function process(input, opts) {
     timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
 
+    const getGPSTimeSrc = i =>
+      firstTimes[i][bestGPSTimeSrc]
+        ? bestGPSTimeSrc
+        : firstTimes[i].GPS9
+        ? 'GPS9'
+        : 'GPS5';
+
     //Loop parse all files, with offsets
     const parsed = [];
     for (let i = 0; i < input.length; i++) {
-      const oneParsed = await parseOne(input[i], opts);
+      const oneParsed = await parseOne(input[i], opts, getGPSTimeSrc(i));
       parsed.push(oneParsed);
     }
     progress(opts, 0.2);
@@ -240,18 +248,13 @@ async function process(input, opts) {
       }
 
       const timeMeta = { gpsDate, mp4Date, offset };
-      const gpsSource = firstTimes[i][bestGPSsource]
-        ? bestGPSsource
-        : firstTimes[i].GPS9
-        ? 'GPS9'
-        : 'GPS5';
 
       interpreted = await interpretOne({
         timing: timing[i],
         parsed: p,
         opts,
         timeMeta,
-        gpsSource
+        gpsTimeSrc: getGPSTimeSrc(i)
       });
 
       if (!gpsDate && timeMeta.gpsDate) {

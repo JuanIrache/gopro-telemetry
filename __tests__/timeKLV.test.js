@@ -14,7 +14,7 @@ describe('Test timing', () => {
       `${__dirname}/../samples/partials/interpreted.json`
     );
 
-    result = await timeKLV(JSON.parse(file)['1'], timing, {});
+    result = await timeKLV(JSON.parse(file)['1'], { timing });
   });
 
   test(`timeKLV should assign times to all samples`, () => {
