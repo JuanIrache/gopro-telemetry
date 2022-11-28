@@ -182,7 +182,9 @@ async function process(input, opts) {
           return foundA.GPS9Time - foundB.GPS9Time;
         }
         if (foundA.GPSU && foundB.GPSU) return foundA.GPSU - foundB.GPSU;
-        if (foundA.STMP && foundB.STMP) return foundA.STMP - foundB.STMP;
+        if (foundA.STMP != null && foundB.STMP != null) {
+          return foundA.STMP - foundB.STMP;
+        }
         return 0;
       });
     }
