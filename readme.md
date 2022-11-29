@@ -225,7 +225,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## Work in progress
 
 - Use GPS9 stream if available, instead of GPS5
-  - Fill date times as values even for classic dateStream
   - Test if dateStream is breaking something down the line
   - Review if date key in GPS9 output matches the recorded day and time
   - Make sure we are not checking altitude correction twice if we are discarding one of the GPS streams

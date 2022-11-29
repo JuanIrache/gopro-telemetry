@@ -433,7 +433,12 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
                       const dateStreamSample = { date, value: GPS9Date };
                       if (includeTime) dateStreamSample.cts = currCts;
                       dummyStream.dateStream.push(dateStreamSample);
-                    } else timedSample.date = new Date(currDate);
+                    } else {
+                      timedSample.date = new Date(currDate);
+                      if (fourCC === 'dateStream') {
+                        timedSample.value = currDate;
+                      }
+                    }
                   }
                   //increment time and date for the next sample and compensate time offset
                   currCts += sDuration[fourCC] - timoDur;
