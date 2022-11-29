@@ -213,7 +213,7 @@ async function process(input, opts) {
     const getGPSTimeSrc = i =>
       firstTimes[i][bestGPSTimeSrc]
         ? bestGPSTimeSrc
-        : firstTimes[i].GPS9
+        : firstTimes[i].GPS9Time
         ? 'GPS9'
         : 'GPS5';
 
