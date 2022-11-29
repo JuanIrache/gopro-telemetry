@@ -263,6 +263,10 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
   } catch (error) {
     result = klv;
   }
+
+  const includeTime = opts.timeOut !== 'date' || opts.groupTimes;
+  const includeDate = opts.timeOut !== 'cts';
+
   try {
     //If valid data
     if (result.DEVC && result.DEVC.length) {
@@ -298,13 +302,17 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
         })();
 
         //Create empty stream if needed for timing purposes
+        const delayDateStream = gpsTimeSrc === 'GPS9' && includeDate;
         const dummyStream = {
           STNM: 'UTC date/time',
           interpretSamples: 'dateStream',
-          dateStream: ['0']
+          dateStream: delayDateStream ? [] : ['0']
         };
 
-        if (d.STRM && opts.dateStream) d.STRM.push(dummyStream);
+        // IF GPS9 times, don't loop dateStream as normal stream
+        if (d.STRM && opts.dateStream && !delayDateStream) {
+          d.STRM.push(dummyStream);
+        }
 
         // Only use STMP when clearly one file or consecutive files
         let skipSTMP = false;
@@ -416,10 +424,16 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
                 if (currCts != null && sDuration[fourCC] != null) {
                   let timedSample = { value };
                   //Filter out if timeOut option, but keep cts if needed for merging times
-                  if (opts.timeOut !== 'date' || opts.groupTimes)
-                    timedSample.cts = currCts;
-                  if (opts.timeOut !== 'cts') {
-                    timedSample.date = new Date(currDate);
+                  if (includeTime) timedSample.cts = currCts;
+                  if (includeDate) {
+                    if (gpsTimeSrc === 'GPS9' && fourCC === 'GPS9') {
+                      const GPS9Date = GPS9toDate(value);
+                      const date = new Date(GPS9Date);
+                      timedSample.date = date;
+                      const dateStreamSample = { date, value: GPS9Date };
+                      if (includeTime) dateStreamSample.cts = currCts;
+                      dummyStream.dateStream.push(dateStreamSample);
+                    } else timedSample.date = new Date(currDate);
                   }
                   //increment time and date for the next sample and compensate time offset
                   currCts += sDuration[fourCC] - timoDur;
@@ -437,6 +451,10 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
             }
           }
         });
+        // Add completed GPS9-based dateStream to streams
+        if (d.STRM && opts.dateStream && delayDateStream) {
+          d.STRM.push(dummyStream);
+        }
       }
     } else throw new Error('Invalid data, no DEVC');
   } catch (error) {
