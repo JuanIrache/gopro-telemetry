@@ -225,13 +225,12 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 ## Work in progress
 
 - Use GPS9 stream if available, instead of GPS5
-  - Use for GPS timing (replace GPSU where possible)
+  - Use true internal date data for GPS9 ssamples and copy to dateStream
   - Review if date key in GPS9 output matches the recorded day and time
-  - Option to disable/enable new GPS9 features? Probably not
-  - Potentially loop through samples in processGPS approveStream to find usable samples instead of discarding entire STRM
   - Make sure we are not checking altitude correction twice if we are discarding one of the GPS streams
   - Add sample and tests
   - Review pending todos/GPS9 comments
+  - Option to disable/enable new GPS9 features? Probably not
 - Review CSV header exports when they might include commas (WIND?)
 
 ## To-Do

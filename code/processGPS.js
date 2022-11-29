@@ -81,7 +81,7 @@ module.exports = async function (
           );
           if (gpsKey && !foundCorrections[gpsKey]) {
             // Do keep GPS5 and GPS9 here, as we want to correct both, if present
-            // Todo, but maybe not if use stream option is otherwise?
+            // Todo, but maybe not if use stream option is otherwise? Shoulnd't the unnecessary stream have been deleted already?
             // Analyse quality of GPS data, and how centered in the dataset time it is
             let fixQuality, precision;
             if (
