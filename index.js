@@ -135,8 +135,12 @@ async function process(input, opts) {
   }
 
   // Find available GPS type and store first times for potential sorting
+  const userGPSChoices = ['GPS9', 'GPS5'].filter(k =>
+    (opts.stream || []).includes(k)
+  );
+  const forceGPSSrc = userGPSChoices.length === 1 ? userGPSChoices[0] : null;
   if (!Array.isArray(input)) input = [input];
-  const firstTimes = input.map(i => findFirstTimes(i.rawData));
+  const firstTimes = input.map(i => findFirstTimes(i.rawData, forceGPSSrc));
   let bestGPSTimeSrc;
   if (firstTimes.every(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
   else if (firstTimes.every(t => t.GPSU)) bestGPSTimeSrc = 'GPS5';
