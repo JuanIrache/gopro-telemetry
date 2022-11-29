@@ -57,7 +57,7 @@ async function fillGPSTime(klv, options, timeMeta, gpsTimeSrc) {
     //Object with partial result
     let partialRes;
     let date;
-    //Loop strams if present
+    //Loop streams if present
     if (d != null && d.STRM && d.STRM.length) {
       for (const key in d.STRM) {
         //Find the GPS date in the gpsTimeSrc stream
