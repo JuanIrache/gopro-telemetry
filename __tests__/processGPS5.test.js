@@ -15,6 +15,6 @@ describe('Test GPS5', () => {
   });
 
   test(`processGPS should filter out bad precision data`, () => {
-    expect(result.DEVC[0].STRM[2].toDelete).toBe(true);
+    expect(result.DEVC[0].STRM[2].toDelete).toBe('all');
   });
 });
