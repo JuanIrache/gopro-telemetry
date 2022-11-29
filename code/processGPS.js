@@ -8,16 +8,43 @@ module.exports = async function (
   gpsTimeSrc
 ) {
   //Set conditions to filter out GPS5 by precision and type of fix
-  const approveStream = s => {
-    const fix = s.GPS5 ? s.GPSF : ((s.GPS9 || [])[0] || [])[8];
-    const precision = s.GPS5 ? s.GPSP : 100 * ((s.GPS9 || [])[0] || [])[7];
-    if (GPSFix != null) {
-      if (fix == null || fix < GPSFix) return false;
+  const evaluateDeletion = s => {
+    if (s.GPS5) {
+      if (GPSFix != null && (s.GPSF == null || s.GPSF < GPSFix)) {
+        return 'all';
+      }
+      if (GPSPrecision != null && (s.GPSP == null || s.GPSP > GPSPrecision)) {
+        return 'all';
+      }
+      return false;
+    } else if (s.GPS9) {
+      let accepted = 0;
+      let rejected = 0;
+      const perSample = [];
+      for (const sample of s.GPS9 || []) {
+        const fix = sample[8];
+        const precision = sample[7];
+        if (GPSFix != null) {
+          if (fix == null || fix < GPSFix) {
+            rejected++;
+            perSample.push(true);
+            continue;
+          }
+        }
+        if (GPSPrecision != null) {
+          if (precision == null || precision > GPSPrecision) {
+            rejected++;
+            perSample.push(true);
+            continue;
+          }
+        }
+        accepted++;
+        perSample.push(false);
+      }
+      if (rejected === s.GPS9.length) return 'all';
+      if (accepted === s.GPS9.length) return false;
+      return perSample;
     }
-    if (GPSPrecision != null) {
-      if (precision == null || precision > GPSPrecision) return false;
-    }
-    return true;
   };
 
   //Copy the klv data
@@ -40,9 +67,9 @@ module.exports = async function (
       for (let i = ((d || {}).STRM || []).length - 1; i >= 0; i--) {
         await breathe();
         //Mark for deletion streams that do not pass the test, but keep them for possible timing
-        if (d.STRM[i][gpsTimeSrc] && !approveStream(d.STRM[i])) {
-          d.STRM[i].toDelete = true;
-        } else if (
+        const toDelete = d.STRM[i][gpsTimeSrc] && evaluateDeletion(d.STRM[i]);
+        if (toDelete) d.STRM[i].toDelete = toDelete;
+        else if (
           (!foundCorrections.GPS5 || foundCorrections.GPS9) &&
           //If altitude is mean sea level, no need to process it further
           //Otherwise check if all needed info is available
