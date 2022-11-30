@@ -224,8 +224,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## Work in progress
 
-- Use GPS9 stream if available, instead of GPS5
-  - Review pending todos/GPS9 comments
 - Review CSV header exports when they might include commas (WIND?)
 
 ## To-Do
