@@ -222,10 +222,6 @@ If you liked this you might like some of my [app prototyping](https://prototypin
 
 Please make your changes to the **dev** branch, so that automated tests can be run before merging to **master**. Also, if possible, provide tests for new functionality.
 
-## Work in progress
-
-- Review CSV header exports when they might include commas (WIND?)
-
 ## To-Do
 
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
