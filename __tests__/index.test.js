@@ -213,3 +213,21 @@ describe('Testing reusing parsed data', () => {
     expect(JSON.stringify(result[0])).toBe(JSON.stringify(result[1]));
   });
 });
+
+describe('Testing using new GPS9 stream', () => {
+  beforeAll(async () => {
+    filename = 'hero11';
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    result = await goproTelemetry({ rawData: file }, { stream: 'GPS' });
+  });
+
+  test(`GPS stream of HERO11 and newer should have GPS9 timestamps`, () => {
+    expect(result['1'].streams.GPS9.samples[10].date.toISOString()).toBe(
+      '2022-09-20T13:29:37.898Z'
+    );
+  });
+
+  test(`GPS stream of HERO11 and newer should have per-sample Fix data`, () => {
+    expect(result['1'].streams.GPS9.samples[10].value[8]).toBe(3);
+  });
+});
