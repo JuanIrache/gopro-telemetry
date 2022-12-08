@@ -66,12 +66,15 @@ async function fillGPSTime(klv, options, timeMeta, gpsTimeSrc) {
           else if (gpsTimeSrc === 'GPS9') {
             date = GPS9toDate(d.STRM[key].GPS9[0]);
           }
-          //Done with GPS times
+          //Almost with GPS times
           delete d.STRM[key].GPSU;
-          if (
-            (options.stream && !options.stream.includes(gpsTimeSrc)) ||
-            d.STRM[key].toDelete === 'all'
-          ) {
+
+          const doneWithGPSTime =
+            options.stream &&
+            !options.stream.includes(gpsTimeSrc) &&
+            (!options.dateStream || gpsTimeSrc === 'GPS5');
+
+          if (doneWithGPSTime || d.STRM[key].toDelete === 'all') {
             delete d.STRM[key];
           } else if (Array.isArray(d.STRM[key].toDelete)) {
             d.STRM[key][gpsTimeSrc] = d.STRM[key][gpsTimeSrc].filter(
@@ -453,6 +456,15 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
               s[fourCC] = s[fourCC].map(value => ({
                 value
               }));
+            }
+
+            // Delete GPS9 when really done
+            if (
+              fourCC === gpsTimeSrc &&
+              opts.stream &&
+              !opts.stream.includes(gpsTimeSrc)
+            ) {
+              delete d.STRM[ii];
             }
           }
         });
