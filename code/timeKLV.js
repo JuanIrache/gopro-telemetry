@@ -1,5 +1,3 @@
-// Review file for GPS9 changes
-
 const breathe = require('./utils/breathe');
 
 //Parse GPSU date format
