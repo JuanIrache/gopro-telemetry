@@ -284,6 +284,10 @@ async function convertSamples(data) {
                 //Update mins and maxes
                 range.occuring.min = Math.min(val, range.occuring.min);
                 range.occuring.max = Math.max(val, range.occuring.max);
+                // Copy occuring min and max to legal ones. This usually avoids a bug in AE where it mixes up float and int values and limits ranges incorrectly
+                range.legal.min = range.occuring.min;
+                range.legal.max = range.occuring.max;
+
                 //And max left and right padding
                 pattern.digitsInteger = Math.max(
                   bigStr(Math.floor(val)).length,
@@ -384,11 +388,6 @@ async function convertSamples(data) {
             }
             //Save total samples count
             dataOutlineChild.sampleCount = sampleSet.samples.length;
-            // Copy occuring min and max to legal ones. This usually avoids a bug in AE where it mixes up float and int values and limits ranges incorrectly
-            dataOutlineChild.dataType.numberStringProperties.range.legal.min =
-              dataOutlineChild.dataType.numberStringProperties.range.occuring.min;
-            dataOutlineChild.dataType.numberStringProperties.range.legal.max =
-              dataOutlineChild.dataType.numberStringProperties.range.occuring.max;
 
             //Save stream
             dataOutline.push(dataOutlineChild);
