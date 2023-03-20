@@ -57,20 +57,20 @@ module.exports = async function (
   klv,
   { groupTimes, timeOut, disableInterpolation, disableMerging }
 ) {
-  //Copy input
-  let result;
-  try {
-    result = JSON.parse(JSON.stringify(klv));
-  } catch (error) {
-    result = klv;
-  }
+  const result = {};
+
   //Loop devices and streams
-  for (const key in result) {
-    if (result[key].streams) {
-      for (const k in result[key].streams) {
+  for (const key in klv) {
+    const { streams, ...rest } = klv[key];
+    // Build result progressively to avoid memory issues copying the entire thing
+    result[key] = rest;
+    if (streams) {
+      result[key].streams = [];
+      for (const k in streams) {
         await breathe();
         //Gather samples
-        const samples = result[key].streams[k].samples;
+        const { samples, ...rest } = streams[k];
+        result[key].streams[k] = rest;
         if (samples) {
           let currentTime = 0;
           let newSamples = [];
@@ -89,6 +89,7 @@ module.exports = async function (
                 break;
                 //Check the next sample
               } else i++;
+              if (i % 1000 === 0) await breathe();
               //One sample is just fine if disableMerging
               if (disableMerging) break;
             }
