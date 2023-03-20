@@ -270,10 +270,11 @@ async function convertSamples(data) {
                 val.toString().length,
                 outline.dataType.paddedStringProperties.maxLen
               );
-              outline.dataType.paddedStringProperties.maxDigitsInStrLength = Math.max(
-                val.length.toString().length,
-                outline.dataType.paddedStringProperties.maxDigitsInStrLength
-              );
+              outline.dataType.paddedStringProperties.maxDigitsInStrLength =
+                Math.max(
+                  val.length.toString().length,
+                  outline.dataType.paddedStringProperties.maxDigitsInStrLength
+                );
             };
 
             //Loop all the samples
