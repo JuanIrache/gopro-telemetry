@@ -145,7 +145,10 @@ async function process(input, opts) {
   if (firstTimes.every(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
   else if (firstTimes.every(t => t.GPSU)) bestGPSTimeSrc = 'GPS5';
   else if (firstTimes.some(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
-  else bestGPSTimeSrc = 'GPS5';
+  else {
+    if (opts.timeIn === 'GPS') delete opts.timeIn;
+    bestGPSTimeSrc = 'GPS5';
+  }
   if ((opts.stream || []).includes('GPS')) {
     opts.stream = opts.stream.map(s => (s === 'GPS' ? bestGPSTimeSrc : s));
   }
