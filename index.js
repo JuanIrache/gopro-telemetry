@@ -303,9 +303,9 @@ async function process(input, opts) {
 
   //Read framerate to convert groupTimes to number if needed
   if (opts.groupTimes === 'frames') {
-    if (timing && timing.frameDuration)
+    if (timing && timing.frameDuration) {
       opts.groupTimes = timing.frameDuration * 1000;
-    else throw new Error('Frame rate is needed for your current options');
+    } else throw new Error('Frame rate is needed for your current options');
   }
 
   await breathe();
