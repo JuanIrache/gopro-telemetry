@@ -37,7 +37,7 @@ const goproTelemetry = require('gopro-telemetry');
 function callback(data) {
   // Do sometging with the data
 }
-const telemetry = goproTelemetry(input, options, callback);
+const telemetry = await goproTelemetry(input, options, callback);
 ```
 
 ## Options
@@ -185,7 +185,7 @@ These are the available preset formats:
 GoPros split very long videos in multiple files. In order to generate a single metadata output you can provide the data as an array of objects with data and timing information. Note that usually the last 1-2 seconds of a video file do not include metadata. In some cases this might create a noticeable gap.
 
 ```js
-const telemetry = goproTelemetry([
+const telemetry = await goproTelemetry([
   { rawData: file1Data, timing: file1Timing },
   { rawData: file2Data, timing: file2Timing }
 ]);
@@ -196,8 +196,8 @@ const telemetry = goproTelemetry([
 The first step in the parsing process is usually the most resource-intensive. To avoid repeating it if you want to apply different options to the same input, you can retrieve the parsed data by using the **raw** option and pass it to in the successive calls as **parsedData** instead of **rawData**.
 
 ```js
-const parsedData = goproTelemetry({ rawData, timing }, { raw: true });
-const telemetry = goproTelemetry({ parsedData, timing });
+const parsedData = await goproTelemetry({ rawData, timing }, { raw: true });
+const telemetry = await goproTelemetry({ parsedData, timing });
 ```
 
 The 'raw' data option is sensitive to the options: **device**, **stream**, **deviceList**, **streamList**, **tolerant**, **debug** and indirectly to some **presets**. Meaning this approach should not be used if any of these options is going to change between calls.
