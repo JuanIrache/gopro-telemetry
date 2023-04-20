@@ -473,7 +473,10 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
       }
     } else throw new Error('Invalid data, no DEVC');
   } catch (error) {
-    if (opts.tolerant) setImmediate(() => console.error(error));
+    if (opts.tolerant) {
+      await breathe();
+      console.error(error);
+    }
     else throw error;
   }
   return result;

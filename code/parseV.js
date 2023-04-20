@@ -3,6 +3,7 @@
 //Binary-parser does not support 64bits. Use @gmod/binary-parser
 const Parser = require('@gmod/binary-parser').Parser;
 const { types } = require('./data/keys');
+const breathe = require('./utils/breathe');
 //Will store unknown types
 let unknown = new Set();
 
@@ -56,7 +57,7 @@ function parseV(environment, slice, len, specifics) {
 
     //If debugging, print unexpected types
     if (options.debug && unknown.size)
-      setImmediate(() =>
+      breathe().then(() =>
         console.warn('unknown types:', [...unknown].join(','))
       );
     return res;

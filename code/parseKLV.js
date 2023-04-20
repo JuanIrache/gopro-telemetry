@@ -16,7 +16,7 @@ function findLastCC(data, start, end) {
       //But don't process it, go to next
       length = ks.size * ks.repeat;
     } catch (error) {
-      setImmediate(() => console.error(error));
+      breathe().then(() => console.error(error));
     }
     const reached = start + 8 + (length >= 0 ? length : 0);
     //Align to 32 bits
@@ -216,8 +216,12 @@ async function parseKLV(
         } else throw Error('Error, negative length');
       }
     } catch (err) {
-      if (options.tolerant) setImmediate(() => console.error(err));
-      else throw err;
+      if (options.tolerant) {
+        await breathe();
+        console.error(err);
+      } else {
+        throw err;
+      }
     }
 
     //Advance to the next KLV, at least 64 bits
@@ -239,7 +243,8 @@ async function parseKLV(
 
   //If debugging, print unexpected types
   if (options.debug && unknown.size)
-    setImmediate(() => console.warn('unknown types:', [...unknown].join(',')));
+    await breathe();
+    console.warn('unknown types:', [...unknown].join(','))
 
   return result;
 }

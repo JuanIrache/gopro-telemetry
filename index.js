@@ -34,7 +34,9 @@ async function parseOne({ rawData, parsedData }, opts, gpsTimeSrc) {
       'Invalid GPMF data. Root object must contain DEVC key'
     );
     if (opts.tolerant) {
-      setImmediate(() => console.error(error));
+      await breathe();
+      console.error(error);
+
       return parsed;
     } else throw error;
   }
