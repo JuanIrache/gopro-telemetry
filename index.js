@@ -8,7 +8,7 @@ const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
-const processGPS5 = require('./code/processGPS5');
+const processGPS = require('./code/processGPS');
 const filterWrongSpeed = require('./code/filterWrongSpeed');
 const presetsOpts = require('./code/data/presetsOptions');
 const toGpx = require('./code/presets/toGpx');
@@ -22,13 +22,13 @@ const breathe = require('./code/utils/breathe');
 const getOffset = require('./code/utils/getOffset');
 const findFirstTimes = require('./code/utils/findFirstTimes');
 
-async function parseOne({ rawData, parsedData }, opts) {
+async function parseOne({ rawData, parsedData }, opts, gpsTimeSrc) {
   if (parsedData) return parsedData;
 
   await breathe();
 
   //Parse input
-  const parsed = await parseKLV(rawData, opts);
+  const parsed = await parseKLV(rawData, opts, { gpsTimeSrc });
   if (!parsed.DEVC) {
     const error = new Error(
       'Invalid GPMF data. Root object must contain DEVC key'
@@ -42,7 +42,7 @@ async function parseOne({ rawData, parsedData }, opts) {
   return parsed;
 }
 
-async function interpretOne({ timing, parsed, opts, timeMeta }) {
+async function interpretOne({ timing, parsed, opts, timeMeta, gpsTimeSrc }) {
   //Group it by device
   const grouped = await groupDevices(parsed);
 
@@ -52,11 +52,11 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
   if (
     !opts.ellipsoid ||
     opts.geoidHeight ||
-    opts.GPS5Precision != null ||
-    opts.GPS5Fix != null
+    opts.GPSPrecision != null ||
+    opts.GPSFix != null
   ) {
     for (const key in grouped)
-      grouped[key] = await processGPS5(grouped[key], opts);
+      grouped[key] = await processGPS(grouped[key], opts, gpsTimeSrc);
   }
 
   let interpreted = {};
@@ -70,7 +70,12 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
   //Apply timing (gps and mp4) to every sample
   for (const key in interpreted) {
     await breathe();
-    timed[key] = await timeKLV(interpreted[key], timing, opts, timeMeta);
+    timed[key] = await timeKLV(interpreted[key], {
+      timing,
+      opts,
+      timeMeta,
+      gpsTimeSrc
+    });
   }
 
   //Merge samples in sensor entries
@@ -85,6 +90,12 @@ async function interpretOne({ timing, parsed, opts, timeMeta }) {
       if (merged[key].streams.GPS5) {
         merged[key].streams.GPS5.samples = filterWrongSpeed(
           merged[key].streams.GPS5.samples,
+          opts.WrongSpeed
+        );
+      }
+      if (merged[key].streams.GPS9) {
+        merged[key].streams.GPS9.samples = filterWrongSpeed(
+          merged[key].streams.GPS9.samples,
           opts.WrongSpeed
         );
       }
@@ -118,6 +129,29 @@ async function process(input, opts) {
   //Create filter arrays if user didn't
   if (opts.device && !Array.isArray(opts.device)) opts.device = [opts.device];
   if (opts.stream && !Array.isArray(opts.stream)) opts.stream = [opts.stream];
+  if (opts.GPSFix == null && opts.GPS5Fix != null) opts.GPSFix = opts.GPS5Fix;
+  if (opts.GPSPrecision == null && opts.GPS5Precision != null) {
+    opts.GPSPrecision = opts.GPS5Precision;
+  }
+
+  // Find available GPS type and store first times for potential sorting
+  const userGPSChoices = ['GPS9', 'GPS5'].filter(k =>
+    (opts.stream || []).includes(k)
+  );
+  const forceGPSSrc = userGPSChoices.length === 1 ? userGPSChoices[0] : null;
+  if (!Array.isArray(input)) input = [input];
+  const firstTimes = input.map(i => findFirstTimes(i.rawData, forceGPSSrc));
+  let bestGPSTimeSrc;
+  if (firstTimes.every(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
+  else if (firstTimes.every(t => t.GPSU)) bestGPSTimeSrc = 'GPS5';
+  else if (firstTimes.some(t => t.GPS9Time)) bestGPSTimeSrc = 'GPS9';
+  else {
+    if (opts.timeIn === 'GPS') delete opts.timeIn;
+    bestGPSTimeSrc = 'GPS5';
+  }
+  if ((opts.stream || []).includes('GPS')) {
+    opts.stream = opts.stream.map(s => (s === 'GPS' ? bestGPSTimeSrc : s));
+  }
 
   let interpreted;
   let timing;
@@ -125,8 +159,8 @@ async function process(input, opts) {
   // Provide approximate progress updates
   progress(opts, 0.01);
 
-  //Check if input is array of sources
-  if (Array.isArray(input) && input.length === 1) input = input[0];
+  // Treat single or multiple inputs differently
+  if (input.length === 1) input = input[0];
   if (!Array.isArray(input)) {
     if (input.timing) {
       timing = JSON.parse(JSON.stringify(input.timing));
@@ -135,7 +169,8 @@ async function process(input, opts) {
 
     await breathe();
 
-    const parsed = await parseOne(input, opts);
+    const gpsTimeSrc = bestGPSTimeSrc;
+    const parsed = await parseOne(input, opts, gpsTimeSrc);
 
     progress(opts, 0.2);
 
@@ -150,7 +185,7 @@ async function process(input, opts) {
 
     await breathe();
 
-    interpreted = await interpretOne({ timing, parsed, opts });
+    interpreted = await interpretOne({ timing, parsed, opts, gpsTimeSrc });
     progress(opts, 0.4);
   } else {
     if (input.some(i => !i.timing))
@@ -166,10 +201,15 @@ async function process(input, opts) {
       // Some firmwares produce consecutive files with the same creation date.
       // Try to use GPS time or timestamps to solve this
       input.sort((a, b) => {
-        const foundA = findFirstTimes(a.rawData);
-        const foundB = findFirstTimes(b.rawData);
+        const foundA = firstTimes[input.indexOf(a)];
+        const foundB = firstTimes[input.indexOf(b)];
+        if (foundA.GPS9Time && foundB.GPS9Time) {
+          return foundA.GPS9Time - foundB.GPS9Time;
+        }
         if (foundA.GPSU && foundB.GPSU) return foundA.GPSU - foundB.GPSU;
-        if (foundA.STMP && foundB.STMP) return foundA.STMP - foundB.STMP;
+        if (foundA.STMP != null && foundB.STMP != null) {
+          return foundA.STMP - foundB.STMP;
+        }
         return 0;
       });
     }
@@ -177,10 +217,17 @@ async function process(input, opts) {
     timing = input.map(i => JSON.parse(JSON.stringify(i.timing)));
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
 
+    const getGPSTimeSrc = i =>
+      firstTimes[i][bestGPSTimeSrc]
+        ? bestGPSTimeSrc
+        : firstTimes[i].GPS9Time
+        ? 'GPS9'
+        : 'GPS5';
+
     //Loop parse all files, with offsets
     const parsed = [];
     for (let i = 0; i < input.length; i++) {
-      const oneParsed = await parseOne(input[i], opts);
+      const oneParsed = await parseOne(input[i], opts, getGPSTimeSrc(i));
       parsed.push(oneParsed);
     }
     progress(opts, 0.2);
@@ -213,7 +260,8 @@ async function process(input, opts) {
         timing: timing[i],
         parsed: p,
         opts,
-        timeMeta
+        timeMeta,
+        gpsTimeSrc: getGPSTimeSrc(i)
       });
 
       if (!gpsDate && timeMeta.gpsDate) {
@@ -239,7 +287,7 @@ async function process(input, opts) {
 
   await breathe();
 
-  //Clean unused streams (namely GPS5 used for timing if cached raw data)
+  //Clean unused streams (namely GPS5 & GPS9 used for timing if cached raw data)
   if (opts.stream && opts.stream.length) {
     for (const dev in interpreted) {
       for (const stream in interpreted[dev].streams) {
@@ -255,9 +303,9 @@ async function process(input, opts) {
 
   //Read framerate to convert groupTimes to number if needed
   if (opts.groupTimes === 'frames') {
-    if (timing && timing.frameDuration)
+    if (timing && timing.frameDuration) {
       opts.groupTimes = timing.frameDuration * 1000;
-    else throw new Error('Frame rate is needed for your current options');
+    } else throw new Error('Frame rate is needed for your current options');
   }
 
   await breathe();

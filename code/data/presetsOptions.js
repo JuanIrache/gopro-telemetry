@@ -14,7 +14,7 @@ module.exports = {
   gpx: {
     mandatory: {
       dateStream: false,
-      stream: 'GPS5',
+      stream: 'GPS',
       timeOut: null,
       geoidHeight: true
     },
@@ -26,16 +26,16 @@ module.exports = {
       timeOut: null,
       geoidHeight: true
     },
-    preferred: { ellipsoid: true, timeIn: 'MP4', stream: 'GPS5' }
+    preferred: { ellipsoid: true, timeIn: 'MP4', stream: 'GPS' }
   },
   kml: {
-    mandatory: { dateStream: false, stream: 'GPS5', timeOut: null },
+    mandatory: { dateStream: false, stream: 'GPS', timeOut: null },
     preferred: {}
   },
   geojson: {
     mandatory: {
       dateStream: false,
-      stream: 'GPS5',
+      stream: 'GPS',
       timeOut: null,
       geoidHeight: true
     },

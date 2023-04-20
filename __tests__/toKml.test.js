@@ -9,7 +9,7 @@ describe('Test KML', () => {
       `${__dirname}/../samples/partials/mergedGps.json`
     );
 
-    result = await toKml(JSON.parse(file), {});
+    result = await toKml(JSON.parse(file), { comment: true });
   });
 
   test(`toKml should return a long string`, () => {
@@ -17,8 +17,8 @@ describe('Test KML', () => {
   });
 
   test(`toKml should export kml placemarks`, () => {
-    expect(result.slice(478, 918)).toBe(`<Placemark>
-            <description>GPS Fix: 3; GPS Accuracy: 606; geoidHeight: -34.03217630752571; 2D Speed: 0.167; 3D Speed: 0.19</description>
+    expect(result.slice(478, 914)).toBe(`<Placemark>
+            <description>GPS Fix: 3; GPS DOP: 6.06; geoidHeight: -34.03217630752571; 2D Speed: 0.167; 3D Speed: 0.19</description>
             <Point>
                 <altitudeMode>absolute</altitudeMode>
                 <coordinates>-117.3273542,33.1264969,-20.184</coordinates>

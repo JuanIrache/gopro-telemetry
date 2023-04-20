@@ -92,13 +92,13 @@ describe('Testing GPS5 with hero7 file', () => {
       {
         stream: 'GPS5',
         smooth: 20,
-        GPS5Precision: 140,
+        GPSPrecision: 140,
         timeIn: 'MP4'
       }
     );
   });
 
-  test(`GPS5Precision should leave us with fewer, better samples`, () => {
+  test(`GPSPrecision should leave us with fewer, better samples`, () => {
     expect(result['1'].streams.GPS5.samples.length).toBe(219);
   });
 
@@ -121,11 +121,11 @@ describe('Testing with hero6 file', () => {
     file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
-      { GPS5Fix: 2, timeOut: 'cts' }
+      { GPSFix: 2, timeOut: 'cts' }
     );
   });
 
-  test(`GPS5Fix should discard bad GPS data`, () => {
+  test(`GPSFix should discard bad GPS data`, () => {
     expect(result['1'].streams.GPS5).toBeUndefined();
   });
 
@@ -202,8 +202,8 @@ describe('Testing reusing parsed data', () => {
         smooth: 5,
         ellipsoid: true,
         geoidHeight: true,
-        GPS5Precision: 200,
-        GPS5Fix: 3
+        GPSPrecision: 200,
+        GPSFix: 3
       }
     );
     result.push(goproTelemetry({ parsedData, timing }));
@@ -211,5 +211,23 @@ describe('Testing reusing parsed data', () => {
 
   test(`Reused parsed data should output the same as binary data`, () => {
     expect(JSON.stringify(result[0])).toBe(JSON.stringify(result[1]));
+  });
+});
+
+describe('Testing using new GPS9 stream', () => {
+  beforeAll(async () => {
+    filename = 'hero11';
+    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    result = await goproTelemetry({ rawData: file }, { stream: 'GPS' });
+  });
+
+  test(`GPS stream of HERO11 and newer should have GPS9 timestamps`, () => {
+    expect(result['1'].streams.GPS9.samples[10].date.toISOString()).toBe(
+      '2022-09-20T13:29:37.898Z'
+    );
+  });
+
+  test(`GPS stream of HERO11 and newer should have per-sample Fix data`, () => {
+    expect(result['1'].streams.GPS9.samples[10].value[8]).toBe(3);
   });
 });

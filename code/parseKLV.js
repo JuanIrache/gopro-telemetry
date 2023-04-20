@@ -29,10 +29,7 @@ function findLastCC(data, start, end) {
 async function parseKLV(
   data,
   options = {},
-  start = 0,
-  end = data.length,
-  parent,
-  unarrayLast = true
+  { start = 0, end = data.length, parent, unArrayLast = true, gpsTimeSrc }
 ) {
   let result = {};
   //Will store unknown types
@@ -42,21 +39,22 @@ async function parseKLV(
   //Find the last, most relevant key
   let lastCC = findLastCC(data, start, end);
   //Undo unarraying of last if this is a valid sample structure, despite being an mp4Header
-  if (mp4ValidSamples.includes(lastCC)) unarrayLast = true;
+  if (mp4ValidSamples.includes(lastCC)) unArrayLast = true;
   //Remember last key for interpreting data later
   result.interpretSamples = lastCC;
 
-  //Check if the lastCC is to be filtered out by options, but keep GPS5 for timing if lists or timein is MP4
+  //Check if the lastCC is to be filtered out by options, but keep GPS5/GPS9 for timing if lists or timein is MP4
   if (
     parent === 'STRM' &&
     options.stream &&
     !options.stream.includes(lastCC) &&
-    (lastCC !== 'GPS5' ||
+    (lastCC !== gpsTimeSrc ||
       (options.timeIn === 'MP4' && !options.raw) ||
       options.streamList ||
       options.deviceList)
-  )
+  ) {
     return undefined;
+  }
 
   while (start < end) {
     let length = 0;
@@ -94,14 +92,13 @@ async function parseKLV(
           else if (types[ks.type].nested) {
             // only if data is long enough to contain them
             if (data.length >= start + 8 + length) {
-              const parsed = await parseKLV(
-                data,
-                options,
-                start + 8,
-                start + 8 + length,
-                ks.fourCC,
-                unArrayLastChild
-              );
+              const parsed = await parseKLV(data, options, {
+                start: start + 8,
+                end: start + 8 + length,
+                parent: ks.fourCC,
+                unArrayLast: unArrayLastChild,
+                gpsTimeSrc
+              });
               if (parsed != null) partialResult.push(parsed);
             } else partialResult.push(undefined);
           }
@@ -232,7 +229,7 @@ async function parseKLV(
   //Undo all arrays except the last key, which should be the array of samples (except for mp4 headers)
   for (const key in result) {
     if (
-      (!unarrayLast || key !== lastCC) &&
+      (!unArrayLast || key !== lastCC) &&
       result[key] &&
       result[key].length === 1
     ) {

@@ -1,7 +1,7 @@
 const breathe = require('./utils/breathe');
 
 //Parse GPSU date format
-function toDate(d) {
+function GPSUtoDate(GPSU) {
   let regex = /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\.(\d{3})/;
   let YEAR = 1,
     MONTH = 2,
@@ -10,9 +10,9 @@ function toDate(d) {
     MIN = 5,
     SEC = 6,
     MIL = 7;
-  let parts = d.match(regex);
-  if (parts)
-    return new Date(
+  let parts = GPSU.match(regex);
+  if (parts) {
+    const date = new Date(
       Date.UTC(
         '20' + parts[YEAR],
         parts[MONTH] - 1,
@@ -22,12 +22,29 @@ function toDate(d) {
         parts[SEC],
         parts[MIL]
       )
-    ).getTime();
+    );
+    return date.getTime();
+  }
+  return null;
+}
+
+function GPS9toDate(GPS9) {
+  if (GPS9 && GPS9.length > 6) {
+    const days = GPS9[5];
+    const seconds = GPS9[6];
+    const fullSeconds = Math.floor(seconds);
+    const milliseconds = (seconds - fullSeconds) * 1000;
+    let date = new Date('2000');
+    date.setUTCDate(date.getUTCDate() + days);
+    date.setUTCSeconds(date.getUTCSeconds() + fullSeconds);
+    date.setUTCMilliseconds(date.getUTCMilliseconds() + milliseconds);
+    return date.getTime();
+  }
   return null;
 }
 
 //Create list of GPS dates, times and duration for each packet of samples
-async function fillGPSTime(klv, options, timeMeta) {
+async function fillGPSTime(klv, options, timeMeta, gpsTimeSrc) {
   let { gpsDate } = timeMeta;
   let res = [];
   //Ignore if timeIn selects the other time input
@@ -38,19 +55,31 @@ async function fillGPSTime(klv, options, timeMeta) {
     //Object with partial result
     let partialRes;
     let date;
-    //Loop strams if present
+    //Loop streams if present
     if (d != null && d.STRM && d.STRM.length) {
       for (const key in d.STRM) {
-        //Find the GPSU date in the GPS5 stream
-        if (d.STRM[key].GPSU != null) {
-          date = toDate(d.STRM[key].GPSU);
-          //Done with GPSU
-          if (
-            (options.stream && !options.stream.includes('GPS5')) ||
-            d.STRM[key].toDelete
-          ) {
+        //Find the GPS date in the gpsTimeSrc stream
+        if (d.STRM[key][gpsTimeSrc] != null) {
+          if (gpsTimeSrc === 'GPS5') date = GPSUtoDate(d.STRM[key].GPSU);
+          else if (gpsTimeSrc === 'GPS9') {
+            date = GPS9toDate(d.STRM[key].GPS9[0]);
+          }
+          //Almost with GPS times
+          delete d.STRM[key].GPSU;
+
+          const doneWithGPSTime =
+            options.stream &&
+            !options.stream.includes(gpsTimeSrc) &&
+            (!options.dateStream || gpsTimeSrc === 'GPS5');
+
+          if (doneWithGPSTime || d.STRM[key].toDelete === 'all') {
             delete d.STRM[key];
-          } else delete d.STRM[key].GPSU;
+          } else if (Array.isArray(d.STRM[key].toDelete)) {
+            d.STRM[key][gpsTimeSrc] = d.STRM[key][gpsTimeSrc].filter(
+              (_, i) => d.STRM[key].toDelete[i]
+            );
+            delete d.STRM[key].toDelete;
+          }
           break;
         }
       }
@@ -225,7 +254,7 @@ async function fillMP4Time(klv, timing, options, timeMeta) {
 }
 
 //Assign time data to each sample
-async function timeKLV(klv, timing, options, timeMeta = {}) {
+async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
   let { offset } = timeMeta;
   if (!offset) offset = 0;
   //Copy the klv data
@@ -235,12 +264,16 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
   } catch (error) {
     result = klv;
   }
+
+  const includeTime = opts.timeOut !== 'date' || opts.groupTimes;
+  const includeDate = opts.timeOut !== 'cts';
+
   try {
     //If valid data
     if (result.DEVC && result.DEVC.length) {
       //Gather and deduce both types of timing info
-      const gpsTimes = await fillGPSTime(result, options, timeMeta);
-      const mp4Times = await fillMP4Time(result, timing, options, timeMeta);
+      const gpsTimes = await fillGPSTime(result, opts, timeMeta, gpsTimeSrc);
+      const mp4Times = await fillMP4Time(result, timing, opts, timeMeta);
 
       //Will remember the duration of samples per (fourCC) type of stream, in case the last durations are missing
       let sDuration = {};
@@ -270,13 +303,17 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
         })();
 
         //Create empty stream if needed for timing purposes
+        const delayDateStream = gpsTimeSrc === 'GPS9' && includeDate;
         const dummyStream = {
           STNM: 'UTC date/time',
           interpretSamples: 'dateStream',
-          dateStream: ['0']
+          dateStream: delayDateStream ? [] : ['0']
         };
 
-        if (d.STRM && options.dateStream) d.STRM.push(dummyStream);
+        // IF GPS9 times, don't loop dateStream as normal stream
+        if (d.STRM && opts.dateStream && !delayDateStream) {
+          d.STRM.push(dummyStream);
+        }
 
         // Only use STMP when clearly one file or consecutive files
         let skipSTMP = false;
@@ -291,7 +328,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
           ) {
             const fourCC = s.interpretSamples;
 
-            if (!options.mp4header) {
+            if (!opts.mp4header) {
               //Will store the current Cts
               let currCts;
               let currDate;
@@ -299,7 +336,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
               if (ii === 0) {
                 // Evaluate convenience of STMP on first sample
                 // Only use timestamps if not removing gap
-                if (options.removeGaps) skipSTMP = true;
+                if (opts.removeGaps) skipSTMP = true;
                 // If no mp4Times, don't bother
                 else if (!mp4Times.length) skipSTMP = true;
                 // Arbitrarily, anything outside 2 seconds from the current offset should not use STMP either
@@ -320,7 +357,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
               if (s.STMP != null) {
                 if (!skipSTMP) {
                   currCts = s.STMP / 1000;
-                  if (options.timeIn === 'MP4') {
+                  if (opts.timeIn === 'MP4') {
                     //Use timeStamps for date if MP4 timing is selected
                     currDate = dInitialDate + currCts;
                     microDate = true;
@@ -338,7 +375,7 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                           sDuration[fourCC] =
                             (ss.STMP / 1000 - currCts) / s[fourCC].length;
                           microDuration = true;
-                          if (options.timeIn === 'MP4') {
+                          if (opts.timeIn === 'MP4') {
                             //Use timeStamps for date if MP4 timing is selected
                             dateSDur[fourCC] = sDuration[fourCC];
                             microDateDuration = true;
@@ -388,10 +425,21 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                 if (currCts != null && sDuration[fourCC] != null) {
                   let timedSample = { value };
                   //Filter out if timeOut option, but keep cts if needed for merging times
-                  if (options.timeOut !== 'date' || options.groupTimes)
-                    timedSample.cts = currCts;
-                  if (options.timeOut !== 'cts') {
-                    timedSample.date = new Date(currDate);
+                  if (includeTime) timedSample.cts = currCts;
+                  if (includeDate) {
+                    if (gpsTimeSrc === 'GPS9' && fourCC === 'GPS9') {
+                      const GPS9Date = GPS9toDate(value);
+                      const date = new Date(GPS9Date);
+                      timedSample.date = date;
+                      const dateStreamSample = { date, value: GPS9Date };
+                      if (includeTime) dateStreamSample.cts = currCts;
+                      dummyStream.dateStream.push(dateStreamSample);
+                    } else {
+                      timedSample.date = new Date(currDate);
+                      if (fourCC === 'dateStream') {
+                        timedSample.value = currDate;
+                      }
+                    }
                   }
                   //increment time and date for the next sample and compensate time offset
                   currCts += sDuration[fourCC] - timoDur;
@@ -407,12 +455,25 @@ async function timeKLV(klv, timing, options, timeMeta = {}) {
                 value
               }));
             }
+
+            // Delete GPS9 when really done
+            if (
+              fourCC === gpsTimeSrc &&
+              opts.stream &&
+              !opts.stream.includes(gpsTimeSrc)
+            ) {
+              delete d.STRM[ii];
+            }
           }
         });
+        // Add completed GPS9-based dateStream to streams
+        if (d.STRM && opts.dateStream && delayDateStream) {
+          d.STRM.push(dummyStream);
+        }
       }
     } else throw new Error('Invalid data, no DEVC');
   } catch (error) {
-    if (options.tolerant) setImmediate(() => console.error(error));
+    if (opts.tolerant) setImmediate(() => console.error(error));
     else throw error;
   }
   return result;

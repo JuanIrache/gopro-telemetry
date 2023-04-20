@@ -112,6 +112,7 @@ const names = {
   ISOG: 'Image sensor gain',
   SHUT: 'Exposure time',
   GPS5: 'Latitude, longitude, altitude (WGS 84), 2D ground speed, and 3D speed',
+  GPS9: 'Lat., Long., Alt., 2D, 3D, days, secs, DOP, fix',
   GPSU: 'UTC time and data from GPS',
   GPSF: 'GPS Fix',
   GPSP: 'GPS Precision - Dilution of Precision (DOP x100)',
