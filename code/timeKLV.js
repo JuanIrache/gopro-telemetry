@@ -356,7 +356,7 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
               let microDateDuration = false;
               if (s.STMP != null) {
                 if (!skipSTMP) {
-                  currCts = s.STMP / 1000;
+                  currCts = Number(s.STMP) / 1000;
                   if (opts.timeIn === 'MP4') {
                     //Use timeStamps for date if MP4 timing is selected
                     currDate = dInitialDate + currCts;
@@ -373,7 +373,7 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
                         if (ss.STMP) {
                           //Has timestamp? Measure duration of all samples and divide by number of samples
                           sDuration[fourCC] =
-                            (ss.STMP / 1000 - currCts) / s[fourCC].length;
+                            (Number(ss.STMP) / 1000 - currCts) / s[fourCC].length;
                           microDuration = true;
                           if (opts.timeIn === 'MP4') {
                             //Use timeStamps for date if MP4 timing is selected
