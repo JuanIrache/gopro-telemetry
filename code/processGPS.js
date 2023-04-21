@@ -140,7 +140,7 @@ module.exports = async function (
     }
     if (warnEgm) {
       console.warn(
-        'Could not fix altitude. Install optional peer dependency `egm95-universal`'
+        'Could not fix altitude. Install optional peer dependency `egm96-universal`'
       );
     }
   }
