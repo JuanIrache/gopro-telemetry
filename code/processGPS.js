@@ -127,17 +127,21 @@ module.exports = async function (
       }
     }
 
-    if (egm96) {
-      for (const k in corrections) {
-        if (corrections[k].source) {
+    let warnEgm;
+    for (const k in corrections) {
+      if (corrections[k].source) {
+        if (egm96) {
           corrections[k].value = egm96.meanSeaLevel(
             corrections[k].source[0],
             corrections[k].source[1]
           );
-        }
+        } else warnEgm = true;
       }
-    } else if (ellipsoid && !geoidHeight) {
-      console.warn('Could not fix altitude. Install optional peer dependency `egm95-universal`');
+    }
+    if (warnEgm) {
+      console.warn(
+        'Could not fix altitude. Install optional peer dependency `egm95-universal`'
+      );
     }
   }
 
