@@ -1,4 +1,4 @@
-const bigStr = require('../code/utils/bigStr');
+const bigStr = require('../../code/utils/bigStr');
 
 test(`bigStr should modify very large numbers to normal strings`, () => {
   expect(bigStr(8.98846567431158e307)).toBe(

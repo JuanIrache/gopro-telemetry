@@ -1,4 +1,4 @@
-const toVirb = require('../code/presets/toVirb');
+const toVirb = require('../../code/presets/toVirb');
 const { readFileSync } = require('fs');
 
 let result;
@@ -6,7 +6,7 @@ let result;
 describe('Test GPS5', () => {
   beforeAll(async () => {
     const file = readFileSync(
-      `${__dirname}/../samples/partials/mergedGps.json`
+      `${__dirname}/../../samples/partials/mergedGps.json`
     );
 
     result = await toVirb(JSON.parse(file), { stream: ['GPS5'] });

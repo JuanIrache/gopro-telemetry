@@ -1,11 +1,11 @@
-const processGPS = require('../code/processGPS');
+const processGPS = require('../../code/processGPS');
 const { readFileSync } = require('fs');
 
 let result;
 
 describe('Test GPS5', () => {
   beforeAll(async () => {
-    const file = readFileSync(`${__dirname}/../samples/partials/grouped.json`);
+    const file = readFileSync(`${__dirname}/../../samples/partials/grouped.json`);
 
     result = await processGPS(
       JSON.parse(file)['1'],

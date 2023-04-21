@@ -34,7 +34,9 @@ async function parseOne({ rawData, parsedData }, opts, gpsTimeSrc) {
       'Invalid GPMF data. Root object must contain DEVC key'
     );
     if (opts.tolerant) {
-      setImmediate(() => console.error(error));
+      await breathe();
+      console.error(error);
+
       return parsed;
     } else throw error;
   }
@@ -341,8 +343,13 @@ async function process(input, opts) {
   return interpreted;
 }
 
-module.exports = async function (input, options = {}, callback) {
+async function GoProTelemetry (input, options = {}, callback) {
   const result = await process(input, options);
   if (!callback) return result;
   callback(result);
 };
+
+module.exports = GoProTelemetry;
+exports = module.exports;
+exports.GoProTelemetry = GoProTelemetry;
+exports.goProTelemetry = GoProTelemetry;

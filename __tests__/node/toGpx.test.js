@@ -1,4 +1,4 @@
-const toGpx = require('../code/presets/toGpx');
+const toGpx = require('../../code/presets/toGpx');
 const { readFileSync } = require('fs');
 
 let result;
@@ -6,7 +6,7 @@ let result;
 describe('Test GPX', () => {
   beforeAll(async () => {
     const file = readFileSync(
-      `${__dirname}/../samples/partials/mergedGps.json`
+      `${__dirname}/../../samples/partials/mergedGps.json`
     );
 
     result = await toGpx(JSON.parse(file), { comment: true });

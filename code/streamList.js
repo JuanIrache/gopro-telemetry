@@ -2,7 +2,7 @@ const { translations, names, knownMulti } = require('./data/keys');
 const hero7Labelling = require('./utils/hero7Labelling');
 
 function deviceList(klv) {
-  result = {};
+  const result = {};
   (klv.DEVC || [])
     .filter(d => d != null)
     .forEach(d => {

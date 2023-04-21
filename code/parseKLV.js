@@ -11,12 +11,12 @@ function findLastCC(data, start, end) {
     //Retrieve structured data
     let length = 0;
     try {
-      const tempKs = keyAndStructParser.parse(data.slice(start)).result;
+      const tempKs = keyAndStructParser.parse(data.slice(start));
       if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
       //But don't process it, go to next
       length = ks.size * ks.repeat;
     } catch (error) {
-      setImmediate(() => console.error(error));
+      breathe().then(() => console.error(error));
     }
     const reached = start + 8 + (length >= 0 ? length : 0);
     //Align to 32 bits
@@ -63,7 +63,7 @@ async function parseKLV(
       if (start % 20000 === 0) await breathe();
       try {
         //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
-        ks = keyAndStructParser.parse(data.slice(start)).result;
+        ks = keyAndStructParser.parse(data.slice(start));
 
         //Get the length of the value (or values, or nested values)
         length = ks.size * ks.repeat;
@@ -216,8 +216,12 @@ async function parseKLV(
         } else throw Error('Error, negative length');
       }
     } catch (err) {
-      if (options.tolerant) setImmediate(() => console.error(err));
-      else throw err;
+      if (options.tolerant) {
+        await breathe();
+        console.error(err);
+      } else {
+        throw err;
+      }
     }
 
     //Advance to the next KLV, at least 64 bits
@@ -238,8 +242,10 @@ async function parseKLV(
   }
 
   //If debugging, print unexpected types
-  if (options.debug && unknown.size)
-    setImmediate(() => console.warn('unknown types:', [...unknown].join(',')));
+  if (options.debug && unknown.size) {
+    await breathe();
+    console.warn('unknown types:', [...unknown].map(el => `"${el}"`).join(','));
+  }
 
   return result;
 }

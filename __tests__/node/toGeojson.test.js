@@ -1,4 +1,4 @@
-const toGeojson = require('../code/presets/toGeojson');
+const toGeojson = require('../../code/presets/toGeojson');
 const { readFileSync } = require('fs');
 
 let result;
@@ -6,7 +6,7 @@ let result;
 describe('Test GeoJSON', () => {
   beforeAll(async () => {
     const file = readFileSync(
-      `${__dirname}/../samples/partials/mergedGps.json`
+      `${__dirname}/../../samples/partials/mergedGps.json`
     );
 
     result = await toGeojson(JSON.parse(file), {});

@@ -1,5 +1,5 @@
 function deviceList(klv) {
-  result = {};
+  const result = {};
   (klv.DEVC || [])
     .filter(d => d != null)
     .forEach(d => {
