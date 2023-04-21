@@ -1,4 +1,4 @@
-const deduceHeaders = require('../code/utils/deduceHeaders');
+const deduceHeaders = require('../../code/utils/deduceHeaders');
 
 test(`DeduceHeaders should create a header per sample with description and unit`, () => {
   expect(

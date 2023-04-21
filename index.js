@@ -343,8 +343,13 @@ async function process(input, opts) {
   return interpreted;
 }
 
-module.exports = async function (input, options = {}, callback) {
+async function GoProTelemetry (input, options = {}, callback) {
   const result = await process(input, options);
   if (!callback) return result;
   callback(result);
 };
+
+module.exports = GoProTelemetry;
+exports = module.exports;
+exports.GoProTelemetry = GoProTelemetry;
+exports.goProTelemetry = GoProTelemetry;

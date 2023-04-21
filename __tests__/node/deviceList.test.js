@@ -1,7 +1,7 @@
-const deviceList = require('../code/deviceList');
+const deviceList = require('../../code/deviceList');
 const { readFileSync } = require('fs');
 
-const file = readFileSync(`${__dirname}/../samples/partials/parsed.json`);
+const file = readFileSync(`${__dirname}/../../samples/partials/parsed.json`);
 const result = deviceList(JSON.parse(file));
 
 test(`deviceList should return the device list`, () => {

@@ -1,4 +1,4 @@
-const toKml = require('../code/presets/toKml');
+const toKml = require('../../code/presets/toKml');
 const { readFileSync } = require('fs');
 
 let result;
@@ -6,7 +6,7 @@ let result;
 describe('Test KML', () => {
   beforeAll(async () => {
     const file = readFileSync(
-      `${__dirname}/../samples/partials/mergedGps.json`
+      `${__dirname}/../../samples/partials/mergedGps.json`
     );
 
     result = await toKml(JSON.parse(file), { comment: true });

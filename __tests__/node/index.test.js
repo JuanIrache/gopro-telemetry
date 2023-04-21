@@ -1,4 +1,4 @@
-const goproTelemetry = require('../');
+const goproTelemetry = require('../../');
 const fs = require('fs');
 
 let filename, file, result;
@@ -12,7 +12,21 @@ const timing = {
 describe('Testing with karma file', () => {
   beforeAll(async () => {
     filename = 'karma';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await goproTelemetry({ rawData: file }, { deviceList: true });
+  });
+
+  test(`Karma should have two devices`, () => {
+    expect(JSON.stringify(result)).toBe(
+      '{"1":"Camera","16835857":"GoPro Karma v1.0"}'
+    );
+  });
+});
+
+describe('Testing with karma file as Uint8Array', () => {
+  beforeAll(async () => {
+    filename = 'karma';
+    file = new Uint8Array(fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`));
     result = await goproTelemetry({ rawData: file }, { deviceList: true });
   });
 
@@ -26,7 +40,7 @@ describe('Testing with karma file', () => {
 describe('Testing with hero6+ble.raw file', () => {
   beforeAll(async () => {
     filename = 'hero6+ble';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry({ rawData: file }, { streamList: true });
   });
 
@@ -48,7 +62,7 @@ describe('Testing with hero6+ble.raw file', () => {
 describe('Testing deeper with hero6+ble file', () => {
   beforeAll(async () => {
     filename = 'hero6+ble';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
       { device: 16778241, stream: 'acc1', repeatSticky: true }
@@ -65,7 +79,7 @@ describe('Testing deeper with hero6+ble file', () => {
 describe('Testing with hero7 file', () => {
   beforeAll(async () => {
     filename = 'hero7';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
       { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000 }
@@ -78,7 +92,7 @@ describe('Testing with hero7 file', () => {
 
   test(`repeatHeaders should describe each value on each sample`, () => {
     expect(
-      result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s2]']
+      result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s²]']
     ).toBeDefined();
   });
 });
@@ -86,7 +100,7 @@ describe('Testing with hero7 file', () => {
 describe('Testing GPS5 with hero7 file', () => {
   beforeAll(async () => {
     filename = 'hero7';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file, timing },
       {
@@ -118,7 +132,7 @@ describe('Testing GPS5 with hero7 file', () => {
 describe('Testing with hero6 file', () => {
   beforeAll(async () => {
     filename = 'hero6';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file },
       { GPSFix: 2, timeOut: 'cts' }
@@ -142,7 +156,7 @@ describe('Testing with Fusion file', () => {
   beforeAll(async () => {
     filename = 'Fusion';
 
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry(
       { rawData: file, timing },
       { ellipsoid: true }
@@ -160,12 +174,12 @@ describe('Testing joining consecutive files', () => {
     const filename2 = 'consecutive2';
 
     let timing = JSON.parse(
-      fs.readFileSync(`${__dirname}/../samples/partials/consecutiveTiming.json`)
+      fs.readFileSync(`${__dirname}/../../samples/partials/consecutiveTiming.json`)
     );
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
 
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    const file2 = fs.readFileSync(`${__dirname}/../samples/${filename2}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    const file2 = fs.readFileSync(`${__dirname}/../../samples/${filename2}.raw`);
     result = await goproTelemetry([
       { rawData: file, timing: timing[0] },
       { rawData: file2, timing: timing[1] }
@@ -185,8 +199,8 @@ describe('Testing reusing parsed data', () => {
   beforeAll(async () => {
     filename = 'hero6';
 
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = [goproTelemetry({ rawData: file, timing })];
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = [await goproTelemetry({ rawData: file, timing })];
     //Retrieve parsed data with a bunch of options to make sure that does not change the output
     const parsedData = await goproTelemetry(
       { rawData: file, timing },
@@ -206,7 +220,7 @@ describe('Testing reusing parsed data', () => {
         GPSFix: 3
       }
     );
-    result.push(goproTelemetry({ parsedData, timing }));
+    result.push(await goproTelemetry({ parsedData, timing }));
   });
 
   test(`Reused parsed data should output the same as binary data`, () => {
@@ -217,7 +231,7 @@ describe('Testing reusing parsed data', () => {
 describe('Testing using new GPS9 stream', () => {
   beforeAll(async () => {
     filename = 'hero11';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry({ rawData: file }, { stream: 'GPS' });
   });
 

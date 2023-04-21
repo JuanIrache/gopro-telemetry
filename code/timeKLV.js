@@ -340,11 +340,11 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
                 // If no mp4Times, don't bother
                 else if (!mp4Times.length) skipSTMP = true;
                 // Arbitrarily, anything outside 2 seconds from the current offset should not use STMP either
-                else if (s.STMP / 1000 > mp4Times[i].cts + 1000 * 2) {
+                else if (Number(s.STMP) / 1000 > mp4Times[i].cts + 1000 * 2) {
                   skipSTMP = true;
                 }
                 // (It's either a non-initial isolated file or a file not directly consecutive in the series)
-                else if (s.STMP / 1000 < mp4Times[i].cts - 1000 * 2) {
+                else if (Number(s.STMP) / 1000 < mp4Times[i].cts - 1000 * 2) {
                   skipSTMP = true;
                 }
               }
