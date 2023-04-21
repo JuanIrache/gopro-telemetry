@@ -231,7 +231,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
-- Add way to compensate for timewarp timing weirdness, either manually or automatically
 - Review CSV conversion (when only 1 sticky value, it does not print)
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
