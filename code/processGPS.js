@@ -1,4 +1,9 @@
-const egm96 = require('egm96-universal');
+let egm96;
+try {
+  egm96 = require('egm96-universal');
+} catch {
+  egm96 = undefined;
+}
 const breathe = require('./utils/breathe');
 
 //Adapts WGS84 ellipsoid heights in GPS data to EGM96 geoid (closer to mean sea level) and filters out bad gps data
@@ -121,13 +126,18 @@ module.exports = async function (
         }
       }
     }
-    for (const k in corrections) {
-      if (corrections[k].source) {
-        corrections[k].value = egm96.meanSeaLevel(
-          corrections[k].source[0],
-          corrections[k].source[1]
-        );
+
+    if (egm96) {
+      for (const k in corrections) {
+        if (corrections[k].source) {
+          corrections[k].value = egm96.meanSeaLevel(
+            corrections[k].source[0],
+            corrections[k].source[1]
+          );
+        }
       }
+    } else if (ellipsoid && !geoidHeight) {
+      console.warn('Could not fix altitude. Install optional peer dependency `egm95-universal`');
     }
   }
 
