@@ -38,7 +38,7 @@ interface GoProTelemetryAllOptions {
   ellipsoid?: boolean;
   /** Saves the altitude offset without applying it, for third party processing. Only relevant when ellipsoid is enabled. */
   geoidHeight?: boolean;
-  /** Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good). */
+  /** Will filter out GPS5 samples where the Dilution of Precision (x100) is higher than specified (under 500 should be good). */
   GPS5Precision?: number;
   /** Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock). */
   GPS5Fix?: 0 | 2 | 3;
