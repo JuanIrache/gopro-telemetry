@@ -62,8 +62,8 @@ The options must be an object. The following keys are supported.
 - **disableMerging** (boolean) Will allow _groupTimes_ to work slightly faster by selecting one sample per time slot instead of merging them all.
 - **smooth** (number) Uses the adjacent samples os a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process.
 - **dateStream** (boolean) Creates an additional stream with only date information, no values, to make sure we have timing information of the whole track, even if the selected streams have empty sections.
-- **ellipsoid** (boolean) On old cameras (pre Hero8) the GPS altitude will be converted by default from WGS84 (World Geodetic System) ellipsoid to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the raw ellipsoid values. The newer cameras (Hero 8, Max...) provide the data directly as mean sea level, so this setting does not apply.
-- **geoidHeight** (boolean) Saves the altitude offset without applying it, for third party processing. Only relevant when _ellipsoid_ is enabled.
+- **ellipsoid** (boolean) On old cameras (pre Hero8) the GPS altitude will be converted by default from WGS84 (World Geodetic System) ellipsoid to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the raw ellipsoid values. The newer cameras (Hero 8, Max...) provide the data directly as mean sea level, so this setting does not apply. Altitude corrections require the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal). If not present, the result will be as if this option was true.
+- **geoidHeight** (boolean) Saves altitude corrections between without applying them, for third party processing. Only relevant when _ellipsoid_ is enabled. Requires the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal).
 - **GPSPrecision** (number) Will filter out GPS samples where the Dilution of Precision (multiplied by 100) is higher than specified (under 500 should be good).
 - **GPSFix** (number) Will filter out GPS samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
 - **WrongSpeed** (number) Will filter out GPS positions that generate higher speeds than indicated in meters per second. This acts on a sample to sample basis, so in order to avoid ignoring generally good samples that produce high speeds due to noise, it is important to set a generous (high) value.
@@ -209,6 +209,10 @@ const telemetry = await goproTelemetry({ parsedData, timing });
 ```
 
 The 'raw' data option is sensitive to the options: **device**, **stream**, **deviceList**, **streamList**, **tolerant**, **debug** and indirectly to some **presets**. Meaning this approach should not be used if any of these options is going to change between calls.
+
+## Altitude correction
+
+Altitude data in old cameras was not recorded as mean-sea-level. The library tries to correct for this automatically, or if requested through the options. For altitude correction to work the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal) must be installed.
 
 ## MP4 header data
 
