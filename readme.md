@@ -256,3 +256,4 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 - [Juan Irache](https://github.com/JuanIrache) - Main developer
 - [Thomas Sarlandie](https://github.com/sarfata) - Contributor
+- [Akxe](https://github.com/Akxe) - Contributor
