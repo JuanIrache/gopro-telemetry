@@ -33,8 +33,15 @@
   "author": "Juan Irache Duesca",
   "license": "ISC",
   "dependencies": {
-    "binary-parser": "^2.2.1",
+    "binary-parser": "^2.2.1"
+  },
+  "peerDependencies": {
     "egm96-universal": "^1.1.0"
+  },
+  "peerDependenciesMeta": {
+    "egm96-universal": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
