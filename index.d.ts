@@ -269,13 +269,22 @@ interface SampleOutputByType {
       value: number[];
     }[];
   } & CommonSampleOutput;
-  [`FACE${number}` | 'Face']: {
+  FACE: {
     name: 'Face Coordinates and details (x,y,w,h,unknown,smile)';
     subStreamName: `ID:${number}`;
     samples: {
       value: [number, number, number, number, number, number];
     }[];
   } & CommonSampleOutput;
+  FACE1: SampleOutputByType['FACE'];
+  FACE2: SampleOutputByType['FACE'];
+  FACE3: SampleOutputByType['FACE'];
+  FACE4: SampleOutputByType['FACE'];
+  FACE5: SampleOutputByType['FACE'];
+  FACE6: SampleOutputByType['FACE'];
+  FACE7: SampleOutputByType['FACE'];
+  FACE8: SampleOutputByType['FACE'];
+  FACE9: SampleOutputByType['FACE'];
   //FCNM: {} & CommonSampleOutput;
   FWVS: {
     name: 'FWVS';
