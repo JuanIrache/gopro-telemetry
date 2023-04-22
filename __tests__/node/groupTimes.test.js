@@ -1,4 +1,4 @@
-const groupTimes = require('../code/groupTimes');
+const groupTimes = require('../../code/groupTimes');
 const { readFileSync } = require('fs');
 
 let result;
@@ -7,7 +7,7 @@ let resNoInter;
 
 describe('Test grouping times', () => {
   beforeAll(async () => {
-    const file = readFileSync(`${__dirname}/../samples/partials/merged.json`);
+    const file = readFileSync(`${__dirname}/../../samples/partials/merged.json`);
 
     result = await groupTimes(JSON.parse(file), { groupTimes: 25 });
     resNoMerge = await groupTimes(JSON.parse(file), {

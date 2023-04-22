@@ -1,4 +1,4 @@
-const parseKLV = require('../code/parseKLV');
+const parseKLV = require('../../code/parseKLV');
 const fs = require('fs');
 
 let filename, file, result;
@@ -6,8 +6,8 @@ let filename, file, result;
 describe('Testing with Fusion file', () => {
   beforeAll(async () => {
     filename = 'Fusion';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await parseKLV(file);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await parseKLV(file, {}, { gpsTimeSrc: 'GPS5' });
   });
 
   test(`Fusion should return valid metadata (DEVC)`, () => {
@@ -36,8 +36,8 @@ describe('Testing with Fusion file', () => {
 describe('Testing with hero5 file', () => {
   beforeAll(async () => {
     filename = 'hero5';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await parseKLV(file);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await parseKLV(file, {}, { gpsTimeSrc: 'GPS5' });
   });
 
   test(`hero5 should return valid metadata (DEVC)`, () => {
@@ -65,8 +65,8 @@ describe('Testing with hero5 file', () => {
 describe('Testing with hero6 file', () => {
   beforeAll(async () => {
     filename = 'hero6';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await parseKLV(file);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await parseKLV(file, {}, { gpsTimeSrc: 'GPS5' });
   });
 
   test(`hero6 should return valid metadata (DEVC)`, () => {
@@ -92,8 +92,8 @@ describe('Testing with hero6 file', () => {
 describe('Testing with hero6+ble file', () => {
   beforeAll(async () => {
     filename = 'hero6+ble';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await parseKLV(file);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await parseKLV(file, {}, { gpsTimeSrc: 'GPS5' });
   });
 
   test(`hero6+ble should contain two devices (DEVC)`, () => {
@@ -119,8 +119,8 @@ describe('Testing with hero6+ble file', () => {
 describe('Testing with karma file', () => {
   beforeAll(async () => {
     filename = 'karma';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await parseKLV(file);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await parseKLV(file, {}, { gpsTimeSrc: 'GPS5' });
   });
 
   test(`karma should contain two devices (DEVC)`, () => {
@@ -137,8 +137,8 @@ describe('Testing with karma file', () => {
 describe('Testing with hero7 file', () => {
   beforeAll(async () => {
     filename = 'hero7';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
-    result = await parseKLV(file);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await parseKLV(file, {}, { gpsTimeSrc: 'GPS5' });
   });
 
   test(`hero7 should contain multiple device entries (DEVC)`, () => {

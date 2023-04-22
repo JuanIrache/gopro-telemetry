@@ -49,7 +49,7 @@ The options must be an object. The following keys are supported.
 - **deviceList** (boolean) Returns an object with only the ids and names of found devices. **Disables the following options**.
 - **streamList** (boolean) Returns an object with only the keys and names of found streams by device. **Disables the following options**.
 - **device** (array of numbers) Filters the results by device id.
-- **stream** (array of strings) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data).
+- **stream** (array of strings) Filters the results by device stream (often a sensor) name. You can find information on what many sensors are called [here](https://github.com/gopro/gpmf-parser#where-to-find-gpmf-data). By passing _GPS_, the code will attempt to select the best stream available for GPS data (_GPS5_ in old cameras, _GPS9_ in new ones)
 - **raw** (boolean) Returns the data as close to raw as possible. No matrix transformations, no scaling, no filtering. It does add some custom keys (like **interpretSamples**) that will help with successive interpretation passes of the data. **Disables the following options**.
 - **repeatSticky** (boolean) Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size.
 - **repeatHeaders** (boolean) Instead of a 'values' array, the samples will be returned under their keys, based on the available name and units. This might increase the output size.
@@ -62,14 +62,15 @@ The options must be an object. The following keys are supported.
 - **disableMerging** (boolean) Will allow _groupTimes_ to work slightly faster by selecting one sample per time slot instead of merging them all.
 - **smooth** (number) Uses the adjacent samples os a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process.
 - **dateStream** (boolean) Creates an additional stream with only date information, no values, to make sure we have timing information of the whole track, even if the selected streams have empty sections.
-- **ellipsoid** (boolean) On old cameras (pre Hero8) the GPS5 altitude will be converted by default from WGS84 (World Geodetic System) ellipsoid to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the raw ellipsoid values. The newer cameras (Hero 8, Max...) provide the data directly as mean sea level, so this setting does not apply.
-- **geoidHeight** (boolean) Saves the altitude offset without applying it, for third party processing. Only relevant when _ellipsoid_ is enabled.
-- **GPS5Precision** (number) Will filter out GPS5 samples where the Dilution of Precision is higher than specified (under 500 should be good).
-- **GPS5Fix** (number) Will filter out GPS5 samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
+- **ellipsoid** (boolean) On old cameras (pre Hero8) the GPS altitude will be converted by default from WGS84 (World Geodetic System) ellipsoid to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the raw ellipsoid values. The newer cameras (Hero 8, Max...) provide the data directly as mean sea level, so this setting does not apply. Altitude corrections require the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal). If not present, the result will be as if this option was true.
+- **geoidHeight** (boolean) Saves altitude corrections between without applying them, for third party processing. Only relevant when _ellipsoid_ is enabled. Requires the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal).
+- **GPSPrecision** (number) Will filter out GPS samples where the Dilution of Precision (multiplied by 100) is higher than specified (under 500 should be good).
+- **GPSFix** (number) Will filter out GPS samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
 - **WrongSpeed** (number) Will filter out GPS positions that generate higher speeds than indicated in meters per second. This acts on a sample to sample basis, so in order to avoid ignoring generally good samples that produce high speeds due to noise, it is important to set a generous (high) value.
 - **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See details below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
 - **progress** (function) Function to execute when progress (between 0 and 1) is made in the extraction process. Not proportional.
+- **comment** (boolean) Add comments to formats like GPX or KML with fields they do not strictly support, like recorded speed.
 
 All options default to _null/false_. Using filters to retrieve the desired results reduces the processing time.
 
@@ -166,6 +167,13 @@ Depending on the camera, model, settings and accessories, these are some of the 
 - Hue
 - Image uniformity
 - Scene classifier
+- Camera Orientation
+- Image Orientation
+- Gravity Vector (useful for Pitch, Roll and Yaw)
+- Audio levels
+- Wind detection
+- Mic wet detection
+- And more
 
 This project is possible thanks to the [gpmf-parser documentation](https://github.com/gopro/gpmf-parser), open sourced by GoPro.
 
@@ -173,9 +181,9 @@ This project is possible thanks to the [gpmf-parser documentation](https://githu
 
 These are the available preset formats:
 
-- **gpx** (.gpx) GPS Exchange format (returns as _string_). Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS5_ and will use _ellipsoid_ altitude if not specified.
-- **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS5_.
-- **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS5_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
+- **gpx** (.gpx) GPS Exchange format (returns as _string_). Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS_ and will use _ellipsoid_ altitude if not specified.
+- **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS_.
+- **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 - **csv** (.csv) Comma separated values, readable by Excel and other spreadsheet software. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present).
 - **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
 - **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd). Also supports the the _stream_ filter to be _ACCL_, which will create a GPX file with empty location data but valid acceleration data, based on [Garmin's Acceleration Extension](https://www8.garmin.com/xmlschemas/AccelerationExtensionv1.xsd). Bot GPS and accelerometer are not allowed at the same time, for now. Will use MP4 time if **timeIn** is not specified.
@@ -202,6 +210,10 @@ const telemetry = await goproTelemetry({ parsedData, timing });
 
 The 'raw' data option is sensitive to the options: **device**, **stream**, **deviceList**, **streamList**, **tolerant**, **debug** and indirectly to some **presets**. Meaning this approach should not be used if any of these options is going to change between calls.
 
+## Altitude correction
+
+Altitude data in old cameras was not recorded as mean-sea-level. The library tries to correct for this automatically, or if requested through the options. For altitude correction to work the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal) must be installed.
+
 ## MP4 header data
 
 Additionally to the GPMF track, the mp4 header contains a GPMF atom embedded within the 'udta' atom. It contains, for example, manual and atomated **highlight** tags and **video settings**. Its structure is slightly different to the common GPMF track, so some different (and opinionated) interpretation is applied when the **mp4header** option is used.
@@ -219,8 +231,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
-- Add way to compensate for timewarp timing weirdness, either manually or automatically
-- Find out why Virb edit does not read recorded speed in their own extensions format. [Details here](https://forums.garmin.com/apps-software/mac-windows-software/f/virb-edit-windows/223058/virb-edit-not-reading-trackpointextension-speed)
 - Review CSV conversion (when only 1 sticky value, it does not print)
 - Adjust grouping times better to frame cts (fixing_grouptimes branch)
 - Streams look out of sync some times, improve timing accuracy?
@@ -245,3 +255,4 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 - [Juan Irache](https://github.com/JuanIrache) - Main developer
 - [Thomas Sarlandie](https://github.com/sarfata) - Contributor
+- [Akxe](https://github.com/Akxe) - Contributor

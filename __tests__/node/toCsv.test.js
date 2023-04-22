@@ -1,11 +1,11 @@
-const toCsv = require('../code/presets/toCsv');
+const toCsv = require('../../code/presets/toCsv');
 const { readFileSync } = require('fs');
 
 let result;
 
 describe('Test CSV', () => {
   beforeAll(async () => {
-    const file = readFileSync(`${__dirname}/../samples/partials/merged.json`);
+    const file = readFileSync(`${__dirname}/../../samples/partials/merged.json`);
 
     result = await toCsv(JSON.parse(file), {});
   });
@@ -19,8 +19,8 @@ describe('Test CSV', () => {
   });
 
   test(`toCsv's result should start with the csv header row`, () => {
-    expect(result['Hero6 Black-ACCL'].slice(0, 112)).toBe(
-      '"cts","date","Accelerometer (z) [m/s2]","Accelerometer (x) [m/s2]","Accelerometer (y) [m/s2]","temperature [°C]"'
+    expect(result['Hero6 Black-ACCL'].slice(0, 100)).toBe(
+      'cts,date,Accelerometer (z) [m/s2],Accelerometer (x) [m/s2],Accelerometer (y) [m/s2],temperature [°C]'
     );
   });
 });

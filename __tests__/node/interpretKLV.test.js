@@ -1,4 +1,4 @@
-const interpretKLV = require('../code/interpretKLV');
+const interpretKLV = require('../../code/interpretKLV');
 const { readFileSync } = require('fs');
 
 let result;
@@ -6,7 +6,7 @@ let result;
 describe('Test interpretation', () => {
   beforeAll(async () => {
     const file = readFileSync(
-      `${__dirname}/../samples/partials/altitudeFix.json`
+      `${__dirname}/../../samples/partials/altitudeFix.json`
     );
 
     result = await interpretKLV(JSON.parse(file)['1'], {});

@@ -1,12 +1,12 @@
-const goproTelemetry = require('../');
+const goproTelemetry = require('../../');
 const fs = require('fs');
 
-let filename, file, result;
 
 describe('Testing with mp4 header', () => {
+  let filename, file, result;
   beforeAll(async () => {
     filename = 'mp4header';
-    file = fs.readFileSync(`${__dirname}/../samples/${filename}.raw`);
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = await goproTelemetry({ rawData: file }, { mp4header: true });
   });
 

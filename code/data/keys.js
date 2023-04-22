@@ -1,4 +1,4 @@
-const Parser = require('@gmod/binary-parser').Parser;
+const Parser = require('binary-parser').Parser;
 
 //First 2 sections (64 bits) of each KLV (Key, Length, Value)
 const keyAndStructParser = new Parser()
@@ -22,7 +22,7 @@ const types = {
   d: { size: 8, func: 'double' }, //Never tested
   j: { size: 8, func: 'int64' },
   J: { size: 8, func: 'uint64' },
-  f: { size: 4, func: 'float' },
+  f: { size: 4, func: 'floatbe' },
   s: { size: 2, func: 'int16' },
   S: { size: 2, func: 'uint16' },
   '': { size: 1, func: 'bit1' },
@@ -112,6 +112,7 @@ const names = {
   ISOG: 'Image sensor gain',
   SHUT: 'Exposure time',
   GPS5: 'Latitude, longitude, altitude (WGS 84), 2D ground speed, and 3D speed',
+  GPS9: 'Lat., Long., Alt., 2D, 3D, days, secs, DOP, fix',
   GPSU: 'UTC time and data from GPS',
   GPSF: 'GPS Fix',
   GPSP: 'GPS Precision - Dilution of Precision (DOP x100)',

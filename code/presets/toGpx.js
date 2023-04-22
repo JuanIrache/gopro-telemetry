@@ -7,7 +7,7 @@ const fixes = {
 };
 
 //Returns the GPS data as a string
-async function getGPGS5Data(data) {
+async function getGPGS5Data(data, comment) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -18,23 +18,28 @@ async function getGPGS5Data(data) {
     if (data[key].streams) {
       for (const stream in data[key].streams) {
         await breathe();
-        //If we find a GPS5 stream, we won't look on any other DEVCS
-        if (stream === 'GPS5' && data[key].streams.GPS5.samples) {
+        //If we find a GPS stream, we won't look on any other DEVCS
+        if (
+          (stream === 'GPS5' || stream === 'GPS9') &&
+          data[key].streams[stream].samples
+        ) {
           let units;
           let name;
-          if (data[key].streams.GPS5.name != null)
-            name = data[key].streams.GPS5.name;
-          if (data[key].streams.GPS5.units != null)
-            units = `[${data[key].streams.GPS5.units.toString()}]`;
+          if (data[key].streams[stream].name != null) {
+            name = data[key].streams[stream].name;
+          }
+          if (data[key].streams[stream].units != null) {
+            units = `[${data[key].streams[stream].units.toString()}]`;
+          }
           let sticky = {};
           //Loop all the samples
-          for (let i = 0; i < data[key].streams.GPS5.samples.length; i++) {
-            const s = data[key].streams.GPS5.samples[i];
+          for (let i = 0; i < data[key].streams[stream].samples.length; i++) {
+            const s = data[key].streams[stream].samples[i];
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {
               //Update and remember sticky data
               if (s.sticky) sticky = { ...sticky, ...s.sticky };
-              let partialSticky = [];
+              let commentParts = [];
               let cmt = '';
               let time = '';
               let ele = '';
@@ -43,31 +48,53 @@ async function getGPGS5Data(data) {
               let geoidHeight = '';
               //Use sticky info
               for (const key in sticky) {
-                if (key === 'fix')
-                  fix = `
+                if (key === 'fix') {
+                  if (stream === 'GPS5') {
+                    fix = `
               <fix>${fixes[sticky[key]] || 'none'}</fix>`;
-                else if (key === 'precision')
-                  hdop = `
-              <hdop>${sticky[key]}</hdop>`;
-                else if (key === 'geoidHeight')
+                  }
+                } else if (key === 'precision') {
+                  if (stream === 'GPS5') {
+                    hdop = `
+              <hdop>${sticky[key] / 100}</hdop>`;
+                  }
+                } else if (key === 'geoidHeight') {
                   geoidHeight = `
               <geoidheight>${sticky[key]}</geoidheight>`;
-                else partialSticky.push(`${key}: ${sticky[key]}`);
+                } else if (comment) {
+                  commentParts.push(`${key}: ${sticky[key]}`);
+                }
               }
-              //Could potentially add other values to cmt
-              if (s.value.length > 3)
-                partialSticky.push(`2dSpeed: ${s.value[3]}`);
-              //Speeds as comment
-              if (s.value.length > 4)
-                partialSticky.push(`3dSpeed: ${s.value[4]}`);
-              //Create comment string
-              if (partialSticky.length)
-                cmt = `
-              <cmt>${partialSticky.join('; ')}</cmt>`;
+              if (stream === 'GPS9') {
+                if (s.value.length > 7) {
+                  hdop = `
+              <hdop>${s.value[7]}</hdop>`;
+                }
+                if (s.value.length > 8) {
+                  fix = `
+              <fix>${s.value[8]}</fix>`;
+                }
+              }
+              if (comment) {
+                //Could potentially add other values to cmt
+                if (s.value.length > 3) {
+                  commentParts.push(`2dSpeed: ${s.value[3]}`);
+                }
+                //Speeds as comment
+                if (s.value.length > 4) {
+                  commentParts.push(`3dSpeed: ${s.value[4]}`);
+                }
+                //Create comment string
+                if (commentParts.length) {
+                  cmt = `
+              <cmt>${commentParts.join('; ')}</cmt>`;
+                }
+              }
               //Set elevation if present
-              if (s.value.length > 1)
+              if (s.value.length > 1) {
                 ele = `
               <ele>${s.value[2]}</ele>`;
+              }
               //Set time if present
               if (s.date != null) {
                 if (typeof s.date != 'object') s.date = new Date(s.date);
@@ -91,11 +118,11 @@ async function getGPGS5Data(data) {
                   firstDate = new Date(s.date.getTime() - s.cts).toISOString();
                 } catch (e) {}
                 const firstTime = `
-            <time>${firstDate}</time>`;
+              <time>${firstDate}</time>`;
                 const fakeFirst = `
-            <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
+          <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
                 ${(ele + firstTime + fix + hdop + geoidHeight + cmt).trim()}
-            </trkpt>`;
+          </trkpt>`;
                 inner += `${fakeFirst}`;
               }
               //Add it to samples
@@ -115,8 +142,8 @@ async function getGPGS5Data(data) {
 }
 
 //Converts the processed data to GPX
-module.exports = async function (data, { name }) {
-  const converted = await getGPGS5Data(data);
+module.exports = async function (data, { name, comment }) {
+  const converted = await getGPGS5Data(data, comment);
   if (!converted) return undefined;
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>

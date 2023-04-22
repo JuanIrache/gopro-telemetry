@@ -1,8 +1,8 @@
 //Main data accessing function. Reads the V in KLV
 
-//Binary-parser does not support 64bits. Use @gmod/binary-parser
-const Parser = require('@gmod/binary-parser').Parser;
+const Parser = require('binary-parser').Parser;
 const { types } = require('./data/keys');
+const breathe = require('./utils/breathe');
 //Will store unknown types
 let unknown = new Set();
 
@@ -11,9 +11,11 @@ const valueParsers = {};
 function getValueParserForType(type, opts) {
   const key = `${type}-${JSON.stringify(opts)}`;
   if (!valueParsers.hasOwnProperty(key)) {
-    valueParsers[key] = new Parser()
-      .endianess('big')
-      [types[type].func]('value', opts);
+    valueParsers[key] = new Parser().endianess('big');
+    if (!valueParsers[key][types[type].func]) {
+      throw new Error(`Unknown type "${type}" (func "${types[type].func}")`);
+    }
+    valueParsers[key] = valueParsers[key][types[type].func]('value', opts);
   }
   return valueParsers[key];
 }
@@ -56,7 +58,7 @@ function parseV(environment, slice, len, specifics) {
 
     //If debugging, print unexpected types
     if (options.debug && unknown.size)
-      setImmediate(() =>
+      breathe().then(() =>
         console.warn('unknown types:', [...unknown].join(','))
       );
     return res;
@@ -65,11 +67,12 @@ function parseV(environment, slice, len, specifics) {
   } else if (!types[type].complex) {
     //Add options required by type
     let opts = { length: len };
-    if (types[type].opt)
-      for (const key in types[type].opt) opts[key] = types[type].opt[key];
+    if (types[type].opt) {
+      Object.assign(opts, types[type].opt);
+    }
     //We pick the necessary function based on data format (stored in types)
     let valParser = getValueParserForType(type, opts);
-    const parsed = valParser.parse(data.slice(slice)).result;
+    const parsed = valParser.parse(data.slice(slice));
 
     return parsed.value;
 

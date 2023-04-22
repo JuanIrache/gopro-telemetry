@@ -1,7 +1,7 @@
 const breathe = require('../utils/breathe');
 
 //Returns the GPS data as an object for geojson
-async function getGPGS5Data(data) {
+async function getGPSData(data) {
   let properties = {};
   let coordinates = [];
   for (const key in data) {
@@ -11,26 +11,26 @@ async function getGPGS5Data(data) {
     if (data[key].streams) {
       for (const stream in data[key].streams) {
         await breathe();
-        //If we find a GPS5 stream, we won't look on any other DEVCS
+        //If we find a GPS stream, we won't look on any other DEVCS
         if (
-          stream === 'GPS5' &&
-          data[key].streams.GPS5.samples &&
-          data[key].streams.GPS5.samples.length
+          (stream === 'GPS5' || stream === 'GPS9') &&
+          data[key].streams[stream].samples &&
+          data[key].streams[stream].samples.length
         ) {
           //Save altitude offset
           if (
-            data[key].streams.GPS5.samples[0].sticky &&
-            data[key].streams.GPS5.samples[0].sticky.geoidHeight
+            data[key].streams[stream].samples[0].sticky &&
+            data[key].streams[stream].samples[0].sticky.geoidHeight
           ) {
             properties.geoidHeight =
-              data[key].streams.GPS5.samples[0].sticky.geoidHeight;
+              data[key].streams[stream].samples[0].sticky.geoidHeight;
           }
           //Will save utc and cts
           properties.AbsoluteUtcMicroSec = [];
           properties.RelativeMicroSec = [];
           //Loop all the samples
-          for (let i = 0; i < data[key].streams.GPS5.samples.length; i++) {
-            const s = data[key].streams.GPS5.samples[i];
+          for (let i = 0; i < data[key].streams[stream].samples.length; i++) {
+            const s = data[key].streams[stream].samples[i];
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {
               coordinates[i] = [s.value[1], s.value[0]];
@@ -54,7 +54,7 @@ async function getGPGS5Data(data) {
 
 //Converts the processed data to geojson
 module.exports = async function (data, { name }) {
-  const converted = await getGPGS5Data(data);
+  const converted = await getGPSData(data);
   let result = {
     type: 'Feature',
     geometry: {
