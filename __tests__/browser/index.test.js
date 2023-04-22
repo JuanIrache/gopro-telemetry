@@ -12,7 +12,9 @@ describe('In browser', () => {
   /** @type {import('puppeteer').ElementHandle<HTMLInputElement>} */
   let inputHandle;
   beforeAll(async () => {
-    await page.goto(`file://${join(__dirname, './index.html')}`, { waitUntil: 'networkidle0' });
+    await page.goto(`file://${join(__dirname, './index.html')}`, {
+      waitUntil: 'networkidle0'
+    });
     inputHandle = await page.$('input[type=file]');
   });
 
@@ -20,24 +22,39 @@ describe('In browser', () => {
     expect(1).toBe(1);
     expect(await page.evaluate(() => 1)).toBe(1);
     expect(await page.evaluate(() => typeof GoProTelemetry)).toBe('function');
-    expect(await page.evaluate(() => GoProTelemetry.name)).toBe('GoProTelemetry');
+    expect(await page.evaluate(() => GoProTelemetry.name)).toBe(
+      'GoProTelemetry'
+    );
 
     await inputHandle.uploadFile(join(__dirname, '../../samples/hero11.raw'));
-    expect(await page.evaluate(() => document.querySelector('[type=file]').files[0] instanceof File)).toBe(true);
-    expect(await page.evaluate(async () => document.querySelector('[type=file]').files[0].size)).toBe(75300);
-    expect(await page.evaluate(async () => (await readFileAsBuffer(0)).length)).toBe(75300);
+    expect(
+      await page.evaluate(
+        () => document.querySelector('[type=file]').files[0] instanceof File
+      )
+    ).toBe(true);
+    expect(
+      await page.evaluate(
+        async () => document.querySelector('[type=file]').files[0].size
+      )
+    ).toBe(75300);
+    expect(
+      await page.evaluate(async () => (await readFileAsBuffer(0)).length)
+    ).toBe(75300);
   });
-
 
   let result;
   describe('Testing with karma file', () => {
     beforeAll(async () => {
       const filename = 'karma';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { deviceList: true },
-      ));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { deviceList: true }
+        )
+      );
     });
 
     test(`Karma should have two devices`, () => {
@@ -50,11 +67,15 @@ describe('In browser', () => {
   describe('Testing with hero6+ble.raw file', () => {
     beforeAll(async () => {
       const filename = 'hero6+ble';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { streamList: true },
-      ));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { streamList: true }
+        )
+      );
     });
 
     test(`hero6+ble.raw should have specific keys`, () => {
@@ -75,11 +96,15 @@ describe('In browser', () => {
   describe('Testing deeper with hero6+ble file', () => {
     beforeAll(async () => {
       const filename = 'hero6+ble';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { device: 16778241, stream: 'acc1', repeatSticky: true },
-      ));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { device: 16778241, stream: 'acc1', repeatSticky: true }
+        )
+      );
     });
 
     test(`repeatSticky should be working for all samples`, () => {
@@ -92,14 +117,18 @@ describe('In browser', () => {
   describe('Testing with hero7 file', () => {
     beforeAll(async () => {
       const filename = 'hero7';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000 }
-      ).then(result => {
-        result['1'].streams = { ACCL: result['1'].streams.ACCL };
-        return result;
-      }));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { stream: 'ACCL', repeatHeaders: true, groupTimes: 1000 }
+        ).then(result => {
+          result['1'].streams = { ACCL: result['1'].streams.ACCL };
+          return result;
+        })
+      );
     });
 
     test(`groupTimes should simplify data samples`, () => {
@@ -116,8 +145,10 @@ describe('In browser', () => {
   describe('Testing GPS5 with hero7 file', () => {
     beforeAll(async () => {
       const filename = 'hero7';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async (timing) => {
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async timing => {
         timing.start = new Date(timing.start); // Date is lost when passing through puppeteer
         return GoProTelemetry(
           { rawData: await readFileAsBuffer(0), timing },
@@ -151,11 +182,15 @@ describe('In browser', () => {
   describe('Testing with hero6 file', () => {
     beforeAll(async () => {
       const filename = 'hero6';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { GPSFix: 2, timeOut: 'cts' },
-      ));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { GPSFix: 2, timeOut: 'cts' }
+        )
+      );
     });
 
     test(`GPSFix should discard bad GPS data`, () => {
@@ -174,11 +209,15 @@ describe('In browser', () => {
   describe('Testing with Fusion file', () => {
     beforeAll(async () => {
       const filename = 'Fusion';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { ellipsoid: true },
-      ));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { ellipsoid: true }
+        )
+      );
     });
 
     test(`ellipsoid option should give bad height (relative to sea level)`, () => {
@@ -190,20 +229,32 @@ describe('In browser', () => {
     beforeAll(async () => {
       const filename1 = 'consecutive1';
       const filename2 = 'consecutive2';
-      const timings = JSON.parse(readFileSync(join(__dirname, `../../samples/partials/consecutiveTiming.json`)));
+      const timings = JSON.parse(
+        readFileSync(
+          join(__dirname, `../../samples/partials/consecutiveTiming.json`)
+        )
+      );
 
-      await inputHandle.evaluate(input => input.multiple = true);
+      await inputHandle.evaluate(input => (input.multiple = true));
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename1}.raw`),
-        join(__dirname, '../../samples/', `${filename2}.raw`),
+        join(__dirname, '../../samples/', `${filename2}.raw`)
       );
 
       // Make sure both files are loaded
-      expect(await page.evaluate(async () => document.querySelector('[type=file]').files[0].size)).toBe(10876);
-      expect(await page.evaluate(async () => document.querySelector('[type=file]').files[1].size)).toBe(16092);
+      expect(
+        await page.evaluate(
+          async () => document.querySelector('[type=file]').files[0].size
+        )
+      ).toBe(10876);
+      expect(
+        await page.evaluate(
+          async () => document.querySelector('[type=file]').files[1].size
+        )
+      ).toBe(16092);
 
-      result = await page.evaluate(async (timings) => {
-        timings.forEach(t => t.start = new Date(t.start));
+      result = await page.evaluate(async timings => {
+        timings.forEach(t => (t.start = new Date(t.start)));
         return GoProTelemetry([
           { rawData: await readFileAsBuffer(0), timing: timings[0] },
           { rawData: await readFileAsBuffer(1), timing: timings[1] }
@@ -216,20 +267,26 @@ describe('In browser', () => {
     });
 
     test(`Consecutive files should keep consecutive cts times`, () => {
-      expect(result['1'].streams.ACCL.samples[1091].cts).toBe(10751.884057971107);
+      expect(result['1'].streams.ACCL.samples[1091].cts).toBe(
+        10751.884057971107
+      );
     });
 
     afterAll(() => {
-      inputHandle.evaluate(input => input.multiple = true);
+      inputHandle.evaluate(input => (input.multiple = true));
     });
   });
 
   describe('Testing reusing parsed data', () => {
     beforeAll(async () => {
       const filename = 'hero6';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async (timing) => {
-        const result = [await GoProTelemetry({ rawData: await readFileAsBuffer(0), timing })];
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async timing => {
+        const result = [
+          await GoProTelemetry({ rawData: await readFileAsBuffer(0), timing })
+        ];
         //Retrieve parsed data with a bunch of options to make sure that does not change the output
         const parsedData = await GoProTelemetry(
           { rawData: await readFileAsBuffer(0), timing },
@@ -262,14 +319,19 @@ describe('In browser', () => {
   describe('Testing using new GPS9 stream', () => {
     beforeAll(async () => {
       const filename = 'hero11';
-      await inputHandle.uploadFile(join(__dirname, '../../samples/', `${filename}.raw`));
-      result = await page.evaluate(async () => GoProTelemetry(
-        { rawData: await readFileAsBuffer(0) },
-        { stream: 'GPS' },
-      ).then(result => {
-        result['1'].streams.GPS9.samples[10].date = result['1'].streams.GPS9.samples[10].date.toISOString();
-        return result;
-      }));
+      await inputHandle.uploadFile(
+        join(__dirname, '../../samples/', `${filename}.raw`)
+      );
+      result = await page.evaluate(async () =>
+        GoProTelemetry(
+          { rawData: await readFileAsBuffer(0) },
+          { stream: 'GPS' }
+        ).then(result => {
+          result['1'].streams.GPS9.samples[10].date =
+            result['1'].streams.GPS9.samples[10].date.toISOString();
+          return result;
+        })
+      );
     });
 
     test(`GPS stream of HERO11 and newer should have GPS9 timestamps`, () => {
