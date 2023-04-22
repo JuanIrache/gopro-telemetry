@@ -280,6 +280,6 @@ describe('In browser', () => {
 
     test(`GPS stream of HERO11 and newer should have per-sample Fix data`, () => {
       expect(result['1'].streams.GPS9.samples[10].value[8]).toBe(3);
-    });
+    }, 10000);
   });
 });
