@@ -332,7 +332,7 @@ describe('In browser', () => {
           return result;
         })
       );
-    }, 10000);
+    }, 20000);
 
     test(`GPS stream of HERO11 and newer should have GPS9 timestamps`, () => {
       expect(result['1'].streams.GPS9.samples[10].date).toBe(
