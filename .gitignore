@@ -6,3 +6,4 @@ private_samples/
 samples/v150.bin
 __tests__/browser/dist.js
 __tests__/browser/dist.js.map
+.DS_Store
