@@ -9,7 +9,7 @@ interface GoProTelemetryAllOptions {
   /** Filters the results by device id. */
   device?: number[];
   /** Filters the results by device stream (often a sensor) name.*/
-  stream?: (keyof SampleOutputByType) | (keyof SampleOutputByType)[];
+  stream?: (keyof SampleOutputFromType) | (keyof SampleOutputFromType)[];
   /** Returns the data as close to raw as possible. No matrix transformations, no scaling, no filtering. It does add some custom keys (like interpretSamples) that will help with successive interpretation passes of the data. Disables the following options. */
   raw?: boolean;
   /** Puts the sticky values in every sample and deletes the 'sticky' object. This will increase the output size. */
@@ -179,103 +179,90 @@ type ExtractStreamType<O extends GoProTelemetryPresetLessOptions> =
     : keyof SampleOutputByType;
 
 
-interface GoProTelemetryDefaultResult<O extends GoProTelemetryPresetLessOptions> {
-  [key: number]: {
-    'device name': string;
-    streams: {
-      [K in ((keyof SampleOutputByType) & ExtractStreamType<O>)]?: SampleOutputByType[K];
-    }[];
+interface GoProTelemetryStreamResult<O extends GoProTelemetryPresetLessOptions> {
+  'device name': string;
+  streams: {
+    [K in (SampleOutputFromType[ExtractStreamType<O> & (keyof SampleOutputFromType)] & (keyof SampleOutputByType))]?: SampleOutputByType[K];
   };
 }
 
-interface CommonSampleOutput {
-  name: string;
-  units?: string | string[];
-  samples: {
+interface GoProTelemetryDefaultResult<O extends GoProTelemetryPresetLessOptions> {
+  [key: number]: GoProTelemetryStreamResult<O>;
+  1: GoProTelemetryStreamResult<O>;
+}
+
+type CommonSampleOutput<
+  N extends string,
+  U extends string | string[] | void,
+  V extends any,
+  S extends Record<any, any> | never = never,
+  E extends Record<any, any> | never = never
+> = {
+  name: N;
+  units: U
+  samples: ({
     cts: number;
     date: Date;
-  }[];
-}
+    value: V;
+    sticky?: S;
+  })[];
+};
 
 // TODO: This list is not complete, please help by completing it
 interface SampleOutputByType {
-  AALP: {
-    name: 'AGC audio level[rms_level ,peak_level]';
-    units: 'dBFS';
-    samples: {
-      value: number;
-    };
-  } & CommonSampleOutput;
-  ACCL: {
-    name: 'Accelerometer' | 'Accelerometer (z,x,y)' | 'Accelerometer (up/down, right/left, forward/back)';
-    units: 'm/s²';
-    samples: {
-      value: [number, number, number];
-    }[];
-    sticky?: {
-      'temperature [°C]': number;
-    };
-  } & CommonSampleOutput;
-  ATTD: {
-    name: 'Attitude';
-    units: ['s', 'rad', 'rad', 'rad', 'rad/s', 'rad/s', 'rad/s', ''];
-    samples: {
-      value: [number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  ATTR: {
-    name: 'Attitude Target';
-    units: ['s', 'rad', 'rad', 'rad', ''];
-    samples: {
-      value: [number | bigint, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  BPOS: {
-    name: 'Controller';
-    units: ['deg', 'deg', 'm', 'deg', 'deg', 'm', 'm', 'm'];
-    samples: {
-      value: [number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  CSEN: {
-    name: 'Coyote Sense';
-    units: ['s', 'rad/s', 'rad/s', 'rad/s', 'g', 'g', 'g', '', '', '', ''];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  CYTS: {
-    name: 'Coyote Status';
-    units: ['s', '', '', '', '', 'rad', 'rad', 'rad', '', ''];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  CORI: {
-    name: 'CameraOrientation';
-    samples: {
-      value: [number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  DEVC: {} & CommonSampleOutput;
-  DISP: {} & CommonSampleOutput;
-  DVID: {} & CommonSampleOutput;
-  DVNM: {} & CommonSampleOutput;
-  EMPT: {} & CommonSampleOutput;
-  ESCS: {
-    name: 'ESC Status';
-    units: ['s', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'degC', 'degC', 'degC', 'degC', 'V', 'V', 'V', 'V', 'A', 'A', 'A', 'A', '', '', '', '', '', '', '', '', ''];
-    samples: {
-      value: number[];
-    }[];
-  } & CommonSampleOutput;
-  FACE: {
-    name: 'Face Coordinates and details (x,y,w,h,unknown,smile)';
-    subStreamName: `ID:${number}`;
-    samples: {
-      value: [number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
+  AALP: CommonSampleOutput<
+    'AGC audio level[rms_level ,peak_level]',
+    'dBFS',
+    number
+  >;
+  ACCL: CommonSampleOutput<
+    'Accelerometer' | 'Accelerometer (z,x,y)' | 'Accelerometer (up/down, right/left, forward/back)',
+    'm/s²',
+    [number, number, number],
+    { 'temperature [°C]': number }
+  >;
+  ATTD: CommonSampleOutput<
+    'Attitude',
+    ['s', 'rad', 'rad', 'rad', 'rad/s', 'rad/s', 'rad/s', ''],
+    [number, number, number, number, number, number, number, number]
+  >;
+  ATTR: CommonSampleOutput<
+    'Attitude Target',
+    ['s', 'rad', 'rad', 'rad', ''],
+    [number | bigint, number, number, number, number]
+  >;
+  BPOS: CommonSampleOutput<
+    'Controller',
+    ['deg', 'deg', 'm', 'deg', 'deg', 'm', 'm', 'm'],
+    [number, number, number, number, number, number, number, number]
+  >;
+  CSEN: CommonSampleOutput<
+    'Coyote Sense',
+    ['s', 'rad/s', 'rad/s', 'rad/s', 'g', 'g', 'g', '', '', '', ''],
+    [number, number, number, number, number, number, number, number, number, number, number]
+  >;
+  CYTS: CommonSampleOutput<
+    'Coyote Status',
+    ['s', '', '', '', '', 'rad', 'rad', 'rad', '', ''],
+    [number, number, number, number, number, number, number, number, number, number]
+  >;
+  CORI: CommonSampleOutput<
+    'CameraOrientation',
+    never,
+    [number, number, number, number]
+  >;
+  ESCS: CommonSampleOutput<
+    'ESC Status',
+    ['s', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'rpm', 'degC', 'degC', 'degC', 'degC', 'V', 'V', 'V', 'V', 'A', 'A', 'A', 'A', '', '', '', '', '', '', '', '', ''],
+    number[]
+  >;
+  FACE: CommonSampleOutput<
+    'Face Coordinates and details (x,y,w,h,unknown,smile)',
+    never,
+    [number, number, number, number, number, number],
+    never,
+    { subStreamName: `ID:${number}` }
+  >;
   FACE1: SampleOutputByType['FACE'];
   FACE2: SampleOutputByType['FACE'];
   FACE3: SampleOutputByType['FACE'];
@@ -285,231 +272,213 @@ interface SampleOutputByType {
   FACE7: SampleOutputByType['FACE'];
   FACE8: SampleOutputByType['FACE'];
   FACE9: SampleOutputByType['FACE'];
-  //FCNM: {} & CommonSampleOutput;
-  FWVS: {
-    name: 'FWVS';
-    samples: [{
-      value: string;
-    }];
-  } & CommonSampleOutput;
-  GPS5: {
-    name: 'GPS (Lat., Long., Alt., 2D speed, 3D speed)';
-    units: ['deg', 'deg', 'm', 'm/s', 'm/s'];
-    samples: {
-      value: [number, number, number, number, number];
-      sticky?: {
-        fix: number;
-        precision: number;
-        'altitude system'?: 'MSLV';
-      };
-    }[];
-  } & CommonSampleOutput;
-  GPS9: {
-    name: 'GPS (Lat., Long., Alt., 2D, 3D, days, secs, DOP, fix)';
-    units: ['deg', 'deg', 'm', 'm/s', 'm/s', '', 'secs', '', ''];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number];
-      sticky?: {
-        'altitude system': 'MSLV';
-      };
-    }[];
-  } & CommonSampleOutput;
-  GPSF: {} & CommonSampleOutput;
-  GPSP: {} & CommonSampleOutput;
-  GPSU: {} & CommonSampleOutput;
-  GLPI: {
-    name: 'Position';
-    units: ['s', 'deg', 'deg', 'm', 'm', 'm/s', 'm/s', 'm/s', 'deg'];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  GLPR: {
-    name: 'GPS RAW';
-    units: ['s', 'deg', 'deg', 'm', 'm', 'm', 'm/s', 'deg', '', ''];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  GRAV: {
-    name: 'Gravity Vector';
-    samples: {
-      value: [number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  GYRO: {
-    name: 'Gyroscope' | 'Gyroscope (z,x,y)';
-    units: 'rad/s';
-    samples: {
-      value: [number, number, number];
-      sticky?: {
-        'temperature [°C]': number;
-      };
-    }[];
-  } & CommonSampleOutput;
-  HLMT: {
-    name: 'Highlights';
-    units: ['ms', 'ms', 'ms', 'deg', 'deg', 'm', '_', '%', '_'];
-    samples: {
-      value: [number, number, number, number, number, number, string, number, number];
-    }[];
-  } & CommonSampleOutput;
-  HUES: {
-    name: 'Predominant hue  | hue (253,49,172)';
-    units: ['weight'];
-    samples: {
-      value: [number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  IORI: {
-    name: 'ImageOrientation';
-    samples: {
-      value: [number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  ISOE: {
-    name: 'Sensor ISO';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  ISOG: {
-    name: 'Sensor gain (ISO x100)';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  KBAT: {
-    name: 'Battery';
-    units: ['A', 'Ah', 'J', 'degC', 'V', 'V', 'V', 'V', 's', '%', '', '', '', '', '%'];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  LNED: {
-    name: 'Local Position NED';
-    units: ['s', 'm', 'm', 'm', 'm/s', 'm/s', 'm/s'];
-    samples: {
-      value: [number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  LSKP: {
-    name: 'LRV Frame Skip';
-    samples: {
-      value: number;
-      sticky?: {
-        LRVO: 0;
-        LRVS: 1;
-      };
-    }[];
-  } & CommonSampleOutput;
-  MAGN: {
-    name: 'Magnetometer';
-    units: 'μT';
-    samples: {
-      value: [number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  MSKP: {
-    name: 'MRV Frame Skip';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  MWET: {
-    name: 'Microphone Wet[mic_wet, all_mics, confidence]';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  //RMRK: {} & CommonSampleOutput;
-  //SCAL: {} & CommonSampleOutput;
-  SCEN: {
-    name: 'Scene classification  | CLASSIFIER (snow,urban,indoor,water,vegetation,beach)';
-    units: ['prob'];
-    samples: {
-      value: [number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  SCPR: {
-    name: 'Scaled Pressure';
-    units: ['s', 'Pa', 'Pa', 'degC'];
-    samples: {
-      value: null | [number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  SHUT: {
-    name: 'Exposure time (shutter speed)';
-    units: 's';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  SIMU: {
-    name: 'Scaled IMU';
-    units: ['s', 'g', 'g', 'g', 'rad/s', 'rad/s', 'rad/s', 'T', 'T', 'T'];
-    samples: {
-      value: [number, number, number, number, number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  //SIUN: {} & CommonSampleOutput;
-  SROT: {
-    name: 'Sensor read out time';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  //STMP: {} & CommonSampleOutput;
-  //STNM: {} & CommonSampleOutput;
-  //STRM: {} & CommonSampleOutput;
-  SYST: {
-    name: 'System time';
-    units: ['ss'];
-    samples: {
-      value: [bigint, bigint];
-    }[];
-  } & CommonSampleOutput;
-  VFRH: {
-    name: 'VFR HUD';
-    units: ['m/s', 'm/s', 'm', 'm/s', 'deg', '%'];
-    samples: {
-      value: [number, number, number, number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  //TIMO: {} & CommonSampleOutput;
-  //TSMP: {} & CommonSampleOutput;
-  //TYPE: {} & CommonSampleOutput;
-  UNIF: {
-    name: 'Image uniformity';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  //UNIT: {} & CommonSampleOutput;
-  WBAL: {
-    name: 'White Balance temperature (Kelvin)';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  WNDM: {
-    name: 'Wind Processing[wind_enable, meter_value(0 - 100)]';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
-  WRGB: {
-    name: 'White Balance RGB gains';
-    samples: {
-      value: [number, number, number];
-    }[];
-  } & CommonSampleOutput;
-  YAVG: {
-    name: 'Average luminance';
-    samples: {
-      value: number;
-    }[];
-  } & CommonSampleOutput;
+  FWVS: CommonSampleOutput<
+    'FWVS',
+    never,
+    string
+  >;
+  GPS5: CommonSampleOutput<
+    'GPS (Lat., Long., Alt., 2D speed, 3D speed)',
+    ['deg', 'deg', 'm', 'm/s', 'm/s'],
+    [number, number, number, number, number],
+    {
+      fix: number;
+      precision: number;
+      'altitude system'?: 'MSLV';
+    }
+  >;
+  GPS9: CommonSampleOutput<
+    'GPS (Lat., Long., Alt., 2D, 3D, days, secs, DOP, fix)',
+    ['deg', 'deg', 'm', 'm/s', 'm/s', '', 'secs', '', ''],
+    [number, number, number, number, number, number, number, number, number],
+    {
+      'altitude system': 'MSLV';
+    }
+  >;
+  GLPI: CommonSampleOutput<
+    'Position',
+    ['s', 'deg', 'deg', 'm', 'm', 'm/s', 'm/s', 'm/s', 'deg'],
+    [number, number, number, number, number, number, number, number, number]
+  >;
+  GLPR: CommonSampleOutput<
+    'GPS RAW',
+    ['s', 'deg', 'deg', 'm', 'm', 'm', 'm/s', 'deg', '', ''],
+    [number, number, number, number, number, number, number, number, number, number]
+  >;
+  GRAV: CommonSampleOutput<
+    'Gravity Vector',
+    never,
+    [number, number, number]
+  >;
+  GYRO: CommonSampleOutput<
+    'Gyroscope' | 'Gyroscope (z,x,y)',
+    'rad/s',
+    [number, number, number],
+    { 'temperature [°C]': number }
+  >;
+  HLMT: CommonSampleOutput<
+    'Highlights',
+    ['ms', 'ms', 'ms', 'deg', 'deg', 'm', '_', '%', '_'],
+    [number, number, number, number, number, number, string, number, number]
+  >;
+  HUES: CommonSampleOutput<
+    'Predominant hue  | hue (253,49,172)',
+    ['weight'],
+    [number, number, number]
+  >;
+  IORI: CommonSampleOutput<
+    'ImageOrientation',
+    never,
+    [number, number, number, number]
+  >;
+  ISOE: CommonSampleOutput<
+    'Sensor ISO',
+    never,
+    number
+  >;
+  ISOG: CommonSampleOutput<
+    'Sensor gain (ISO x100)',
+    never,
+    number
+  >;
+  KBAT: CommonSampleOutput<
+    'Battery',
+    ['A', 'Ah', 'J', 'degC', 'V', 'V', 'V', 'V', 's', '%', '', '', '', '', '%'],
+    [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number]
+  >;
+  LNED: CommonSampleOutput<
+    'Local Position NED',
+    ['s', 'm', 'm', 'm', 'm/s', 'm/s', 'm/s'],
+    [number, number, number, number, number, number, number]
+  >;
+  LSKP: CommonSampleOutput<
+    'LRV Frame Skip',
+    never,
+    number,
+    {
+      LRVO: 0;
+      LRVS: 1;
+    }
+  >;
+  MAGN: CommonSampleOutput<
+    'Magnetometer',
+    'μT',
+    [number, number, number]
+  >;
+  MSKP: CommonSampleOutput<
+    'MRV Frame Skip',
+    never,
+    number
+  >;
+  MWET: CommonSampleOutput<
+    'Microphone Wet[mic_wet, all_mics, confidence]',
+    never,
+    number
+  >;
+  SCEN: CommonSampleOutput<
+    'Scene classification  | CLASSIFIER (snow,urban,indoor,water,vegetation,beach)',
+    ['prob'],
+    [number, number, number, number, number, number]
+  >;
+  SCPR: CommonSampleOutput<
+    'Scaled Pressure',
+    ['s', 'Pa', 'Pa', 'degC'],
+    null | [number, number, number, number]
+  >;
+  SHUT: CommonSampleOutput<
+    'Exposure time (shutter speed)',
+    's',
+    number
+  >;
+  SIMU: CommonSampleOutput<
+    'Scaled IMU',
+    ['s', 'g', 'g', 'g', 'rad/s', 'rad/s', 'rad/s', 'T', 'T', 'T'],
+    [number, number, number, number, number, number, number, number, number, number]
+  >;
+  SROT: CommonSampleOutput<
+    'Sensor read out time',
+    never,
+    number
+  >;
+  SYST: CommonSampleOutput<
+    'System time',
+    ['ss'],
+    [bigint, bigint]
+  >;
+  VFRH: CommonSampleOutput<
+    'VFR HUD',
+    ['m/s', 'm/s', 'm', 'm/s', 'deg', '%'],
+    [number, number, number, number, number, number]
+  >;
+  UNIF: CommonSampleOutput<
+    'Image uniformity',
+    never,
+    number
+  >;
+  WBAL: CommonSampleOutput<
+    'White Balance temperature (Kelvin)',
+    never,
+    number
+  >;
+  WNDM: CommonSampleOutput<
+    'Wind Processing[wind_enable, meter_value(0 - 100)]',
+    never,
+    number
+  >;
+  WRGB: CommonSampleOutput<
+    'White Balance RGB gains',
+    never,
+    [number, number, number]
+  >;
+  YAVG: CommonSampleOutput<
+    'Average luminance',
+    never,
+    number
+  >;
+}
+
+interface SampleOutputFromType {
+  AALP: 'AALP';
+  ACCL: 'ACCL';
+  ATTD: 'ATTD';
+  ATTR: 'ATTR';
+  BPOS: 'BPOS';
+  CSEN: 'CSEN';
+  CYTS: 'CYTS';
+  CORI: 'CORI';
+  ESCS: 'ESCS';
+  FACE: 'FACE' | 'FACE1' | 'FACE2' | 'FACE3' | 'FACE4' | 'FACE5' | 'FACE6' | 'FACE7' | 'FACE8' | 'FACE9';
+  FWVS: 'FWVS';
+  GPS: 'GPS5' | 'GPS9';
+  GPS5: 'GPS5';
+  GPS9: 'GPS9';
+  GLPI: 'GLPI';
+  GLPR: 'GLPR';
+  GRAV: 'GRAV';
+  GYRO: 'GYRO';
+  HLMT: 'HLMT';
+  HUES: 'HUES';
+  IORI: 'IORI';
+  ISOE: 'ISOE';
+  ISOG: 'ISOG';
+  KBAT: 'KBAT';
+  LNED: 'LNED';
+  LSKP: 'LSKP';
+  MAGN: 'MAGN';
+  MSKP: 'MSKP';
+  MWET: 'MWET';
+  SCEN: 'SCEN';
+  SCPR: 'SCPR';
+  SHUT: 'SHUT';
+  SIMU: 'SIMU';
+  SROT: 'SROT';
+  SYST: 'SYST';
+  VFRH: 'VFRH';
+  UNIF: 'UNIF';
+  WBAL: 'WBAL';
+  WNDM: 'WNDM';
+  WRGB: 'WRGB';
+  YAVG: 'YAVG';
 }
 
 interface GoProTelemetryResultByPreset {
@@ -529,11 +498,18 @@ type GoProTelemetryResult<
     ? GoProTelemetryResultByPreset[O['preset']]
     : never;
 
-declare function GoProTelemetry<O extends GoProTelemetryOptions = {}>(
+/**
+ *
+ * @param input
+ * @param options
+ * @returns This function returns a promise of **streams** object.
+ * To access any stream, use `results[deviceID]`. Usually there is deviceID `1`, but sometimes there is also an arbitrary number too.
+ */
+declare function GoProTelemetry<O extends GoProTelemetryOptions>(
   input: GoProTelemetryInput,
   options?: O,
 ): Promise<GoProTelemetryResult<O>>;
-declare function GoProTelemetry<O extends GoProTelemetryOptions = {}>(
+declare function GoProTelemetry<O extends GoProTelemetryOptions>(
   input: GoProTelemetryInput,
   options: O,
   callback: (data: GoProTelemetryResult<O>) => void,
