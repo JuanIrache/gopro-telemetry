@@ -1,7 +1,11 @@
-const { keyAndStructParser, types } = require('./data/keys');
+const {
+  keyAndStructParser,
+  types,
+  generateStructArr,
+  mp4ValidSamples
+} = require('./data/keys');
 const parseV = require('./parseV');
 const unArrayTypes = require('./utils/unArrayTypes');
-const { generateStructArr, mp4ValidSamples } = require('./data/keys');
 const breathe = require('./utils/breathe');
 
 //quick function to find the last, most relevant fourCC key
