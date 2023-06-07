@@ -33,7 +33,7 @@
   "author": "Juan Irache Duesca",
   "license": "ISC",
   "dependencies": {
-    "binary-parser": "^2.2.1"
+    "@gmod/binary-parser": "^1.4.1"
   },
   "peerDependencies": {
     "egm96-universal": "^1.1.0"
