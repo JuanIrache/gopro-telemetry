@@ -197,7 +197,7 @@ describe('Testing joining consecutive files', () => {
 
 describe('Testing reusing parsed data', () => {
   beforeAll(async () => {
-    filename = 'hero6';
+    filename = 'hero11';
 
     file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
     result = [await goproTelemetry({ rawData: file, timing })];
