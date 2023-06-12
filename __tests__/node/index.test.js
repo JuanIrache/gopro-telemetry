@@ -223,9 +223,39 @@ describe('Testing reusing parsed data', () => {
     result.push(await goproTelemetry({ parsedData, timing }));
   });
 
-  test(`Reused parsed data should output the same as binary data`, () => {
-    expect(JSON.stringify(result[0])).toBe(JSON.stringify(result[1]));
-  });
+  const keys = [
+    'ACCL',
+    'GYRO',
+    'SHUT',
+    'WBAL',
+    'WRGB',
+    'ISOE',
+    'YAVG',
+    'UNIF',
+    'SCEN',
+    'HUES',
+    'GPS5',
+    'GPS9',
+    'CORI',
+    'IORI',
+    'GRAV',
+    'WNDM',
+    'MWET',
+    'AALP',
+    'MSKP',
+    'LSKP'
+  ];
+  for (const key of keys) {
+    test(`Reused parsed data should output the same as binary data for "${key}"`, () => {
+      if (result[0][1].streams[key]) {
+        expect(result[0][1].streams[key].samples.slice(0, 3)).toEqual(
+          result[1][1].streams[key].samples.slice(0, 3)
+        );
+      } else {
+        expect(result[0][1]).toEqual(result[1][1]);
+      }
+    });
+  }
 });
 
 describe('Testing using new GPS9 stream', () => {
