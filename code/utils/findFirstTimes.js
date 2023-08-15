@@ -1,16 +1,11 @@
-var readUInt8, readUInt16BE, readInt32BE, readInt64BEasFloat;
+const atob = require('atob');
 
-if (typeof Buffer !== 'undefined') {
-  readUInt8 = (buffer) => buffer.readUInt8(0);
-  readUInt16BE = (buffer) => buffer.readUInt16BE(0);
-  readInt32BE = (buffer) => buffer.readInt32BE(0);
-  readInt64BEasFloat = (buffer, offset) => buffer.readDoubleBE(offset);
-} else {
-  readUInt8 = (buffer) => new DataView(buffer.buffer).getUint8(0);
-  readUInt16BE = (buffer) => new DataView(buffer.buffer).getUint16(0);
-  readInt32BE = (buffer) => new DataView(buffer.buffer).getInt32(0);
-  readInt64BEasFloat = (buffer, offset) => new DataView(buffer.buffer).getFloat64(offset);
-}
+const readInt64BEasFloat = (buffer, offset) => {
+  const low = buffer.readInt32BE(offset + 4);
+  let n = buffer.readInt32BE(offset) * 4294967296.0 + low;
+  if (low < 0) n += 4294967296;
+  return n;
+};
 
 // Try to find timing data quickly as last resort for sorting files
 module.exports = (data, forceGPSSrc) => {
@@ -26,36 +21,36 @@ module.exports = (data, forceGPSSrc) => {
     //Find potential fourCCs, letter by letter to discard quicker
     if (
       checkGPS5 &&
-      'G' === String.fromCharCode(data[i + 0]) &&
-      'P' === String.fromCharCode(data[i + 1]) &&
-      'S' === String.fromCharCode(data[i + 2]) &&
-      'U' === String.fromCharCode(data[i + 3])
+      'G' === atob(data.slice(i + 0, i + 1)) &&
+      'P' === atob(data.slice(i + 1, i + 2)) &&
+      'S' === atob(data.slice(i + 2, i + 3)) &&
+      'U' === atob(data.slice(i + 3, i + 4))
     ) {
       const sizeIdx = i + 5;
       const repeatIdx = i + 6;
       const valIdx = i + 8;
-      const size = readUInt8(data.slice(sizeIdx, sizeIdx + 1));
-      const repeat = readUInt16BE(data.slice(repeatIdx, repeatIdx + 2));
+      const size = data.slice(sizeIdx, sizeIdx + 1).readUInt8();
+      const repeat = data.slice(repeatIdx, repeatIdx + 2).readUInt16BE();
       const value = data.slice(valIdx, valIdx + size * repeat);
-      GPSU = +value.map(i => String.fromCharCode(i)).join('');
+      GPSU = +atob(value);
     } else if (
       checkGPS9 &&
-      'G' === String.fromCharCode(data[i + 0]) &&
-      'P' === String.fromCharCode(data[i + 1]) &&
-      'S' === String.fromCharCode(data[i + 2]) &&
-      '9' === String.fromCharCode(data[i + 3])
+      'G' === atob(data.slice(i + 0, i + 1)) &&
+      'P' === atob(data.slice(i + 1, i + 2)) &&
+      'S' === atob(data.slice(i + 2, i + 3)) &&
+      '9' === atob(data.slice(i + 3, i + 4))
     ) {
       const valIdx = i + 8;
       const daysValue = data.slice(valIdx + 20, valIdx + 24);
       const secondsValue = data.slice(valIdx + 24, valIdx + 28);
-      const days = readInt32BE(daysValue);
-      const seconds = readInt32BE(secondsValue) / 1000;
+      const days = daysValue.readInt32BE();
+      const seconds = secondsValue.readInt32BE() / 1000;
       GPS9Time = seconds + days * 86400;
     } else if (
-      'S' === String.fromCharCode(data[i + 0]) &&
-      'T' === String.fromCharCode(data[i + 1]) &&
-      'M' === String.fromCharCode(data[i + 2]) &&
-      'P' === String.fromCharCode(data[i + 3])
+      'S' === atob(data.slice(i + 0, i + 1)) &&
+      'T' === atob(data.slice(i + 1, i + 2)) &&
+      'M' === atob(data.slice(i + 2, i + 3)) &&
+      'P' === atob(data.slice(i + 3, i + 4))
     ) {
       STMP = readInt64BEasFloat(data, i + 8);
     }

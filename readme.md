@@ -35,7 +35,7 @@ Use with callback:
 ```js
 const goproTelemetry = require('gopro-telemetry');
 function callback(data) {
-  // Do sometging with the data
+  // Do something with the data
 }
 const telemetry = await goproTelemetry(input, options, callback);
 ```
@@ -256,3 +256,4 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - [Juan Irache](https://github.com/JuanIrache) - Main developer
 - [Thomas Sarlandie](https://github.com/sarfata) - Contributor
 - [Akxe](https://github.com/Akxe) - Contributor
+- [rtf6x](https://github.com/rtf6x) - Contributor

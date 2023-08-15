@@ -1,7 +1,11 @@
-const { keyAndStructParser, types } = require('./data/keys');
+const {
+  keyAndStructParser,
+  types,
+  generateStructArr,
+  mp4ValidSamples
+} = require('./data/keys');
 const parseV = require('./parseV');
 const unArrayTypes = require('./utils/unArrayTypes');
-const { generateStructArr, mp4ValidSamples } = require('./data/keys');
 const breathe = require('./utils/breathe');
 
 //quick function to find the last, most relevant fourCC key
@@ -11,7 +15,7 @@ function findLastCC(data, start, end) {
     //Retrieve structured data
     let length = 0;
     try {
-      const tempKs = keyAndStructParser.parse(data.slice(start));
+      const tempKs = keyAndStructParser.parse(data.slice(start)).result;
       if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
       //But don't process it, go to next
       length = ks.size * ks.repeat;
@@ -63,7 +67,7 @@ async function parseKLV(
       if (start % 20000 === 0) await breathe();
       try {
         //Parse the first 2 sections (64 bits) of each KLV to decide what to do with the third
-        ks = keyAndStructParser.parse(data.slice(start));
+        ks = keyAndStructParser.parse(data.slice(start)).result;
 
         //Get the length of the value (or values, or nested values)
         length = ks.size * ks.repeat;
