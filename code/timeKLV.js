@@ -477,8 +477,7 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
     if (opts.tolerant) {
       await breathe();
       console.error(error);
-    }
-    else throw error;
+    } else throw error;
   }
   return result;
 }
