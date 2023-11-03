@@ -1,6 +1,8 @@
 /// <reference types="jest" />
 const { join } = require('path');
 
+const slowTest = (name, func) => test(name, func, 500000);
+
 describe('Testing with mp4 header', () => {
   /** @type {import('puppeteer').ElementHandle<HTMLInputElement>} */
   let inputHandle;
@@ -22,11 +24,11 @@ describe('Testing with mp4 header', () => {
     );
   }, 500000);
 
-  test(`The sample should have 3 highlight tags`, () => {
+  slowTest(`The sample should have 3 highlight tags`, () => {
     expect(result.HLMT.streams.HLMT.samples.length).toBe(3);
   });
 
-  test(`The firmware version should be readable`, () => {
+  slowTest(`The firmware version should be readable`, () => {
     expect(result[1].streams['Data 0'][0].FMWR).toBe('HD7.01.01.90.00');
   });
 });
