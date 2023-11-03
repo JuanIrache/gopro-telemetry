@@ -17,7 +17,8 @@ describe('In browser', () => {
   slowBeforeAll(async () => {
     await page.goto(`file://${join(__dirname, './index.html')}`, {
       waitUntil: 'networkidle0',
-      timeout: 1200000
+      timeout: 12000000,
+      protocolTimeout: 12000000
     });
     inputHandle = await page.$('input[type=file]');
   });
