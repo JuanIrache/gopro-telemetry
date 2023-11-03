@@ -286,7 +286,7 @@ describe('In browser', () => {
 
   describe('Testing reusing parsed data', () => {
     slowBeforeAll(async () => {
-      const filename = 'hero6';
+      const filename = 'hero11';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
       );
