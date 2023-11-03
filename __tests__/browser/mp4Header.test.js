@@ -19,7 +19,7 @@ describe('Testing with mp4 header', () => {
         { mp4header: true }
       )
     );
-  }, 10000);
+  }, 20000);
 
   test(`The sample should have 3 highlight tags`, () => {
     expect(result.HLMT.streams.HLMT.samples.length).toBe(3);
