@@ -328,6 +328,7 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
           ) {
             const matchSTMP =
               typeof s.STMP === 'bigint' ? n => BigInt(n) : n => n;
+
             const fourCC = s.interpretSamples;
 
             if (!opts.mp4header) {
