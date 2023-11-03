@@ -1,5 +1,6 @@
 const reduceSamples = require('./utils/reduceSamples');
 const breathe = require('./utils/breathe');
+const { JSONParse, JSONStringify } = require('./utils/customJSON');
 
 function process2Vals(vals, prop, k) {
   //If no 2 valid values, assign the first. This covers nulls too
@@ -17,7 +18,7 @@ function process2Vals(vals, prop, k) {
   } else if (typeof vals[0] === 'object') {
     let result;
     try {
-      result = JSON.parse(JSON.stringify(vals[0]));
+      result = JSONParse(JSONStringify(vals[0]));
     } catch (error) {
       result = vals[0];
     }

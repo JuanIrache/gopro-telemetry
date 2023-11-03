@@ -1,11 +1,12 @@
 const { names } = require('./data/keys');
+const { JSONParse, JSONStringify } = require('./utils/customJSON');
 const rmrkToNameUnits = require('./utils/rmrkToNameUnits');
 
 //Apply scale and matrix transformations to data
 async function interpretKLV(klv, options) {
   let result;
   try {
-    result = JSON.parse(JSON.stringify(klv));
+    result = JSONParse(JSONStringify(klv));
   } catch (e) {
     result = klv;
   }

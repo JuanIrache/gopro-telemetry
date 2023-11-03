@@ -5,6 +5,7 @@ try {
   egm96 = undefined;
 }
 const breathe = require('./utils/breathe');
+const { JSONParse, JSONStringify } = require('./utils/customJSON');
 
 //Adapts WGS84 ellipsoid heights in GPS data to EGM96 geoid (closer to mean sea level) and filters out bad gps data
 module.exports = async function (
@@ -55,7 +56,7 @@ module.exports = async function (
   //Copy the klv data
   let result;
   try {
-    result = JSON.parse(JSON.stringify(klv));
+    result = JSONParse(JSONStringify(klv));
   } catch (error) {
     result = klv;
   }

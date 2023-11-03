@@ -1,4 +1,5 @@
 const breathe = require('./utils/breathe');
+const { JSONParse, JSONStringify } = require('./utils/customJSON');
 
 //Parse GPSU date format
 function GPSUtoDate(GPSU) {
@@ -260,7 +261,7 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
   //Copy the klv data
   let result;
   try {
-    result = JSON.parse(JSON.stringify(klv));
+    result = JSONParse(JSONStringify(klv));
   } catch (error) {
     result = klv;
   }
