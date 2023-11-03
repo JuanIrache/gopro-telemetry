@@ -9,6 +9,7 @@ const timing = {
 };
 
 const slowBeforeAll = func => beforeAll(func, 500000);
+const slowTest = (name, func) => test(name, func, 500000);
 
 describe('In browser', () => {
   /** @type {import('puppeteer').ElementHandle<HTMLInputElement>} */
@@ -21,7 +22,7 @@ describe('In browser', () => {
     inputHandle = await page.$('input[type=file]');
   });
 
-  test('Library loaded', async () => {
+  slowTest('Library loaded', async () => {
     expect(1).toBe(1);
     expect(await page.evaluate(() => 1)).toBe(1);
     expect(await page.evaluate(() => typeof GoProTelemetry)).toBe('function');
@@ -60,7 +61,7 @@ describe('In browser', () => {
       );
     });
 
-    test(`Karma should have two devices`, () => {
+    slowTest(`Karma should have two devices`, () => {
       expect(JSON.stringify(result)).toBe(
         '{"1":"Camera","16835857":"GoPro Karma v1.0"}'
       );
@@ -81,7 +82,7 @@ describe('In browser', () => {
       );
     });
 
-    test(`hero6+ble.raw should have specific keys`, () => {
+    slowTest(`hero6+ble.raw should have specific keys`, () => {
       expect(Object.keys(result['1'].streams)).toEqual([
         'ACCL',
         'GYRO',
@@ -110,7 +111,7 @@ describe('In browser', () => {
       );
     });
 
-    test(`repeatSticky should be working for all samples`, () => {
+    slowTest(`repeatSticky should be working for all samples`, () => {
       expect(
         JSON.stringify(result['16778241'].streams.acc1.samples[5].MFGI)
       ).toBeDefined();
@@ -134,11 +135,11 @@ describe('In browser', () => {
       );
     });
 
-    test(`groupTimes should simplify data samples`, () => {
+    slowTest(`groupTimes should simplify data samples`, () => {
       expect(result['1'].streams.ACCL.samples.length).toBe(18);
     });
 
-    test(`repeatHeaders should describe each value on each sample`, () => {
+    slowTest(`repeatHeaders should describe each value on each sample`, () => {
       expect(
         result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s²]']
       ).toBeDefined();
@@ -165,17 +166,17 @@ describe('In browser', () => {
       }, timing);
     });
 
-    test(`GPSPrecision should leave us with fewer, better samples`, () => {
+    slowTest(`GPSPrecision should leave us with fewer, better samples`, () => {
       expect(result['1'].streams.GPS5.samples.length).toBe(219);
     });
 
-    test(`smooth should return averaged values`, () => {
+    slowTest(`smooth should return averaged values`, () => {
       expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(
         42.34258096153846
       );
     });
 
-    test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
+    slowTest(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
       expect(result['1'].streams.GPS5.samples[0].date).toEqual(
         '2017-12-31T12:15:27.002Z'
       );
@@ -196,15 +197,15 @@ describe('In browser', () => {
       );
     });
 
-    test(`GPSFix should discard bad GPS data`, () => {
+    slowTest(`GPSFix should discard bad GPS data`, () => {
       expect(result['1'].streams.GPS5).toBeUndefined();
     });
 
-    test(`timeOut:"cts" option should export cts time values`, () => {
+    slowTest(`timeOut:"cts" option should export cts time values`, () => {
       expect(result['1'].streams.FACE1.samples[1].cts).toBeDefined();
     });
 
-    test(`timeOut:'cts' option should discard date values`, () => {
+    slowTest(`timeOut:'cts' option should discard date values`, () => {
       expect(result['1'].streams.FACE1.samples[6].date).toBeUndefined();
     });
   });
@@ -223,9 +224,12 @@ describe('In browser', () => {
       );
     });
 
-    test(`ellipsoid option should give bad height (relative to sea level)`, () => {
-      expect(result['1'].streams.GPS5.samples[0].value[2]).toBe(-18.524);
-    });
+    slowTest(
+      `ellipsoid option should give bad height (relative to sea level)`,
+      () => {
+        expect(result['1'].streams.GPS5.samples[0].value[2]).toBe(-18.524);
+      }
+    );
   });
 
   describe('Testing joining consecutive files', () => {
@@ -265,11 +269,11 @@ describe('In browser', () => {
       }, timings);
     });
 
-    test(`Consecutive files should add samples from two files`, () => {
+    slowTest(`Consecutive files should add samples from two files`, () => {
       expect(result['1'].streams.ACCL.samples.length).toBe(1092);
     });
 
-    test(`Consecutive files should keep consecutive cts times`, () => {
+    slowTest(`Consecutive files should keep consecutive cts times`, () => {
       expect(result['1'].streams.ACCL.samples[1091].cts).toBe(
         10751.884057971107
       );
@@ -314,7 +318,7 @@ describe('In browser', () => {
       }, timing);
     });
 
-    test(`Reused parsed data should output the same as binary data`, () => {
+    slowTest(`Reused parsed data should output the same as binary data`, () => {
       expect(JSON.stringify(result[0])).toBe(JSON.stringify(result[1]));
     });
   });
@@ -337,14 +341,20 @@ describe('In browser', () => {
       );
     });
 
-    test(`GPS stream of HERO11 and newer should have GPS9 timestamps`, () => {
-      expect(result['1'].streams.GPS9.samples[10].date).toBe(
-        '2022-09-20T13:29:37.898Z'
-      );
-    });
+    slowTest(
+      `GPS stream of HERO11 and newer should have GPS9 timestamps`,
+      () => {
+        expect(result['1'].streams.GPS9.samples[10].date).toBe(
+          '2022-09-20T13:29:37.898Z'
+        );
+      }
+    );
 
-    test(`GPS stream of HERO11 and newer should have per-sample Fix data`, () => {
-      expect(result['1'].streams.GPS9.samples[10].value[8]).toBe(3);
-    });
+    slowTest(
+      `GPS stream of HERO11 and newer should have per-sample Fix data`,
+      () => {
+        expect(result['1'].streams.GPS9.samples[10].value[8]).toBe(3);
+      }
+    );
   });
 });
