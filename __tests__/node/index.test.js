@@ -26,7 +26,9 @@ describe('Testing with karma file', () => {
 describe('Testing with karma file as Uint8Array', () => {
   beforeAll(async () => {
     filename = 'karma';
-    file = new Uint8Array(fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`));
+    file = new Uint8Array(
+      fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`)
+    );
     result = await goproTelemetry({ rawData: file }, { deviceList: true });
   });
 
@@ -174,12 +176,16 @@ describe('Testing joining consecutive files', () => {
     const filename2 = 'consecutive2';
 
     let timing = JSON.parse(
-      fs.readFileSync(`${__dirname}/../../samples/partials/consecutiveTiming.json`)
+      fs.readFileSync(
+        `${__dirname}/../../samples/partials/consecutiveTiming.json`
+      )
     );
     timing = timing.map(t => ({ ...t, start: new Date(t.start) }));
 
     file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
-    const file2 = fs.readFileSync(`${__dirname}/../../samples/${filename2}.raw`);
+    const file2 = fs.readFileSync(
+      `${__dirname}/../../samples/${filename2}.raw`
+    );
     result = await goproTelemetry([
       { rawData: file, timing: timing[0] },
       { rawData: file2, timing: timing[1] }
