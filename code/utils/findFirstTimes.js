@@ -1,15 +1,20 @@
 var readUInt8, readUInt16BE, readInt32BE, readInt64BEasFloat;
 
-if (typeof Buffer !== 'undefined') {
-  readUInt8 = (buffer) => buffer.readUInt8(0);
-  readUInt16BE = (buffer) => buffer.readUInt16BE(0);
-  readInt32BE = (buffer) => buffer.readInt32BE(0);
+if (DataView) {
+  readUInt8 = buffer => new DataView(buffer.buffer).getUint8(0);
+  readUInt16BE = buffer => new DataView(buffer.buffer).getUint16(0);
+  readInt32BE = buffer => new DataView(buffer.buffer).getInt32(0);
+  readInt64BEasFloat = (buffer, offset) =>
+    new DataView(buffer.buffer).getFloat64(offset);
+} else if (typeof Buffer !== 'undefined') {
+  readUInt8 = buffer => buffer.readUInt8(0);
+  readUInt16BE = buffer => buffer.readUInt16BE(0);
+  readInt32BE = buffer => buffer.readInt32BE(0);
   readInt64BEasFloat = (buffer, offset) => buffer.readDoubleBE(offset);
 } else {
-  readUInt8 = (buffer) => new DataView(buffer.buffer).getUint8(0);
-  readUInt16BE = (buffer) => new DataView(buffer.buffer).getUint16(0);
-  readInt32BE = (buffer) => new DataView(buffer.buffer).getInt32(0);
-  readInt64BEasFloat = (buffer, offset) => new DataView(buffer.buffer).getFloat64(offset);
+  throw new Error(
+    'Please install a compatible `Buffer` or `DataView` polyfill'
+  );
 }
 
 // Try to find timing data quickly as last resort for sorting files
