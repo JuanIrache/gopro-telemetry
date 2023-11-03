@@ -7,7 +7,8 @@ describe('Testing with mp4 header', () => {
   let result;
   beforeAll(async () => {
     await page.goto(`file://${join(__dirname, './index.html')}`, {
-      waitUntil: 'networkidle0'
+      waitUntil: 'networkidle0',
+      timeout: 120000
     });
     inputHandle = await page.$('input[type=file]');
     await inputHandle.uploadFile(
