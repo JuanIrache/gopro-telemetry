@@ -8,10 +8,12 @@ const timing = {
   samples: [{ cts: 0, duration: 1001 }]
 };
 
+const slowBeforeAll = func => beforeAll(func, 50000);
+
 describe('In browser', () => {
   /** @type {import('puppeteer').ElementHandle<HTMLInputElement>} */
   let inputHandle;
-  beforeAll(async () => {
+  slowBeforeAll(async () => {
     await page.goto(`file://${join(__dirname, './index.html')}`, {
       waitUntil: 'networkidle0'
     });
@@ -44,7 +46,7 @@ describe('In browser', () => {
 
   let result;
   describe('Testing with karma file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'karma';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -62,10 +64,10 @@ describe('In browser', () => {
         '{"1":"Camera","16835857":"GoPro Karma v1.0"}'
       );
     });
-  }, 20000);
+  });
 
   describe('Testing with hero6+ble.raw file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero6+ble';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -91,10 +93,10 @@ describe('In browser', () => {
         'WRGB'
       ]);
     });
-  }, 20000);
+  });
 
   describe('Testing deeper with hero6+ble file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero6+ble';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -112,10 +114,10 @@ describe('In browser', () => {
         JSON.stringify(result['16778241'].streams.acc1.samples[5].MFGI)
       ).toBeDefined();
     });
-  }, 20000);
+  });
 
   describe('Testing with hero7 file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero7';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -140,10 +142,10 @@ describe('In browser', () => {
         result['1'].streams.ACCL.samples[5]['Accelerometer (z) [m/s²]']
       ).toBeDefined();
     });
-  }, 20000);
+  });
 
   describe('Testing GPS5 with hero7 file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero7';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -177,10 +179,10 @@ describe('In browser', () => {
         '2017-12-31T12:15:27.002Z'
       );
     });
-  }, 20000);
+  });
 
   describe('Testing with hero6 file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero6';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -204,10 +206,10 @@ describe('In browser', () => {
     test(`timeOut:'cts' option should discard date values`, () => {
       expect(result['1'].streams.FACE1.samples[6].date).toBeUndefined();
     });
-  }, 20000);
+  });
 
   describe('Testing with Fusion file', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'Fusion';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -223,10 +225,10 @@ describe('In browser', () => {
     test(`ellipsoid option should give bad height (relative to sea level)`, () => {
       expect(result['1'].streams.GPS5.samples[0].value[2]).toBe(-18.524);
     });
-  }, 20000);
+  });
 
   describe('Testing joining consecutive files', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename1 = 'consecutive1';
       const filename2 = 'consecutive2';
       const timings = JSON.parse(
@@ -275,10 +277,10 @@ describe('In browser', () => {
     afterAll(() => {
       inputHandle.evaluate(input => (input.multiple = true));
     });
-  }, 20000);
+  });
 
   describe('Testing reusing parsed data', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero6';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -314,10 +316,10 @@ describe('In browser', () => {
     test(`Reused parsed data should output the same as binary data`, () => {
       expect(JSON.stringify(result[0])).toBe(JSON.stringify(result[1]));
     });
-  }, 20000);
+  });
 
   describe('Testing using new GPS9 stream', () => {
-    beforeAll(async () => {
+    slowBeforeAll(async () => {
       const filename = 'hero11';
       await inputHandle.uploadFile(
         join(__dirname, '../../samples/', `${filename}.raw`)
@@ -332,7 +334,7 @@ describe('In browser', () => {
           return result;
         })
       );
-    }, 20000);
+    });
 
     test(`GPS stream of HERO11 and newer should have GPS9 timestamps`, () => {
       expect(result['1'].streams.GPS9.samples[10].date).toBe(
@@ -342,6 +344,6 @@ describe('In browser', () => {
 
     test(`GPS stream of HERO11 and newer should have per-sample Fix data`, () => {
       expect(result['1'].streams.GPS9.samples[10].value[8]).toBe(3);
-    }, 10000);
-  }, 20000);
+    });
+  });
 });
