@@ -340,11 +340,11 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
                 // If no mp4Times, don't bother
                 else if (!mp4Times.length) skipSTMP = true;
                 // Arbitrarily, anything outside 2 seconds from the current offset should not use STMP either
-                else if (Number(s.STMP) / 1000 > mp4Times[i].cts + 1000 * 2) {
+                else if (s.STMP / BigInt(1000) > mp4Times[i].cts + 1000 * 2) {
                   skipSTMP = true;
                 }
                 // (It's either a non-initial isolated file or a file not directly consecutive in the series)
-                else if (Number(s.STMP) / 1000 < mp4Times[i].cts - 1000 * 2) {
+                else if (s.STMP / BigInt(1000) < mp4Times[i].cts - 1000 * 2) {
                   skipSTMP = true;
                 }
               }
@@ -356,7 +356,7 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
               let microDateDuration = false;
               if (s.STMP != null) {
                 if (!skipSTMP) {
-                  currCts = Number(s.STMP) / 1000;
+                  currCts = Number(s.STMP / BigInt(1000));
                   if (opts.timeIn === 'MP4') {
                     //Use timeStamps for date if MP4 timing is selected
                     currDate = dInitialDate + currCts;
@@ -373,7 +373,8 @@ async function timeKLV(klv, { timing, opts = {}, timeMeta = {}, gpsTimeSrc }) {
                         if (ss.STMP) {
                           //Has timestamp? Measure duration of all samples and divide by number of samples
                           sDuration[fourCC] =
-                            (Number(ss.STMP) / 1000 - currCts) / s[fourCC].length;
+                            (Number(ss.STMP / BigInt(1000)) - currCts) /
+                            s[fourCC].length;
                           microDuration = true;
                           if (opts.timeIn === 'MP4') {
                             //Use timeStamps for date if MP4 timing is selected
