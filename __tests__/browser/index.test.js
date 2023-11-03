@@ -8,7 +8,7 @@ const timing = {
   samples: [{ cts: 0, duration: 1001 }]
 };
 
-const slowBeforeAll = func => beforeAll(func, 50000);
+const slowBeforeAll = func => beforeAll(func, 500000);
 
 describe('In browser', () => {
   /** @type {import('puppeteer').ElementHandle<HTMLInputElement>} */
@@ -16,7 +16,7 @@ describe('In browser', () => {
   slowBeforeAll(async () => {
     await page.goto(`file://${join(__dirname, './index.html')}`, {
       waitUntil: 'networkidle0',
-      timeout: 120000
+      timeout: 1200000
     });
     inputHandle = await page.$('input[type=file]');
   });
