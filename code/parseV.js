@@ -1,6 +1,6 @@
 //Main data accessing function. Reads the V in KLV
 
-const Parser = require('@gmod/binary-parser').Parser;
+const Parser = require('binary-parser').Parser;
 const { types } = require('./data/keys');
 const breathe = require('./utils/breathe');
 //Will store unknown types
@@ -72,7 +72,8 @@ function parseV(environment, slice, len, specifics) {
     }
     //We pick the necessary function based on data format (stored in types)
     let valParser = getValueParserForType(type, opts);
-    const parsed = valParser.parse(data.slice(slice)).result;
+    const parsed = valParser.parse(data.slice(slice));
+    if (types[type].forceNum) parsed.value = Number(parsed.value);
 
     return parsed.value;
 
