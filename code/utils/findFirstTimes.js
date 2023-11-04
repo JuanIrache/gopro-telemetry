@@ -6,7 +6,12 @@ if (DataView) {
   readInt32BE = buffer => new DataView(buffer.buffer).getInt32(0);
   readInt64BEasFloat = (buffer, offset) =>
     Number(new DataView(buffer.buffer).getFloat64(offset));
-} else if (typeof Buffer !== 'undefined') {
+} else if (
+  typeof Buffer !== 'undefined' &&
+  ['readUInt8', 'readUInt16BE', 'readInt32BE', 'readDoubleBE'].every(
+    fn => Buffer.prototype[fn]
+  )
+) {
   readUInt8 = buffer => buffer.readUInt8(0);
   readUInt16BE = buffer => buffer.readUInt16BE(0);
   readInt32BE = buffer => buffer.readInt32BE(0);
