@@ -255,5 +255,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 - [Juan Irache](https://github.com/JuanIrache) - Main developer
 - [Thomas Sarlandie](https://github.com/sarfata) - Contributor
-- [Akxe](https://github.com/Akxe) - Contributor
-- [rtf6x](https://github.com/rtf6x) - Contributor
+- [Adam Eisenreich](https://github.com/Akxe) - Contributor
+- [Alex](https://github.com/rtf6x) - Contributor
+- [James Alexandre](https://github.com/itsonlyjames ) - Contributor
