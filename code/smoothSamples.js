@@ -1,13 +1,12 @@
 const reduceSamples = require('./utils/reduceSamples');
 const breathe = require('./utils/breathe');
-const { JSONParse, JSONStringify } = require('./utils/customJSON');
 
 //Smoothens contrast between samples by averaging the specified number of them
 module.exports = async function (klv, { smooth, repeatSticky }) {
   //Copy input
   let result;
   try {
-    result = JSONParse(JSONStringify(klv));
+    result = JSON.parse(JSON.stringify(klv));
   } catch (error) {
     result = klv;
   }

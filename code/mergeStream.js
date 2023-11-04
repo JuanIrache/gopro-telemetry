@@ -9,7 +9,6 @@ const {
 const deduceHeaders = require('./utils/deduceHeaders');
 const hero7Labelling = require('./utils/hero7Labelling');
 const breathe = require('./utils/breathe');
-const { JSONParse, JSONStringify } = require('./utils/customJSON');
 
 //Compare equality of values, including objects
 function deepEqual(a, b) {
@@ -283,7 +282,7 @@ async function mergeStreams(klv, options) {
             //If this not a normal stream with samples, just copy the data
           } else {
             if (s.interpretSamples) delete s.interpretSamples;
-            result.streams[`Data ${i}`] = JSONParse(JSONStringify(d.STRM));
+            result.streams[`Data ${i}`] = JSON.parse(JSON.stringify(d.STRM));
           }
         }
       } catch (error) {}

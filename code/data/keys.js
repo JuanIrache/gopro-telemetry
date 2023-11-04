@@ -21,7 +21,7 @@ const types = {
   Q: { size: 8, func: 'uint64' }, //Never tested
   d: { size: 8, func: 'double' }, //Never tested
   j: { size: 8, func: 'int64' },
-  J: { size: 8, func: 'uint64' },
+  J: { size: 8, func: 'uint64', forceNum: true },
   f: { size: 4, func: 'floatbe' },
   s: { size: 2, func: 'int16' },
   S: { size: 2, func: 'uint16' },

@@ -210,7 +210,7 @@ async function process(input, opts) {
         }
         if (foundA.GPSU && foundB.GPSU) return foundA.GPSU - foundB.GPSU;
         if (foundA.STMP != null && foundB.STMP != null) {
-          return Number(foundA.STMP - foundB.STMP);
+          return foundA.STMP - foundB.STMP;
         }
         return 0;
       });

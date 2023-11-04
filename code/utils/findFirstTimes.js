@@ -5,7 +5,7 @@ if (DataView) {
   readUInt16BE = buffer => new DataView(buffer.buffer).getUint16(0);
   readInt32BE = buffer => new DataView(buffer.buffer).getInt32(0);
   readInt64BEasFloat = (buffer, offset) =>
-    new DataView(buffer.buffer).getFloat64(offset);
+    Number(new DataView(buffer.buffer).getFloat64(offset));
 } else if (typeof Buffer !== 'undefined') {
   readUInt8 = buffer => buffer.readUInt8(0);
   readUInt16BE = buffer => buffer.readUInt16BE(0);
