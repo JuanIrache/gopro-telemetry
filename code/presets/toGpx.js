@@ -7,7 +7,7 @@ const fixes = {
 };
 
 //Returns the GPS data as a string
-async function getGPGS5Data(data, comment, CoordinatesPrecision) {
+async function getGPSData(data, comment, CoordinatesPrecision) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -149,7 +149,7 @@ async function getGPGS5Data(data, comment, CoordinatesPrecision) {
 
 //Converts the processed data to GPX
 module.exports = async function (data, { name, comment, CoordinatesPrecision }) {
-  const converted = await getGPGS5Data(data, comment, CoordinatesPrecision);
+  const converted = await getGPSData(data, comment, CoordinatesPrecision);
   if (!converted) return undefined;
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
