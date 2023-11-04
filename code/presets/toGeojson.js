@@ -1,7 +1,7 @@
 const breathe = require('../utils/breathe');
 
 //Returns the GPS data as an object for geojson
-async function getGPSData(data) {
+async function getGPSData(data, CoordinatesPrecision) {
   let properties = {};
   let coordinates = [];
   for (const key in data) {
@@ -34,6 +34,12 @@ async function getGPSData(data) {
             //Check that at least we have the valid values
             if (s.value && s.value.length > 1) {
               coordinates[i] = [s.value[1], s.value[0]];
+              if (CoordinatesPrecision != null) {
+                coordinates[i] = [
+                  parseFloat(s.value[1].toFixed(CoordinatesPrecision)),
+                  parseFloat(s.value[0].toFixed(CoordinatesPrecision)),
+                ];
+              }
               //Set elevation if present
               if (s.value.length > 1) coordinates[i].push(s.value[2]);
               //Set time if present
@@ -53,8 +59,8 @@ async function getGPSData(data) {
 }
 
 //Converts the processed data to geojson
-module.exports = async function (data, { name }) {
-  const converted = await getGPSData(data);
+module.exports = async function (data, { name, CoordinatesPrecision }) {
+  const converted = await getGPSData(data, CoordinatesPrecision);
   let result = {
     type: 'Feature',
     geometry: {

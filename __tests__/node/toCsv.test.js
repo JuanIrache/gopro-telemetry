@@ -5,7 +5,9 @@ let result;
 
 describe('Test CSV', () => {
   beforeAll(async () => {
-    const file = readFileSync(`${__dirname}/../../samples/partials/merged.json`);
+    const file = readFileSync(
+      `${__dirname}/../../samples/partials/merged.json`
+    );
 
     result = await toCsv(JSON.parse(file), {});
   });
