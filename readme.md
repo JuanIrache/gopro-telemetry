@@ -69,6 +69,7 @@ The options must be an object. The following keys are supported.
 - **WrongSpeed** (number) Will filter out GPS positions that generate higher speeds than indicated in meters per second. This acts on a sample to sample basis, so in order to avoid ignoring generally good samples that produce high speeds due to noise, it is important to set a generous (high) value.
 - **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See details below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
+- **CoordinatesPrecision** (number) Sets Precision on Coordinates. 6 decimal places is roughly 10cm of precision, 9 would be sufficient for professional survey-grade GPS coordinates.
 - **progress** (function) Function to execute when progress (between 0 and 1) is made in the extraction process. Not proportional.
 - **comment** (boolean) Add comments to formats like GPX or KML with fields they do not strictly support, like recorded speed.
 
