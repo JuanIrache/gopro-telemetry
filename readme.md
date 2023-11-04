@@ -250,7 +250,6 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - grouptimes and smooth can produce bad results when interpolating/smoothing integers (like it happened before with face ids)
 - Optimise parseKLV performance even more
 - Implement highlight tags? https://github.com/gopro/gpmf-parser/issues/21
-- Round values to fewer decimals optionally?
 
 ## Acknowledgements/credits
 
