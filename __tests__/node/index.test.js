@@ -9,8 +9,8 @@ const timing = {
   samples: [{ cts: 0, duration: 1001 }]
 };
 
-const slowBeforeAll = func => slowBeforeAll(func, 500000);
-const slowTest = (name, func) => slowTest(name, func, 500000);
+const slowBeforeAll = func => beforeAll(func, 500000);
+const slowTest = (name, func) => test(name, func, 500000);
 
 describe('Testing with karma file', () => {
   slowBeforeAll(async () => {
