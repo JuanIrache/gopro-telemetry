@@ -7,7 +7,7 @@ const fixes = {
 };
 
 //Returns the GPS data as a string
-async function getGPSData(data, comment, CoordinatesPrecision) {
+async function getGPGS5Data(data, comment) {
   let frameRate;
   let inner = '';
   let device = '';
@@ -107,14 +107,8 @@ async function getGPSData(data, comment, CoordinatesPrecision) {
                 }
               }
               //Create sample string
-              let lat = s.value[0];
-              let lon = s.value[1];
-              if (CoordinatesPrecision != null) {
-                lat = parseFloat(s.value[0].toFixed(CoordinatesPrecision));
-                lon = parseFloat(s.value[1].toFixed(CoordinatesPrecision));
-              }
               const partial = `
-          <trkpt lat="${lat}" lon="${lon}">
+          <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
               ${(ele + time + fix + hdop + geoidHeight + cmt).trim()}
           </trkpt>`;
               if (i === 0 && s.cts > 0) {
@@ -126,7 +120,7 @@ async function getGPSData(data, comment, CoordinatesPrecision) {
                 const firstTime = `
               <time>${firstDate}</time>`;
                 const fakeFirst = `
-          <trkpt lat="${lat}" lon="${lon}">
+          <trkpt lat="${s.value[0]}" lon="${s.value[1]}">
                 ${(ele + firstTime + fix + hdop + geoidHeight + cmt).trim()}
           </trkpt>`;
                 inner += `${fakeFirst}`;
@@ -148,8 +142,8 @@ async function getGPSData(data, comment, CoordinatesPrecision) {
 }
 
 //Converts the processed data to GPX
-module.exports = async function (data, { name, comment, CoordinatesPrecision }) {
-  const converted = await getGPSData(data, comment, CoordinatesPrecision);
+module.exports = async function (data, { name, comment }) {
+  const converted = await getGPGS5Data(data, comment);
   if (!converted) return undefined;
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
