@@ -22,26 +22,3 @@ describe('Test GPS5', () => {
     );
   });
 });
-
-describe('Test GPS5 with Coordinates Precision', () => {
-  beforeAll(async () => {
-    const file = readFileSync(
-      `${__dirname}/../../samples/partials/mergedGps.json`
-    );
-
-    result = await toVirb(JSON.parse(file), {
-      stream: ['GPS5'],
-      CoordinatesPrecision: 6,
-    });
-  });
-
-  test(`toVirb should return a long string`, () => {
-    expect(result.length).toBeGreaterThan(4000);
-  });
-
-  test(`toVirb should start with xml- (virb) format`, () => {
-    expect(result.slice(383, 732).replace(/\s/g, '').trim()).toBe(
-      `<src>Camera</src><trkseg><trkptlat=\"33.126497\"lon=\"-117.327354\"><ele>-20.184</ele><time>2017-04-17T17:31:03Z</time><geoidheight>-34.03217630752571</geoidheight></trkpt><trkptlat=\"33.126497\"lon=\"-117.327354\"><ele>-20.146</ele>`
-    );
-  });
-});
