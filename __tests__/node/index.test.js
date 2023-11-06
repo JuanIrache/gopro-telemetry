@@ -144,7 +144,7 @@ describe('Testing GPS5 with hero7 file and Coordinates Precision', () => {
         stream: 'GPS5',
         smooth: 20,
         GPSPrecision: 140,
-        CoordinatesPrecision: 4,
+        decimalPlaces: 4,
         timeIn: 'MP4'
       }
     );

@@ -1,7 +1,7 @@
-// Apply Chosen Precision Level to GPS Coordinates
+// Apply Chosen Decimal Places to Number Values
 module.exports = async function (
     interpreted,
-    { CoordinatesPrecision }
+    { decimalPlaces }
   ) {
     //Copy input
     let result = interpreted
@@ -15,7 +15,7 @@ module.exports = async function (
               let newSample = samples[i];
               for (let j = 0; j < newSample.value.length; j++) {
                 if (!isNaN(newSample.value[j])) {
-                  newSample.value[j] = parseFloat(newSample.value[j].toFixed(CoordinatesPrecision));
+                  newSample.value[j] = parseFloat(newSample.value[j].toFixed(decimalPlaces));
                 }
               }
               newSamples.push(newSample);

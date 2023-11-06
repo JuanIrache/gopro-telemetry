@@ -8,7 +8,7 @@ const interpretKLV = require('./code/interpretKLV');
 const mergeStream = require('./code/mergeStream');
 const groupTimes = require('./code/groupTimes');
 const smoothSamples = require('./code/smoothSamples');
-const coordinatesPrecision = require('./code/coordinatesPrecision')
+const decimalPlaces = require('./code/decimalPlaces')
 const processGPS = require('./code/processGPS');
 const filterWrongSpeed = require('./code/filterWrongSpeed');
 const presetsOpts = require('./code/data/presetsOptions');
@@ -320,8 +320,8 @@ async function process(input, opts) {
 
   await breathe();
 
-  // Apply Coordinates Precision
-  if(opts.CoordinatesPrecision) interpreted = await coordinatesPrecision(interpreted, opts)
+  // Apply decimal places 
+  if(opts.decimalPlaces) interpreted = await decimalPlaces(interpreted, opts)
 
   //Group samples by time if necessary
   if (opts.groupTimes) interpreted = await groupTimes(interpreted, opts);
