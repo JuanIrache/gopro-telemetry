@@ -12,10 +12,13 @@ module.exports = async function (
           let newSamples = [];
           if(samples) {
             for (let i = 0; i < samples.length; i++) {
-              let newSample = samples[i]
-              newSample.value[0] = parseFloat(newSample.value[0].toFixed(CoordinatesPrecision))
-              newSample.value[1] = parseFloat(newSample.value[1].toFixed(CoordinatesPrecision))
-              newSamples.push(newSample)
+              let newSample = samples[i];
+              for (let j = 0; j < newSample.value.length; j++) {
+                if (!isNaN(newSample.value[j])) {
+                  newSample.value[j] = parseFloat(newSample.value[j].toFixed(CoordinatesPrecision));
+                }
+              }
+              newSamples.push(newSample);
             }
           }
           result[key].streams[k].samples = newSamples
