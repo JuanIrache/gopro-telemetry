@@ -46,8 +46,8 @@ interface GoProTelemetryAllOptions {
   WrongSpeed?: number;
   /** Will convert the final output to the specified format. */
   preset?: 'gpx' | 'virb' | 'kml' | 'geojson' | 'csv' | 'mgjson';
-  /** Sets Precision on Coordinates for some presets (GPX, geoJSON, KML, Virb). 6 decimal places is roughly 10cm of precision, 9 would be sufficient for professional survey-grade GPS coordinates.  */
-  CoordinatesPrecision?: number;
+  /** Sets Decimal Places on Number Values. For GPS coordinates, 6 decimal places is roughly 10cm of precision, 9 would be sufficient for professional survey-grade GPS coordinates.  */
+  decimalPlaces?: number;
   /** Some preset formats (gpx) accept a name value that will be included in the file. */
   name?: string;
   /** Function to execute when progress (between 0 and 1) is made in the extraction process. Not proportional. */

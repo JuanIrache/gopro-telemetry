@@ -1,7 +1,7 @@
 const breathe = require('../utils/breathe');
 
 //Returns the GPS data as a string
-async function getGPSData(data, comment, CoordinatesPrecision) {
+async function getGPSData(data, comment) {
   let frameRate;
   let device;
   let inner = '';
@@ -89,12 +89,6 @@ async function getGPSData(data, comment, CoordinatesPrecision) {
               }
               //Prepare coordinates
               let coords = [s.value[1], s.value[0]];
-              if (CoordinatesPrecision != null) {
-                coords = [
-                  parseFloat(s.value[1].toFixed(CoordinatesPrecision)),
-                  parseFloat(s.value[0].toFixed(CoordinatesPrecision)),
-                ];
-              }
               //Set elevation if present
               if (s.value.length > 2) {
                 coords.push(s.value[2]);
@@ -131,8 +125,8 @@ async function getGPSData(data, comment, CoordinatesPrecision) {
 }
 
 //Converts the processed data to KML
-module.exports = async function (data, { name, comment, CoordinatesPrecision }) {
-  const converted = await getGPSData(data, comment, CoordinatesPrecision);
+module.exports = async function (data, { name, comment }) {
+  const converted = await getGPSData(data, comment);
   let string = `\
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">

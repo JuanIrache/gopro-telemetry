@@ -134,6 +134,45 @@ describe('Testing GPS5 with hero7 file', () => {
   });
 });
 
+describe('Testing GPS5 with hero7 file and Coordinates Precision', () => {
+  beforeAll(async () => {
+    filename = 'hero7';
+    file = fs.readFileSync(`${__dirname}/../../samples/${filename}.raw`);
+    result = await goproTelemetry(
+      { rawData: file, timing },
+      {
+        stream: 'GPS5',
+        smooth: 20,
+        GPSPrecision: 140,
+        decimalPlaces: 4,
+        timeIn: 'MP4'
+      }
+    );
+  });
+
+  test(`GPSPrecision should leave us with fewer, better samples`, () => {
+    expect(result['1'].streams.GPS5.samples.length).toBe(219);
+  });
+
+  test(`smooth should return averaged values`, () => {
+    expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(
+      42.3426
+    );
+  });
+
+  test(`coordinates should be precisely set`, () => {
+    expect(result['1'].streams.GPS5.samples[5].value[0]).toBe(
+      42.3426
+    );
+  });
+
+  test(`timeIn: 'MP4' option should use mp4 timing dates`, () => {
+    expect(result['1'].streams.GPS5.samples[0].date).toEqual(
+      '2017-12-31T12:15:27.002Z'
+    );
+  });
+});
+
 describe('Testing with hero6 file', () => {
   slowBeforeAll(async () => {
     filename = 'hero6';

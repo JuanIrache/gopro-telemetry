@@ -63,13 +63,13 @@ The options must be an object. The following keys are supported.
 - **smooth** (number) Uses the adjacent samples os a sample to smoothen it. For example, a value of 3 would average 3 samples before and 3 samples after each one. This can be a slow process.
 - **dateStream** (boolean) Creates an additional stream with only date information, no values, to make sure we have timing information of the whole track, even if the selected streams have empty sections.
 - **ellipsoid** (boolean) On old cameras (pre Hero8) the GPS altitude will be converted by default from WGS84 (World Geodetic System) ellipsoid to sea level with EGM96 (Earth Gravitational Model 1996). Use this option if you prefer the raw ellipsoid values. The newer cameras (Hero 8, Max...) provide the data directly as mean sea level, so this setting does not apply. Altitude corrections require the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal). If not present, the result will be as if this option was true.
-- **geoidHeight** (boolean) Saves altitude corrections between without applying them, for third party processing. Only relevant when _ellipsoid_ is enabled. Requires the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal).
+- **geoidHeight** (boolean) Saves altitude corrections between ellipsoid and sea level without applying them, for third party processing. Only relevant when _ellipsoid_ is enabled. Requires the optional peer dependency [egm96-universal](https://www.npmjs.com/package/egm96-universal).
 - **GPSPrecision** (number) Will filter out GPS samples where the Dilution of Precision (multiplied by 100) is higher than specified (under 500 should be good).
 - **GPSFix** (number) Will filter out GPS samples where the type of GPS lock is lower than specified (0: no lock, 2: 2D lock, 3: 3D Lock).
 - **WrongSpeed** (number) Will filter out GPS positions that generate higher speeds than indicated in meters per second. This acts on a sample to sample basis, so in order to avoid ignoring generally good samples that produce high speeds due to noise, it is important to set a generous (high) value.
 - **preset** (string) Will convert the final output to the specified format. Some formats will force certain options. See details below.
 - **name** (string) Some preset formats (gpx) accept a name value that will be included in the file.
-- **CoordinatesPrecision** (number) Sets Precision on Coordinates. 6 decimal places is roughly 10cm of precision, 9 would be sufficient for professional survey-grade GPS coordinates. For now, applies only to poreset exports (GPX, geoJSON, KML, Virb)
+- **decimalPlaces** (number) Sets Decimal Places on Number Values. For GPS coordinates, 6 decimal places is roughly 10cm of precision, 9 would be sufficient for professional survey-grade GPS coordinates.
 - **progress** (function) Function to execute when progress (between 0 and 1) is made in the extraction process. Not proportional.
 - **comment** (boolean) Add comments to formats like GPX or KML with fields they do not strictly support, like recorded speed.
 
@@ -182,12 +182,12 @@ This project is possible thanks to the [gpmf-parser documentation](https://githu
 
 These are the available preset formats:
 
-- **gpx** (.gpx) GPS Exchange format (returns as _string_). Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://tailorandwayne.com/dji-srt-viewer/). Will force the _stream_ filter to be _GPS_ and will use _ellipsoid_ altitude if not specified.
+- **gpx** (.gpx) GPS Exchange format (returns as _string_). Compatible with many maps systems. For a quick visualization you can use the [DJI SRT Viewer](https://djitelemetryoverlay.com/srt-viewer/). Will force the _stream_ filter to be _GPS_ and will use _ellipsoid_ altitude if not specified.
 - **kml** (.kml) Keyhole Markup Language (returns as _string_). Compatible with Google Earth. Will force the _stream_ filter to be _GPS_.
 - **geojson** (.json / .geojson) Open standard format designed for representing simple geographical features. Will force the _stream_ filter to be _GPS_, the _timeOut_ to be _null_ (output both _cts_ and _date_) and will use _ellipsoid_ altitude if not specified.
 - **csv** (.csv) Comma separated values, readable by Excel and other spreadsheet software. Will return an object with a CSV formatted string for every _stream_ in every _device_ (except when filters are present).
 - **mgjson** (.mgjson) Format for Adobe After Effects. The file can be imported as standard footage and will generate data streams to link properties/effects to. See how to use data in After Effects [here](https://helpx.adobe.com/after-effects/using/data-driven-animations.html).
-- **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd). Also supports the the _stream_ filter to be _ACCL_, which will create a GPX file with empty location data but valid acceleration data, based on [Garmin's Acceleration Extension](https://www8.garmin.com/xmlschemas/AccelerationExtensionv1.xsd). Bot GPS and accelerometer are not allowed at the same time, for now. Will use MP4 time if **timeIn** is not specified.
+- **virb** (.gpx) Just like GPX but with small changes for compatibility with Garmin's Virb Edit video editing software. Based on [Garmin's Trackpoint Extension](https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd). Also supports the the _stream_ filter to be _ACCL_, which will create a GPX file with empty location data but valid acceleration data, based on [Garmin's Acceleration Extension](https://www8.garmin.com/xmlschemas/AccelerationExtensionv1.xsd). Both GPS and accelerometer are not allowed at the same time, for now. Will use MP4 time if **timeIn** is not specified.
 
 ## Merging consecutive files
 
@@ -257,4 +257,4 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - [Thomas Sarlandie](https://github.com/sarfata) - Contributor
 - [Adam Eisenreich](https://github.com/Akxe) - Contributor
 - [Alex](https://github.com/rtf6x) - Contributor
-- [James Alexandre](https://github.com/itsonlyjames ) - Contributor
+- [James Alexandre](https://github.com/itsonlyjames) - Contributor
