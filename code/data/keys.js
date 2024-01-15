@@ -19,7 +19,7 @@ const types = {
   L: { size: 4, func: 'uint32' },
   q: { size: 4, func: 'uint32' }, //Never tested
   Q: { size: 8, func: 'uint64' }, //Never tested
-  d: { size: 8, func: 'double' }, //Never tested
+  d: { size: 8, func: 'doublebe' },
   j: { size: 8, func: 'int64' },
   J: { size: 8, func: 'uint64', forceNum: true },
   f: { size: 4, func: 'floatbe' },
