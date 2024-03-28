@@ -72,7 +72,7 @@ function parseV(environment, slice, len, specifics) {
     }
     //We pick the necessary function based on data format (stored in types)
     let valParser = getValueParserForType(type, opts);
-    const parsed = valParser.parse(data.slice(slice));
+    const parsed = valParser.parse(data.subarray(slice));
     if (types[type].forceNum) parsed.value = Number(parsed.value);
 
     return parsed.value;
