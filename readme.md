@@ -258,3 +258,4 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 - [Adam Eisenreich](https://github.com/Akxe) - Contributor
 - [Alex](https://github.com/rtf6x) - Contributor
 - [James Alexandre](https://github.com/itsonlyjames) - Contributor
+- [Claudio Genovese](https://github.com/cgen0) - Contributor
