@@ -19,7 +19,11 @@ module.exports = (samples, maxSpeed) => {
       if (tracks.length < 15) tracks.push([sample]);
     } else tracks[destination.track].push(sample);
     // Give priority to the longest one
-    tracks.sort((a, b) => b.length - a.length);
+    tracks.sort((a, b) =>
+      a[0].value[0] === 0 && a[0].value[1] === 0
+        ? Infinity
+        : b.length - a.length
+    );
   }
   return tracks[0] || [];
 };
