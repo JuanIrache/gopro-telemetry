@@ -20,7 +20,7 @@ module.exports = (samples, maxSpeed) => {
     } else tracks[destination.track].push(sample);
     // Give priority to the longest one
     tracks.sort((a, b) =>
-      a[0].value[0] === 0 && a[0].value[1] === 0
+      !a[0].value || (a[0].value[0] === 0 && a[0].value[1] === 0)
         ? Infinity
         : b.length - a.length
     );
