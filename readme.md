@@ -229,6 +229,7 @@ Please make your changes to the **dev** branch, so that automated tests can be r
 
 ## To-Do
 
+- merging streams with 'multiple' values (nested arrays) does always go right, like HERO13 LOGS
 - removeGaps breaks joining streams in some conditions (GRAV to CSV)
 - removeGaps also removes small initial gap of first file
 - Don't group times to frame rate if known rate of stream is already frame rate (GRAV, CORI...)
