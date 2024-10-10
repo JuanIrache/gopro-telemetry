@@ -6,7 +6,7 @@ const keyAndStructParser = new Parser()
   .string('fourCC', { length: 4, encoding: 'ascii' })
   .string('type', { length: 1, encoding: 'ascii' })
   .uint8('size')
-  .int16('repeat');
+  .uint16('repeat');
 
 //Instructions for interpreting data types.
 const types = {
