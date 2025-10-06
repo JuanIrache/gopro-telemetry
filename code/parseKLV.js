@@ -33,6 +33,7 @@ function findLastCC(data, start, end) {
     let length = 0;
     try {
       const tempKs = keyAndStructParser.parse(data.subarray(start));
+      // we could also test by doing if /\w{4}/.test(tempKs.fourCC) right?
       if (tempKs.fourCC !== '\u0000\u0000\u0000\u0000') ks = tempKs;
       //But don't process it, go to next
       length = ks.size * ks.repeat;
