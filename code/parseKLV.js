@@ -8,6 +8,23 @@ const parseV = require('./parseV');
 const unArrayTypes = require('./utils/unArrayTypes');
 const breathe = require('./utils/breathe');
 
+function extendIfNeeded(data, ks, start) {
+  // HERO (2024) samples seem to have bad DEVC alignement
+  let extend = 0;
+  if (ks && ks.fourCC === 'DEVC') {
+    while (
+      data[start + extend] === 0 &&
+      data[start + extend + 1] === 0 &&
+      data[start + extend + 2] === 0 &&
+      data[start + extend + 3] === 0
+    ) {
+      extend += 4;
+    }
+  }
+
+  return extend;
+}
+
 //quick function to find the last, most relevant fourCC key
 function findLastCC(data, start, end) {
   let ks;
@@ -25,7 +42,10 @@ function findLastCC(data, start, end) {
     const reached = start + 8 + (length >= 0 ? length : 0);
     //Align to 32 bits
     while (start < reached) start += 4;
+
+    start += extendIfNeeded(data, ks, start);
   }
+
   if (ks) return ks.fourCC;
 }
 
@@ -228,6 +248,7 @@ async function parseKLV(
     const reached = start + 8 + (length >= 0 ? length : 0);
     //Align to 32 bits
     while (start < reached) start += 4;
+    start += extendIfNeeded(data, ks, start);
   }
 
   //Undo all arrays except the last key, which should be the array of samples (except for mp4 headers)
