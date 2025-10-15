@@ -52,7 +52,7 @@ module.exports = async function (
       }
       if (rejected === s.GPS9.length) return 'all';
       if (accepted === s.GPS9.length) return false;
-      return perSample;
+      return perSample.filter(s => !!s).length;
     }
   };
 
